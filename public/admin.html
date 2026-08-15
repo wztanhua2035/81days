@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e1717" />
+  <title>八十一天 · 管理后台</title>
+  <link rel="stylesheet" href="/admin.css" />
+</head>
+<body>
+  <main class="admin-shell">
+    <section id="loginView" class="panel login-panel">
+      <div class="eyebrow">DAY 81 · ADMIN</div>
+      <h1>《八十一天》管理后台</h1>
+      <p class="muted">输入管理密码后，可调整全局难度参数与六名备选角色姓名。</p>
+      <form id="loginForm">
+        <label>管理密码<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
+        <button type="submit">登录</button>
+      </form>
+      <div id="loginMsg" class="msg"></div>
+      <a class="back" href="/">← 返回游戏</a>
+    </section>
+
+    <section id="adminView" class="hidden">
+      <header class="topbar">
+        <div><div class="eyebrow">DAY 81 · ADMIN</div><h1>游戏参数</h1></div>
+        <div class="top-actions"><a href="/" class="ghost">打开游戏</a><button id="logoutBtn" class="ghost">退出</button></div>
+      </header>
+
+      <section class="panel">
+        <h2>角色姓名</h2>
+        <p class="muted">只修改显示姓名，不改变职业、年龄、属性、能力和初始道具。角色姓名刷新游戏页面后即可更新。</p>
+        <div id="roleFields" class="grid"></div>
+      </section>
+
+      <section class="panel">
+        <h2>难度设置</h2>
+        <p class="muted">难度参数在玩家“新开一局”时写入该局存档，避免一局进行到中途突然改变规则。</p>
+        <div class="settings-grid">
+          <label>夜间事件触发概率（%）<input id="nightEventChance" type="number" min="10" max="90" step="1" /><small>默认50。越高越难。</small></label>
+          <label>所有属性检定修正（%）<input id="baseCheckModifier" type="number" min="-20" max="20" step="1" /><small>默认0。正数更容易通过事件检定。</small></label>
+          <label>人物遭遇间隔（天）<input id="encounterInterval" type="number" min="3" max="10" step="1" /><small>默认5，即DAY 6、11、16……</small></label>
+          <label>基础躲避成功率（%）<input id="avoidChance" type="number" min="5" max="60" step="1" /><small>默认20；摄影师角色额外+15个百分点。</small></label>
+          <label>每日健康自然下降概率（%）<input id="healthDecayChance" type="number" min="50" max="100" step="1" /><small>默认100。调低会明显降低难度。</small></label>
+          <label>连续3天健康≥2后的回血概率（%）<input id="healthyLifeRecoverChance" type="number" min="0" max="60" step="1" /><small>默认20。</small></label>
+          <label>背包容量<input id="inventoryLimit" type="number" min="3" max="6" step="1" /><small>默认4。允许3—6格。</small></label>
+          <label>每人开局额外食物<input id="startingBonusFood" type="number" min="0" max="2" step="1" /><small>默认0，可额外获得0—2份基础食物。</small></label>
+        </div>
+        <div class="row"><button id="saveBtn">保存角色与难度设置</button><button id="resetBtn" class="ghost" type="button">恢复标准难度</button></div>
+        <div id="saveMsg" class="msg"></div>
+      </section>
+
+      <section class="panel">
+        <h2>修改管理密码</h2>
+        <div class="settings-grid password-grid">
+          <label>当前密码<input id="currentPassword" type="password" autocomplete="current-password" /></label>
+          <label>新密码<input id="newPassword" type="password" autocomplete="new-password" minlength="6" /></label>
+          <label>再次输入新密码<input id="confirmPassword" type="password" autocomplete="new-password" minlength="6" /></label>
+        </div>
+        <button id="passwordBtn">修改密码</button>
+        <div id="passwordMsg" class="msg"></div>
+      </section>
+    </section>
+  </main>
+  <script src="/admin.js"></script>
+</body>
+</html>

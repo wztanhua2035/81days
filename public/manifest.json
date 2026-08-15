@@ -1,0 +1,9 @@
+{
+  "name": "八十一天 DAY 81",
+  "short_name": "八十一天",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0e1717",
+  "theme_color": "#0e1717",
+  "icons": []
+}
