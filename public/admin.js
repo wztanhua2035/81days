@@ -1,7 +1,7 @@
 (() => {
   const ids=['linlan','zhouye','chenmo','suqing','gaoyuan','xutang'];
   const labels={linlan:'急诊护士',zhouye:'消防员',chenmo:'机械工程师',suqing:'户外摄影师',gaoyuan:'餐厅厨师',xutang:'中学教师'};
-  const standard={nightEventChance:.50,baseCheckModifier:0,encounterInterval:5,avoidChance:.20,healthDecayChance:1,healthyLifeRecoverChance:.20,inventoryLimit:4,startingBonusFood:0};
+  const standard={nightEventChance:.70,baseCheckModifier:0,avoidChance:.20,healthDecayChance:1,healthyLifeRecoverChance:.20,inventoryLimit:4,startingBonusFood:0};
   const $=id=>document.getElementById(id);
   const pct=x=>Math.round(Number(x)*100);
   const unpct=x=>Number(x)/100;
@@ -16,11 +16,11 @@
   function renderRoles(names){$('roleFields').innerHTML=ids.map(id=>`<label>${labels[id]}<input id="role_${id}" maxlength="12" value="${escapeHtml(names[id]||'')}" /></label>`).join('')}
   function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
   function fillDifficulty(d){
-    $('nightEventChance').value=pct(d.nightEventChance);$('baseCheckModifier').value=pct(d.baseCheckModifier);$('encounterInterval').value=d.encounterInterval;
+    $('nightEventChance').value=pct(d.nightEventChance);$('baseCheckModifier').value=pct(d.baseCheckModifier);
     $('avoidChance').value=pct(d.avoidChance);$('healthDecayChance').value=pct(d.healthDecayChance);$('healthyLifeRecoverChance').value=pct(d.healthyLifeRecoverChance);
     $('inventoryLimit').value=d.inventoryLimit;$('startingBonusFood').value=d.startingBonusFood;
   }
-  function collect(){return {roleNames:Object.fromEntries(ids.map(id=>[id,$(`role_${id}`).value.trim()])),difficulty:{nightEventChance:unpct($('nightEventChance').value),baseCheckModifier:unpct($('baseCheckModifier').value),encounterInterval:Number($('encounterInterval').value),avoidChance:unpct($('avoidChance').value),healthDecayChance:unpct($('healthDecayChance').value),healthyLifeRecoverChance:unpct($('healthyLifeRecoverChance').value),inventoryLimit:Number($('inventoryLimit').value),startingBonusFood:Number($('startingBonusFood').value)}}}
+  function collect(){return {roleNames:Object.fromEntries(ids.map(id=>[id,$(`role_${id}`).value.trim()])),difficulty:{nightEventChance:unpct($('nightEventChance').value),baseCheckModifier:unpct($('baseCheckModifier').value),avoidChance:unpct($('avoidChance').value),healthDecayChance:unpct($('healthDecayChance').value),healthyLifeRecoverChance:unpct($('healthyLifeRecoverChance').value),inventoryLimit:Number($('inventoryLimit').value),startingBonusFood:Number($('startingBonusFood').value)}}}
   async function loadSettings(){
     try{const d=await api('/api/admin/settings');renderRoles(d.settings.roleNames);fillDifficulty(d.settings.difficulty);showAdmin();}
     catch(e){if(e.status===401)showLogin();else{showLogin();msg('loginMsg',e.message,'error')}}

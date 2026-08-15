@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 3000;
 const ROOT = path.join(__dirname, 'public');
 const DATA_DIR = process.env.ADMIN_DATA_DIR ? path.resolve(process.env.ADMIN_DATA_DIR) : path.join(__dirname, 'data');
 const CONFIG_FILE = path.join(DATA_DIR, 'admin-config.json');
+const LEADERBOARD_FILE = path.join(DATA_DIR, 'leaderboard.json');
 const DEFAULT_PASSWORD = process.env.ADMIN_PASSWORD || '818181';
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8',
@@ -19,9 +20,8 @@ const DEFAULT_SETTINGS = {
     linlan:'林岚', zhouye:'周野', chenmo:'陈默', suqing:'苏晴', gaoyuan:'高远', xutang:'许棠'
   },
   difficulty: {
-    nightEventChance: 0.50,
+    nightEventChance: 0.70,
     baseCheckModifier: 0,
-    encounterInterval: 5,
     avoidChance: 0.20,
     healthDecayChance: 1.00,
     healthyLifeRecoverChance: 0.20,
@@ -58,7 +58,7 @@ function normalizeConfig(raw){
       if(typeof n === 'string' && n.trim()) out.settings.roleNames[id] = n.trim().slice(0,12);
     }
   }
-  if(raw?.settings?.difficulty) Object.assign(out.settings.difficulty, raw.settings.difficulty);
+  if(raw?.settings?.difficulty){ for(const key of Object.keys(out.settings.difficulty)){ if(raw.settings.difficulty[key] !== undefined) out.settings.difficulty[key]=raw.settings.difficulty[key]; } }
   return out;
 }
 function loadConfig(){
@@ -70,6 +70,37 @@ function loadConfig(){
   catch { const fresh=normalizeConfig(null); writeConfig(fresh); return fresh; }
 }
 let config = loadConfig();
+
+function loadLeaderboard(){
+  fs.mkdirSync(DATA_DIR,{recursive:true});
+  if(!fs.existsSync(LEADERBOARD_FILE)) return [];
+  try{
+    const rows=JSON.parse(fs.readFileSync(LEADERBOARD_FILE,'utf8'));
+    return Array.isArray(rows)?rows:[];
+  }catch{return []}
+}
+function writeLeaderboard(rows){
+  fs.mkdirSync(DATA_DIR,{recursive:true});
+  const tmp=`${LEADERBOARD_FILE}.tmp`;
+  fs.writeFileSync(tmp,JSON.stringify(rows,null,2),'utf8');
+  fs.renameSync(tmp,LEADERBOARD_FILE);
+}
+function rankLeaderboard(rows){
+  return [...rows].sort((a,b)=>
+    (b.survivedDays-a.survivedDays)||
+    (b.score-a.score)||
+    (String(a.createdAt).localeCompare(String(b.createdAt)))
+  ).slice(0,100).map((r,i)=>({...r,rank:i+1}));
+}
+function normalizeAccount(v){
+  const s=String(v||'').trim();
+  const chars=[...s];
+  if(chars.length<6||chars.length>8) throw new Error('账号长度需为6—8个字符');
+  if(!/^[\p{L}\p{N}_]+$/u.test(s)) throw new Error('账号只能使用中文、字母、数字或下划线');
+  return s;
+}
+let leaderboard=loadLeaderboard();
+
 
 const sessions = new Map();
 const loginAttempts = new Map();
@@ -107,7 +138,6 @@ function validateSettings(input){
   return {roleNames,difficulty:{
     nightEventChance:num('nightEventChance',.10,.90),
     baseCheckModifier:num('baseCheckModifier',-.20,.20),
-    encounterInterval:num('encounterInterval',3,10,true),
     avoidChance:num('avoidChance',.05,.60),
     healthDecayChance:num('healthDecayChance',.50,1.00),
     healthyLifeRecoverChance:num('healthyLifeRecoverChance',0,.60),
@@ -123,6 +153,30 @@ function failedAttempt(ip){ const r=loginAttempts.get(ip)||{count:0,reset:Date.n
 
 async function handleApi(req,res,pathname){
   if(pathname==='/api/game-config' && req.method==='GET') return json(res,200,publicSettings());
+  if(pathname==='/api/leaderboard' && req.method==='GET') return json(res,200,{ok:true,rows:rankLeaderboard(leaderboard)});
+  if(pathname==='/api/leaderboard' && req.method==='POST'){
+    let body; try{body=await readBody(req)}catch{return json(res,400,{ok:false,error:'请求格式错误'});}
+    try{
+      const account=normalizeAccount(body.account);
+      const survivedDays=Number(body.survivedDays), score=Number(body.score);
+      const difficulty=String(body.difficulty||'正常').slice(0,8);
+      const character=String(body.character||'').trim().slice(0,12);
+      if(!Number.isInteger(survivedDays)||survivedDays<1||survivedDays>81) throw new Error('幸存天数无效');
+      if(!Number.isInteger(score)||score<0||score>100) throw new Error('得分无效');
+      const entry={account,survivedDays,score,difficulty,character,createdAt:new Date().toISOString()};
+      const oldIndex=leaderboard.findIndex(r=>r.account===account);
+      if(oldIndex>=0){
+        const old=leaderboard[oldIndex];
+        const better=(entry.survivedDays>old.survivedDays)||(entry.survivedDays===old.survivedDays&&entry.score>old.score);
+        if(better) leaderboard[oldIndex]=entry;
+      }else leaderboard.push(entry);
+      leaderboard=rankLeaderboard(leaderboard).map(({rank,...r})=>r);
+      writeLeaderboard(leaderboard);
+      const ranked=rankLeaderboard(leaderboard);
+      const mine=ranked.find(r=>r.account===account)||null;
+      return json(res,200,{ok:true,entry:mine,rows:ranked});
+    }catch(e){return json(res,400,{ok:false,error:e.message||'提交失败'});}
+  }
   if(pathname==='/api/admin/login' && req.method==='POST'){
     const ip=clientIp(req); if(!canAttempt(ip)) return json(res,429,{ok:false,error:'登录失败次数过多，请稍后再试。'});
     let body; try{body=await readBody(req)}catch{return json(res,400,{ok:false,error:'请求格式错误'});}

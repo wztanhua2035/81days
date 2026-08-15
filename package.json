@@ -1,8 +1,8 @@
 {
   "name": "day81-card-survival",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "private": true,
-  "description": "《八十一天》单人卡牌荒岛生存游戏（含管理后台）",
+  "description": "《八十一天》单人卡牌荒岛生存游戏（地点探索、三档难度、排行榜、管理后台）",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
