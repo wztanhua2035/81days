@@ -114,6 +114,157 @@ window.DAY81_DATA = (() => {
     E('aircraft_glint','云层里的反光','高空突然闪过一道规则的金属反光。你冲到开阔地挥舞能找到的一切。',{type:'instant',effect:{rescueScore:.75},minDay:65,rescue:true})
   ];
 
+
+  const locations = [
+    {id:'crash_beach',name:'失事海滩',x:16,y:58,icon:'🛬',desc:'飞机碎片与行李散落最多的海滩。'},
+    {id:'coconut_grove',name:'椰林',x:28,y:31,icon:'🌴',desc:'树荫最浓的椰子林。'},
+    {id:'fresh_stream',name:'淡水溪',x:43,y:43,icon:'💧',desc:'岛上最稳定的淡水来源之一。'},
+    {id:'moon_bay',name:'月牙湾',x:67,y:65,icon:'🏖️',desc:'沙质柔软的月牙形海湾。'},
+    {id:'reef_pools',name:'潮汐礁池',x:82,y:46,icon:'🪸',desc:'退潮后会留下许多潮池。'},
+    {id:'jungle_path',name:'密林小径',x:24,y:72,icon:'🌿',desc:'通往林子深处的一条小路。'},
+    {id:'bamboo_clearing',name:'林中空地',x:51,y:58,icon:'🍃',desc:'适合短暂停留和搭简易营地。'},
+    {id:'rock_cave',name:'岩洞',x:61,y:33,icon:'🕳️',desc:'阴凉潮湿的天然洞穴。'},
+    {id:'cliff_edge',name:'断崖',x:76,y:22,icon:'🪢',desc:'面朝大海的高陡崖壁。'},
+    {id:'swamp_edge',name:'沼泽边缘',x:39,y:77,icon:'🪷',desc:'湿气很重，地面松软。'},
+    {id:'wreck_cabin',name:'机舱残骸',x:54,y:18,icon:'✈️',desc:'损毁最严重的机体区域。'},
+    {id:'ridge_hill',name:'山脊高地',x:51,y:8,icon:'⛰️',desc:'能俯瞰全岛与海平线的高点。'}
+  ];
+
+  const LE=(id,location,name,text,choices,opts={})=>({id,location,name,text,type:'choice',choices,...opts});
+  const locationEvents = [
+    LE('cb_supply','crash_beach','散落的餐车箱','几只翻倒的餐车箱半埋在沙里，里面也许还有能吃的东西。',[
+      {text:'撬开保温箱',action:'check',stat:'str',difficulty:'normal',success:{randomFood:1},fail:{health:-1},risk:'一般',tags:['resource']},
+      {text:'翻找座椅口袋',action:'check',stat:'int',difficulty:'easy',success:{randomItemChance:.75},fail:{none:true},risk:'安全'},
+      {text:'坐下整理背包',action:'effect',effect:{skipDecay:true},risk:'安全'}
+    ]),
+    LE('cb_tide','crash_beach','回潮的行李带','一截行李带被回潮卷上岸，几个箱包卡在上面来回晃动。',[
+      {text:'赶在潮水前拖上来',action:'check',stat:'agi',difficulty:'normal',success:{randomItem:1},fail:{life:-1,chance:.35},risk:'危险',tags:['water']},
+      {text:'只捡最近的小包',action:'check',stat:'luck',difficulty:'easy',success:{randomItemChance:.8},fail:{none:true},risk:'安全'},
+      {text:'观察潮水走势',action:'effect',effect:{nextCheckBonus:.08},risk:'安全'}
+    ]),
+
+    LE('cg_coconut','coconut_grove','成熟椰树','几棵椰树上挂着沉甸甸的果实，风一吹就轻轻摇晃。',[
+      {text:'爬树摘椰子',action:'check',stat:'agi',difficulty:'normal',success:{item:'coconut'},fail:{health:-1,chance:.35},risk:'一般'},
+      {text:'用木棍敲落',action:'check',stat:'str',difficulty:'normal',success:{item:'coconut'},fail:{none:true},risk:'一般',tags:['resource']},
+      {text:'捡些椰叶回去',action:'effect',effect:{skipDecay:true},risk:'安全'}
+    ]),
+    LE('cg_birds','coconut_grove','海鸟闹林','海鸟在树冠间叫个不停，像是在围着什么东西打转。',[
+      {text:'钻进去看看',action:'check',stat:'luck',difficulty:'normal',success:{randomFood:1},fail:{health:-1},risk:'一般',tags:['explore']},
+      {text:'耐心等它们飞走',action:'effect',effect:{health:1},risk:'安全'},
+      {text:'绕去树后搜寻',action:'check',stat:'int',difficulty:'easy',success:{randomItemChance:.7},fail:{none:true},risk:'安全'}
+    ]),
+
+    LE('fs_slippery','fresh_stream','湿滑溪石','溪边石头长满青苔，水里似乎还困着一点小鱼。',[
+      {text:'踩着石头抓鱼',action:'check',stat:'agi',difficulty:'normal',success:{item:'grilled_fish'},fail:{health:-1},risk:'一般',tags:['fish']},
+      {text:'先喝足淡水',action:'effect',effect:{health:1},risk:'安全'},
+      {text:'沿着水流往上走',action:'check',stat:'int',difficulty:'normal',success:{randomItemChance:.75},fail:{none:true},risk:'一般',tags:['explore','water']}
+    ]),
+    LE('fs_herbs','fresh_stream','溪边草药','溪边长着几株带苦味的叶子，像是有药用价值。',[
+      {text:'采回去试试',action:'check',stat:'int',difficulty:'normal',success:{randomFrom:['disinfectant','painkiller']},fail:{health:-1},risk:'一般'},
+      {text:'只装一些水',action:'effect',effect:{health:1,skipDecay:true},risk:'安全'},
+      {text:'原地休息片刻',action:'effect',effect:{skipDecay:true},risk:'安全'}
+    ]),
+
+    LE('mb_crate','moon_bay','漂流木箱','月牙湾的浅滩里卡着一个木箱，边角已经被海水泡白。',[
+      {text:'直接撬开',action:'check',stat:'str',difficulty:'normal',success:{randomItem:1},fail:{health:-1},risk:'一般',tags:['resource']},
+      {text:'先观察箱体破损处',action:'check',stat:'int',difficulty:'easy',success:{pickItems:2},fail:{none:true},risk:'安全'},
+      {text:'坐在沙滩晒干衣服',action:'effect',effect:{skipDecay:true},risk:'安全'}
+    ]),
+    LE('mb_turtle','moon_bay','沙地凹痕','平整沙地上有新鲜凹痕，像是海龟刚离开不久。',[
+      {text:'顺着痕迹挖一挖',action:'check',stat:'luck',difficulty:'normal',success:{health:1,randomFood:1},fail:{none:true},risk:'一般'},
+      {text:'留意是否有贝类',action:'check',stat:'agi',difficulty:'easy',success:{health:1},fail:{none:true},risk:'安全'},
+      {text:'安静观海',action:'effect',effect:{rescueScore:.25},risk:'安全'}
+    ]),
+
+    LE('rp_tidefish','reef_pools','退潮潮池','退潮后的礁池里困着几条小鱼和几只螃蟹。',[
+      {text:'徒手抓鱼',action:'check',stat:'agi',difficulty:'normal',success:{item:'grilled_fish'},fail:{none:true},risk:'一般',tags:['fish']},
+      {text:'用容器捞一捞',action:'check',stat:'int',difficulty:'easy',success:{randomFood:1},fail:{none:true},risk:'安全'},
+      {text:'只挑安全的贝类',action:'effect',effect:{health:1},risk:'安全'}
+    ]),
+    LE('rp_shells','reef_pools','尖刺海胆','礁石缝里长满海胆和贝壳，颜色鲜艳得有些危险。',[
+      {text:'冒险撬开海胆',action:'check',stat:'luck',difficulty:'hard',success:{health:2},fail:{health:-1},risk:'危险'},
+      {text:'挑些贝壳带回去',action:'check',stat:'agi',difficulty:'easy',success:{randomItemChance:.7},fail:{none:true},risk:'安全'},
+      {text:'绕着边缘慢慢查看',action:'effect',effect:{nextCheckBonus:.08},risk:'安全'}
+    ]),
+
+    LE('jp_thorns','jungle_path','荆棘小道','小道两边荆棘缠成一片，深处隐约有金属反光。',[
+      {text:'硬着头皮钻进去',action:'check',stat:'agi',difficulty:'normal',success:{randomHighItem:1},fail:{health:-1},risk:'一般',tags:['explore']},
+      {text:'绕开荆棘寻找别路',action:'check',stat:'int',difficulty:'easy',success:{randomItemChance:.75},fail:{none:true},risk:'安全'},
+      {text:'砍些枝条做标记',action:'effect',effect:{nextCheckBonus:.08},risk:'安全'}
+    ]),
+    LE('jp_bananas','jungle_path','野香蕉丛','林缘长着一小片野香蕉，果实不大，但看起来已经成熟。',[
+      {text:'直接采一把',action:'effect',effect:{randomFood:1},risk:'安全'},
+      {text:'顺便深入搜索',action:'check',stat:'luck',difficulty:'normal',success:{randomItem:1},fail:{beast:true},risk:'危险',tags:['explore']},
+      {text:'带着叶片返回',action:'effect',effect:{skipDecay:true},risk:'安全'}
+    ]),
+
+    LE('bc_clear','bamboo_clearing','风吹空地','林中空地通风干燥，看起来很适合休整。',[
+      {text:'原地休息整理',action:'effect',effect:{skipDecay:true,health:1},risk:'安全'},
+      {text:'搜寻别人留下的痕迹',action:'check',stat:'int',difficulty:'normal',success:{fromNpc:true},fail:{none:true},risk:'一般'},
+      {text:'砍几根细竹带走',action:'check',stat:'str',difficulty:'easy',success:{randomFrom:['spear','torch']},fail:{none:true},risk:'安全',tags:['resource']}
+    ]),
+    LE('bc_insects','bamboo_clearing','低洼积水','空地一角积着浅水，周围有密集的昆虫盘旋。',[
+      {text:'翻翻积水边缘',action:'check',stat:'luck',difficulty:'normal',success:{randomItemChance:.75},fail:{health:-1},risk:'一般'},
+      {text:'避开虫群原路返回',action:'effect',effect:{none:true},risk:'安全'},
+      {text:'取一些清亮积水',action:'effect',effect:{health:1},risk:'安全'}
+    ]),
+
+    LE('rc_bats','rock_cave','洞顶蝙蝠','岩洞顶传来扑簌簌的声音，里面也许藏着别人没发现的东西。',[
+      {text:'举着火源进去',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{beast:true},risk:'危险',tags:['explore','fire']},
+      {text:'只在洞口翻找',action:'check',stat:'luck',difficulty:'easy',success:{randomItemChance:.72},fail:{none:true},risk:'安全'},
+      {text:'记下洞口位置',action:'effect',effect:{nextCheckBonus:.1},risk:'安全'}
+    ]),
+    LE('rc_cool','rock_cave','阴凉岩棚','洞边有一块干燥平整的岩棚，能遮风，也能避太阳。',[
+      {text:'在这里休息',action:'effect',effect:{skipDecay:true,health:1},risk:'安全'},
+      {text:'检查岩缝里的东西',action:'check',stat:'agi',difficulty:'normal',success:{randomItem:1},fail:{health:-1},risk:'一般'},
+      {text:'留意地上的足迹',action:'check',stat:'int',difficulty:'easy',success:{fromNpc:true},fail:{none:true},risk:'安全'}
+    ]),
+
+    LE('ce_pack','cliff_edge','悬崖背包','一个背包挂在断崖下方的灌木上，距离不远，但下面就是海。',[
+      {text:'慢慢爬下去拿',action:'check',stat:'agi',difficulty:'hard',success:{randomHighItem:1},fail:{life:-1},risk:'危险',tags:['climb']},
+      {text:'利用绳索尝试勾取',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{none:true},risk:'一般',tags:['climb']},
+      {text:'登高观察海面',action:'effect',effect:{rescueScore:.5},risk:'安全'}
+    ]),
+    LE('ce_nest','cliff_edge','海鸟巢','断崖低处有一窝海鸟蛋，风很大，但似乎并不难够到。',[
+      {text:'冒险取蛋',action:'check',stat:'agi',difficulty:'hard',success:{randomFood:1,health:1},fail:{health:-1},risk:'危险',tags:['climb']},
+      {text:'等海鸟飞开再动手',action:'check',stat:'luck',difficulty:'normal',success:{randomFood:1},fail:{none:true},risk:'一般'},
+      {text:'只看看远方',action:'effect',effect:{rescueScore:.25,nextCheckBonus:.05},risk:'安全'}
+    ]),
+
+    LE('se_reeds','swamp_edge','药味芦苇','沼泽边长着一片带有苦味的芦苇和草叶。',[
+      {text:'采一点带回去',action:'check',stat:'int',difficulty:'normal',success:{randomFrom:['disinfectant','painkiller']},fail:{health:-1},risk:'一般'},
+      {text:'绕边查看漂浮物',action:'check',stat:'agi',difficulty:'normal',success:{randomItemChance:.75},fail:{health:-1},risk:'一般'},
+      {text:'不深入，立刻返回',action:'effect',effect:{none:true},risk:'安全'}
+    ]),
+    LE('se_sink','swamp_edge','松软泥地','脚下泥地不断下陷，前方却有一小片亮闪闪的东西。',[
+      {text:'快步冲过去拿',action:'check',stat:'str',difficulty:'hard',success:{randomHighItem:1},fail:{health:-1,loseItem:1},risk:'危险'},
+      {text:'找树枝试探前进',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{none:true},risk:'一般'},
+      {text:'放弃这点贪心',action:'effect',effect:{skipDecay:true},risk:'安全'}
+    ]),
+
+    LE('wc_cockpit','wreck_cabin','驾驶舱残片','驾驶舱附近压着不少变形金属，缝隙里似乎还留着设备。',[
+      {text:'拆开面板看看',action:'check',stat:'int',difficulty:'normal',success:{pickItems:3},fail:{life:-1,chance:.25},risk:'危险',tags:['mechanic']},
+      {text:'只取外露物资',action:'check',stat:'agi',difficulty:'easy',success:{randomItem:1},fail:{none:true},risk:'安全'},
+      {text:'记录可用位置',action:'effect',effect:{nextCheckBonus:.1},risk:'安全'}
+    ]),
+    LE('wc_medkit','wreck_cabin','应急储物格','一块内饰板后面露出一个半开的储物格。',[
+      {text:'用工具撬开',action:'check',stat:'int',difficulty:'normal',success:{randomFrom:['first_aid','painkiller','disinfectant']},fail:{none:true},risk:'一般',tags:['mechanic']},
+      {text:'暴力拉开',action:'check',stat:'str',difficulty:'normal',success:{randomItem:1},fail:{health:-1},risk:'一般'},
+      {text:'不管它，先休息',action:'effect',effect:{skipDecay:true},risk:'安全'}
+    ]),
+
+    LE('rh_signal','ridge_hill','海风高地','站在山脊最高处，整片海域都一览无余。',[
+      {text:'大幅挥舞求救信号',action:'effect',effect:{rescueScore:1},risk:'安全'},
+      {text:'继续向更高处观察',action:'check',stat:'agi',difficulty:'normal',success:{rescueScore:1,achievement:'watch_sea'},fail:{health:-1},risk:'一般',tags:['climb']},
+      {text:'静坐恢复体力',action:'effect',effect:{health:1,skipDecay:true},risk:'安全'}
+    ]),
+    LE('rh_smoke','ridge_hill','海平线上的烟','远处海平线上似乎升起一缕细烟，很像船只留下的尾迹。',[
+      {text:'立刻持续观察',action:'check',stat:'luck',difficulty:'normal',success:{rescueScore:1},fail:{none:true},risk:'一般'},
+      {text:'用镜面反光尝试示警',action:'check',stat:'int',difficulty:'easy',success:{rescueScore:1, item:'mirror'},fail:{rescueScore:.25},risk:'安全'},
+      {text:'记住这个方向',action:'effect',effect:{rescueScore:.5,nextCheckBonus:.05},risk:'安全'}
+    ],{minDay:20})
+  ];
+
   const N=(id,name,text,effect,polarity='neutral',opts={})=>({id,name,text,effect,polarity,...opts});
   const nights = [
     N('rain','暴雨','暴雨敲打着临时营地。',{allHazard:'rain'},'bad'),
@@ -144,5 +295,5 @@ window.DAY81_DATA = (() => {
     N('distant_light','远海灯光','很远的海面上，似乎有一盏灯一闪而过。没有人敢确定那是不是船。',{rescueScore:.5},'good',{minDay:60})
   ];
 
-  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,nights};
+  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,nights};
 })();

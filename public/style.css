@@ -21,3 +21,19 @@ body{min-height:100dvh;background:radial-gradient(circle at top,#1b3230 0,#0d171
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.character{cursor:pointer;transition:.15s transform}.character:hover{transform:translateY(-2px)}.avatar{font-size:38px}.ability{font-size:12px;color:#cdd9d4;line-height:1.5;margin-top:8px}.selected{outline:2px solid var(--accent)}
 .modalWrap{position:fixed;inset:0;background:#000a;z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:12px}.modal{width:min(520px,100%);max-height:88dvh;overflow:auto;background:#142321;border:1px solid var(--line);border-radius:20px 20px 14px 14px;padding:18px}.modal h2{margin-top:0}.row{display:flex;gap:8px;align-items:center}.between{justify-content:space-between}.list{display:grid;gap:8px}.listItem{background:#0e1a19;border:1px solid #2b403e;border-radius:12px;padding:12px}.dead{opacity:.45;filter:grayscale(1)}.log{font-size:13px;line-height:1.55;color:#cad6d1;max-height:260px;overflow:auto}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#f0e3c4;color:#25231f;padding:10px 14px;border-radius:999px;z-index:40;box-shadow:0 8px 25px #0007;font-weight:700;max-width:90%;text-align:center}.result{font-size:13px;color:#433e34;background:#fff6e3;border-radius:10px;padding:10px;margin-top:12px}.bad{color:#ffb1a9}.good{color:#a8ddb5}.muted{color:var(--muted)}.divider{height:1px;background:var(--line);margin:12px 0}.score{font-size:64px;font-weight:900;color:var(--accent)}
 @media (max-width:390px){.brand{font-size:38px}.card{padding:14px}.stats{gap:6px}.stat{padding:8px 4px}.inventory{gap:6px}.slot{min-height:70px;padding:6px}}
+
+.islandCard{padding:14px;background:linear-gradient(180deg,#183134,#152626);overflow:hidden}
+.islandMap{position:relative;height:330px;border-radius:24px;background:linear-gradient(180deg,#9be0ff 0%,#8ed4ff 38%,#7cc7f8 100%);overflow:hidden;border:2px solid #bde8ff;box-shadow:inset 0 0 0 1px #ffffff33}
+.islandSea{position:absolute;inset:0;background:
+  radial-gradient(circle at 16% 22%,#ffffff55 0 18px,transparent 19px),
+  radial-gradient(circle at 85% 74%,#ffffff44 0 20px,transparent 21px),
+  radial-gradient(circle at 70% 18%,#ffffff33 0 14px,transparent 15px),
+  linear-gradient(180deg,#a9e9ff00 0%,#6fbef880 100%)}
+.islandBody{position:absolute;left:10%;right:10%;top:8%;bottom:12%;background:radial-gradient(circle at 45% 38%,#dff8bf 0%,#c8e996 35%,#a9d276 65%,#8fba66 100%);border-radius:44% 56% 52% 48% / 42% 40% 60% 58%;transform:rotate(-8deg);box-shadow:inset 0 -18px 0 #8abd61,inset 0 26px 0 #efffd5}
+.mapSpot{position:absolute;transform:translate(-50%,-50%);border:0;background:transparent;padding:0;cursor:pointer;width:84px;text-align:center}
+.mapSpot .pin{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#fffef2;color:#2d624b;font-size:18px;box-shadow:0 6px 16px #0003;border:2px solid #f6d488}
+.mapSpot.known .pin{background:#fff7df}
+.spotLabel{display:block;margin-top:5px;background:#103333cc;color:#f4fbff;padding:4px 6px;border-radius:999px;font-size:11px;line-height:1.2;box-shadow:0 4px 12px #0002;backdrop-filter:blur(3px)}
+.mapSpot:hover .pin,.mapSpot:active .pin{transform:translateY(-1px) scale(1.04)}
+.mapLegend{font-size:12px;line-height:1.6;color:#d4ebe5;margin-top:10px}
+@media (max-width:390px){.islandMap{height:290px}.mapSpot{width:74px}.spotLabel{font-size:10px;padding:3px 5px}}

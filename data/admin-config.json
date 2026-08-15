@@ -1,0 +1,23 @@
+{
+  "passwordHash": "c41f19414366ad83bc26611d46c424d7:46075aa7129795b6ec7138d847f795940fdb69fce315495ec300581d80f24ad84198a64dd3fd24e0a5da9142c188358a755b7e580dd2291bb7e267f7425552bf",
+  "settings": {
+    "roleNames": {
+      "linlan": "林岚",
+      "zhouye": "周野",
+      "chenmo": "陈默",
+      "suqing": "苏晴",
+      "gaoyuan": "高远",
+      "xutang": "许棠"
+    },
+    "difficulty": {
+      "nightEventChance": 0.5,
+      "baseCheckModifier": 0,
+      "encounterInterval": 5,
+      "avoidChance": 0.2,
+      "healthDecayChance": 1,
+      "healthyLifeRecoverChance": 0.2,
+      "inventoryLimit": 4,
+      "startingBonusFood": 0
+    }
+  }
+}
