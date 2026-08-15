@@ -1,11 +1,11 @@
 window.DAY81_DATA = (() => {
   const characters = [
-    {id:'linlan',name:'林岚',sex:'女',age:29,job:'急诊护士',avatar:'🩺',maxLife:3,str:2,agi:3,int:5,luck:4,startItem:'first_aid',ability:'急救本能：生命降到1后，从次日早晨起30%概率恢复1点生命；成功后冷却5天。'},
-    {id:'zhouye',name:'周野',sex:'男',age:34,job:'消防员',avatar:'🧯',maxLife:5,str:5,agi:3,int:2,luck:4,startItem:'rope',ability:'硬汉：危险事件或战斗造成生命伤害时，25%概率抵消1点。'},
-    {id:'chenmo',name:'陈默',sex:'男',age:41,job:'机械工程师',avatar:'🔧',maxLife:4,str:3,agi:2,int:5,luck:4,startItem:'multitool',ability:'修理专家：非消耗道具损坏时35%概率修复。'},
-    {id:'suqing',name:'苏晴',sex:'女',age:26,job:'户外摄影师',avatar:'📷',maxLife:4,str:2,agi:5,int:3,luck:4,startItem:'compass',ability:'观察者：选择事件会显示风险提示；人物遭遇躲避成功率提升至35%。'},
-    {id:'gaoyuan',name:'高远',sex:'男',age:38,job:'餐厅厨师',avatar:'🍳',maxLife:4,str:4,agi:2,int:3,luck:5,startItem:'canned',ability:'精打细算：使用食品时25%概率产生效果但不消耗。'},
-    {id:'xutang',name:'许棠',sex:'女',age:32,job:'中学教师',avatar:'📚',maxLife:3,str:2,agi:3,int:4,luck:5,startItem:'notebook',ability:'冷静判断：每7天获得一次非战斗属性检定重试。'}
+    {id:'linlan',portrait:'assets/avatars/linlan.jpg',name:'林岚',sex:'女',age:29,job:'急诊护士',avatar:'🩺',maxLife:3,str:2,agi:3,int:5,luck:4,startItem:'first_aid',ability:'急救本能：生命降到1后，从次日早晨起30%概率恢复1点生命；成功后冷却5天。'},
+    {id:'zhouye',portrait:'assets/avatars/zhouye.jpg',name:'周野',sex:'男',age:34,job:'消防员',avatar:'🧯',maxLife:5,str:5,agi:3,int:2,luck:4,startItem:'rope',ability:'硬汉：危险事件或战斗造成生命伤害时，25%概率抵消1点。'},
+    {id:'chenmo',portrait:'assets/avatars/chenmo.jpg',name:'陈默',sex:'男',age:41,job:'机械工程师',avatar:'🔧',maxLife:4,str:3,agi:2,int:5,luck:4,startItem:'multitool',ability:'修理专家：非消耗道具损坏时35%概率修复。'},
+    {id:'suqing',portrait:'assets/avatars/suqing.jpg',name:'苏晴',sex:'女',age:26,job:'户外摄影师',avatar:'📷',maxLife:4,str:2,agi:5,int:3,luck:4,startItem:'compass',ability:'观察者：选择事件会显示风险提示；人物遭遇躲避成功率提升至35%。'},
+    {id:'gaoyuan',portrait:'assets/avatars/gaoyuan.jpg',name:'高远',sex:'男',age:38,job:'餐厅厨师',avatar:'🍳',maxLife:4,str:4,agi:2,int:3,luck:5,startItem:'canned',ability:'精打细算：使用食品时25%概率产生效果但不消耗。'},
+    {id:'xutang',portrait:'assets/avatars/xutang.jpg',name:'许棠',sex:'女',age:32,job:'中学教师',avatar:'📚',maxLife:3,str:2,agi:3,int:4,luck:5,startItem:'notebook',ability:'冷静判断：每7天获得一次非战斗属性检定重试。'}
   ];
 
   const items = {
@@ -265,6 +265,104 @@ window.DAY81_DATA = (() => {
     ],{minDay:20})
   ];
 
+
+  const campBuildings = [
+    {id:'shelter',name:'遮雨棚',icon:'🏕️',desc:'减轻暴雨、寒夜与大型风暴造成的伤害。',cost:{wood:2,fiber:1}},
+    {id:'water_collector',name:'集水器',icon:'💧',desc:'每3天储存1份净水；回到林中空地可领取并恢复健康。',cost:{wood:1,fiber:1,scrap:1}},
+    {id:'fish_trap',name:'捕鱼陷阱',icon:'🎣',desc:'每4天为公共营地储存1份食物。',cost:{wood:2,fiber:1}},
+    {id:'rescue_tower',name:'求救台',icon:'📡',desc:'立即提高求救努力，并强化后期救援相关事件。',cost:{wood:2,fiber:1,scrap:2}}
+  ];
+
+  const storyChains = [
+    {
+      id:'footprints',name:'林中的脚印',startLocation:'jungle_path',minDay:4,startChance:.28,
+      steps:[
+        {location:'jungle_path',name:'奇怪脚印',text:'泥地里出现一串反复折返的脚印。它不像野兽，也不像你自己的鞋印。',choices:[
+          {text:'沿着脚印追过去',action:'check',stat:'luck',difficulty:'normal',success:{randomItemChance:.65},fail:{health:-1},risk:'一般',story:{advance:1,delay:2,branch:'追踪'}},
+          {text:'做下记号，等以后再来',action:'effect',effect:{nextCheckBonus:.08},risk:'安全',story:{advance:1,delay:3,branch:'谨慎'}},
+          {text:'把发现告诉其他人',action:'effect',effect:{relationRandom:8},risk:'安全',story:{advance:1,delay:2,branch:'分享'}}
+        ]},
+        {location:'rock_cave',name:'被移动过的石块',text:'岩洞口的石头明显被人搬动过。下面压着一小片撕破的衣料。',choices:[
+          {text:'进入洞内寻找',action:'check',stat:'int',difficulty:'normal',success:{randomHighItem:1},fail:{beast:true},risk:'危险',story:{advance:1,delay:2}},
+          {text:'守在洞口等待',action:'effect',effect:{relationRandom:10},risk:'一般',story:{advance:1,delay:2}},
+          {text:'拿走衣料作为线索',action:'effect',effect:{rescueScore:.5},risk:'安全',story:{advance:1,delay:3}}
+        ]},
+        {location:'swamp_edge',name:'脚印的主人',text:'脚印最终停在沼泽边。你发现那并不是什么怪物，而是一名幸存者秘密藏物资的路线。',choices:[
+          {text:'当面询问对方',action:'effect',effect:{relationRandom:15,randomItemChance:.7},risk:'一般',story:{complete:true}},
+          {text:'不揭穿，悄悄离开',action:'effect',effect:{rescueScore:.5,nextCheckBonus:.08},risk:'安全',story:{complete:true}},
+          {text:'拿走一件藏起来的物资',action:'effect',effect:{randomItem:1,relationRandom:-18},risk:'危险',story:{complete:true}}
+        ]}
+      ]
+    },
+    {
+      id:'radio_signal',name:'沉默的无线电',startLocation:'wreck_cabin',minDay:10,startChance:.24,
+      steps:[
+        {location:'wreck_cabin',name:'没有声音的无线电',text:'你找到一台还能亮起指示灯的无线电，但它始终没有声音。也许缺少的是天线。',choices:[
+          {text:'拆下还能用的零件',action:'check',stat:'int',difficulty:'normal',success:{campMaterial:{scrap:1}},fail:{none:true},risk:'一般',story:{advance:1,delay:2}},
+          {text:'完整保留无线电',action:'effect',effect:{rescueScore:.5},risk:'安全',story:{advance:1,delay:3}},
+          {text:'请陈默帮忙判断',action:'effect',effect:{relationTo:'chenmo',relation:10},risk:'安全',story:{advance:1,delay:2}}
+        ]},
+        {location:'ridge_hill',name:'临时天线',text:'高地风很大。只要做出一个简单天线，也许无线电能听到外面的信号。',choices:[
+          {text:'架设临时天线',action:'check',stat:'int',difficulty:'normal',success:{rescueScore:1},fail:{health:-1},risk:'一般',story:{advance:1,delay:2}},
+          {text:'用信号镜辅助观察',action:'effect',effect:{rescueScore:.75},risk:'安全',story:{advance:1,delay:2}},
+          {text:'先记录附近船只方向',action:'effect',effect:{nextCheckBonus:.1},risk:'安全',story:{advance:1,delay:3}}
+        ]},
+        {location:'crash_beach',name:'短促的人声',text:'傍晚，无线电里突然传出不到两秒的人声。你听不清内容，但这证明外界并不遥远。',choices:[
+          {text:'反复尝试呼叫',action:'effect',effect:{rescueScore:2},risk:'安全',story:{complete:true}},
+          {text:'节省设备，等待更好时机',action:'effect',effect:{rescueScore:1,skipDecay:true},risk:'安全',story:{complete:true}},
+          {text:'召集其他幸存者一起监听',action:'effect',effect:{relationAll:6,rescueScore:1},risk:'安全',story:{complete:true}}
+        ]}
+      ]
+    },
+    {
+      id:'lost_diary',name:'失落的日记',startLocation:'crash_beach',minDay:6,startChance:.25,
+      steps:[
+        {location:'crash_beach',name:'湿透的日记',text:'一本泡过海水的日记夹在座椅缝里。大部分文字模糊，只能认出几个日期和名字。',choices:[
+          {text:'仔细晒干并阅读',action:'check',stat:'int',difficulty:'easy',success:{nextCheckBonus:.1},fail:{none:true},risk:'安全',story:{advance:1,delay:2}},
+          {text:'把它交给许棠整理',action:'effect',effect:{relationTo:'xutang',relation:12},risk:'安全',story:{advance:1,delay:2}},
+          {text:'不看隐私，只收好它',action:'effect',effect:{relationAll:3},risk:'安全',story:{advance:1,delay:3}}
+        ]},
+        {location:'moon_bay',name:'日记里的海湾',text:'日记里有一句话提到“像月牙一样的海湾”。你在这里找到一个被石头压住的小袋子。',choices:[
+          {text:'打开袋子',action:'effect',effect:{randomFood:1,randomItemChance:.55},risk:'安全',story:{advance:1,delay:2}},
+          {text:'寻找袋子的主人',action:'effect',effect:{relationRandom:10},risk:'一般',story:{advance:1,delay:2}},
+          {text:'把物资留在原地',action:'effect',effect:{relationAll:5,rescueScore:.25},risk:'安全',story:{advance:1,delay:3}}
+        ]},
+        {location:'bamboo_clearing',name:'日记的最后一页',text:'你终于拼出最后一页内容：失事前，有人计划把紧急物资集中到一个较安全的空地。',choices:[
+          {text:'按线索搜索空地',action:'check',stat:'luck',difficulty:'normal',success:{randomHighItem:1,campMaterial:{wood:1,fiber:1}},fail:{none:true},risk:'一般',story:{complete:true}},
+          {text:'先把线索告诉大家',action:'effect',effect:{relationAll:8},risk:'安全',story:{complete:true}},
+          {text:'把这页留作纪念',action:'effect',effect:{rescueScore:.5,health:1},risk:'安全',story:{complete:true}}
+        ]}
+      ]
+    },
+    {
+      id:'beast_trail',name:'野兽迁徙',startLocation:'coconut_grove',minDay:14,startChance:.22,
+      steps:[
+        {location:'coconut_grove',name:'折断的树枝',text:'椰林里出现大量新鲜折痕，像是有一群大型动物刚经过这里。',choices:[
+          {text:'追踪它们的方向',action:'check',stat:'agi',difficulty:'normal',success:{randomFood:1},fail:{health:-1},risk:'一般',story:{advance:1,delay:2}},
+          {text:'做陷阱标记',action:'effect',effect:{campMaterial:{wood:1}},risk:'安全',story:{advance:1,delay:3}},
+          {text:'提醒所有人避开',action:'effect',effect:{relationAll:5},risk:'安全',story:{advance:1,delay:2}}
+        ]},
+        {location:'jungle_path',name:'越来越近的低吼',text:'密林深处传来连续低吼。动物群似乎正在改变活动范围。',choices:[
+          {text:'趁机寻找被惊出的猎物',action:'check',stat:'luck',difficulty:'normal',success:{randomFood:1},fail:{beast:true},risk:'危险',story:{advance:1,delay:2}},
+          {text:'制作简易警戒线',action:'effect',effect:{campMaterial:{fiber:1}},risk:'安全',story:{advance:1,delay:2}},
+          {text:'绕到高处观察',action:'effect',effect:{nextCheckBonus:.1},risk:'安全',story:{advance:1,delay:3}}
+        ]},
+        {location:'cliff_edge',name:'迁徙终点',text:'你在断崖下看到动物群沿着狭窄路线离开岛心。它们短时间内不会再靠近营地。',choices:[
+          {text:'收集沿路留下的食物',action:'effect',effect:{randomFood:1,health:1},risk:'安全',story:{complete:true}},
+          {text:'记录安全路线',action:'effect',effect:{nextCheckBonus:.12,rescueScore:.25},risk:'安全',story:{complete:true}},
+          {text:'设置一个长期警戒点',action:'effect',effect:{campMaterial:{wood:1,fiber:1}},risk:'安全',story:{complete:true}}
+        ]}
+      ]
+    }
+  ];
+
+  const crisisTemplates = [
+    {id:'tropical_storm',name:'热带风暴',icon:'🌪️',warningDays:2,window:[18,27],desc:'海面持续低压，强风和暴雨正在接近。岩洞与遮雨棚会明显降低风险。'},
+    {id:'heatwave',name:'高温干旱',icon:'☀️',warningDays:2,window:[34,45],desc:'云层持续消散，接下来几天可能极端炎热。淡水溪与集水器尤其重要。'},
+    {id:'beast_migration',name:'野兽迁徙',icon:'🐗',warningDays:3,window:[49,61],desc:'密林里的动物活动突然增加。火把、警戒与营地设施可以降低危险。'},
+    {id:'king_tide',name:'异常大潮',icon:'🌊',warningDays:2,window:[66,76],desc:'潮位一天比一天高。海滩、月牙湾与礁池在危机当晚风险更高。'}
+  ];
+
   const N=(id,name,text,effect,polarity='neutral',opts={})=>({id,name,text,effect,polarity,...opts});
   const nights = [
     N('rain','暴雨','暴雨敲打着临时营地。',{allHazard:'rain'},'bad'),
@@ -295,5 +393,5 @@ window.DAY81_DATA = (() => {
     N('distant_light','远海灯光','很远的海面上，似乎有一盏灯一闪而过。没有人敢确定那是不是船。',{rescueScore:.5},'good',{minDay:60})
   ];
 
-  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,nights};
+  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,campBuildings,storyChains,crisisTemplates,nights};
 })();
