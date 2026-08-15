@@ -1,8 +1,8 @@
 {
   "name": "day81-card-survival",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "private": true,
-  "description": "《八十一天》单人卡牌荒岛生存游戏（8格背包、专属初始道具、地点行动、人物互动、剧情链、营地、大危机、排行榜）",
+  "description": "《八十一天》单人卡牌荒岛生存游戏（双行动、健康转生命、丰富地图、扩展事件、平衡模拟、排行榜）",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,4 +1,7 @@
-/** 《八十一天》v1.5 近似平衡模拟器。默认每名角色 10000 局，仅用于估算正常难度压力。 */
+/** 《八十一天》v1.6 近似平衡回归测试。
+ * 普通难度目标：玩家平均通关率约50%；NPC DAY30前死亡率<20%，DAY50前<50%。
+ * 这是简化压力模型，用于调参回归，不代替上线后的真实玩家统计。
+ */
 const chars=[
   {id:'linlan',name:'林岚',max:3,agi:3,luck:4},
   {id:'zhouye',name:'周野',max:5,agi:3,luck:4},
@@ -8,44 +11,47 @@ const chars=[
   {id:'xutang',name:'许棠',max:3,agi:3,luck:5}
 ];
 const R=Math.random;
-function run(c){
-  let life=c.max,health=3,foods=2,meds=c.id==='linlan'?1:0,death=81,linCd=0,goodStreak=0;
+function gainHealth(s,n){for(let i=0;i<n;i++){if(s.health>=3){s.health=1;s.life=Math.min(s.max,s.life+1);}else s.health++;}}
+function saveNpc(s,day,npc){if(!npc||s.life>0)return;const p=day<=30?.82:day<=50?.52:0;if(p&&R()<p)s.life=1;}
+function run(c,npc=false){
+  const s={life:c.max,max:c.max,health:3,foods:2,meds:c.id==='linlan'?1:0,linCd:0,streak:0,death:81};
   let shelter=false,water=false,trap=false;
   for(let day=1;day<=80;day++){
-    if(day>=18&&R()<.08)shelter=true;if(day>=25&&R()<.06)water=true;if(day>=30&&R()<.05)trap=true;
-    if(trap&&day%4===0)foods++;
-    if(health<=1&&foods>0){health=Math.min(3,health+(R()<.60?2:1));if(!(c.id==='gaoyuan'&&R()<.25))foods--;}
-    if(life<=Math.max(1,c.max-2)&&meds>0){life=Math.min(c.max,life+1);meds--;}
-    if(c.id==='linlan'&&life===1&&linCd<=0&&R()<.30){life=Math.min(c.max,life+1);linCd=5;}if(linCd>0)linCd--;
-    const dayStartHealth=health;
+    if(day>=18&&R()<.08)shelter=true;if(day>=25&&R()<.06)water=true;if(day>=30&&R()<.05)trap=true;if(trap&&day%4===0)s.foods++;
+    if(s.health<=1&&s.foods>0){gainHealth(s,R()<.60?2:1);if(!(c.id==='gaoyuan'&&R()<.25))s.foods--;}
+    if(s.life<=Math.max(1,c.max-2)&&s.meds>0){s.life=Math.min(c.max,s.life+1);s.meds--;}
+    if(c.id==='linlan'&&s.life===1&&s.linCd<=0&&R()<.30){s.life=Math.min(c.max,s.life+1);s.linCd=5;}if(s.linCd>0)s.linCd--;
+    const dayStart=s.health;
 
-    // 地点探索 + 剧情链/营地使资源比旧版略稳定。
+    // 一次地点探索：资源前期略多，后期逐步收紧。
     const foodP=day<=20?.44:day<=40?.41:day<=60?.38:.35;
     const x=R();
-    if(x<foodP)foods++;
-    else if(x<foodP+.16)health=Math.min(3,health+1);
-    else if(x<foodP+.22)meds++;
-    else if(x<foodP+.30)health=Math.max(0,health-1);
-    else if(x<foodP+.335){let avoid=.68+(c.agi-3)*.045+(c.luck-4)*.02;if(c.id==='xutang')avoid+=.06;if(R()>avoid&&!(c.id==='zhouye'&&R()<.25))life--;}
+    if(x<foodP)s.foods++;
+    else if(x<foodP+.16)gainHealth(s,1);
+    else if(x<foodP+.22)s.meds++;
+    else if(x<foodP+.30)s.health=Math.max(0,s.health-1);
+    else if(x<foodP+.335){let avoid=.68+(c.agi-3)*.045+(c.luck-4)*.02;if(c.id==='xutang')avoid+=.06;if(R()>avoid&&!(c.id==='zhouye'&&R()<.25))s.life--;}
 
-    // 同地点相遇平均约三成多，但理性玩家多交易/躲避，生命伤害很低。
-    if(R()<.34){let safe=.91+(c.id==='suqing'?.035:0)+(c.agi-3)*.008;if(R()>safe&&!(c.id==='zhouye'&&R()<.25))life--;}
+    // 人物互动多为关系与小收益；敌对冲突概率低。
+    if(R()<.32&&R()<.04&&!(c.id==='zhouye'&&R()<.25))s.life--;
 
-    // 70% 夜间特别事件；正面/中性事件和营地保护使其不等于70%伤害。
-    if(R()<.70){const n=R();if(n<.19&&!shelter)health=Math.max(0,health-1);else if(n<.215&&!shelter){if(!(c.id==='zhouye'&&R()<.25))life--;}else if(n>.72)health=Math.min(3,health+1);}
+    // 默认70%夜间特别事件，并非所有事件都会命中该地点或造成损失。
+    if(R()<.70){const n=R();if(n<.19&&!shelter)s.health=Math.max(0,s.health-1);else if(n<.215&&!shelter){if(!(c.id==='zhouye'&&R()<.25))s.life--;}else if(n>.72)gainHealth(s,1);}
+    if([23,40,55,71].includes(day)&&R()<.28&&!shelter)s.health=Math.max(0,s.health-1);
+    saveNpc(s,day,npc);if(s.life<=0){s.death=day;break;}
 
-    // 四次大危机，有提前准备；只造成温和的额外压力。
-    if([23,40,55,71].includes(day)&&R()<.28&&!shelter)health=Math.max(0,health-1);
-    if(life<=0){death=day;break;}
-
-    let decay=.95;if(water)decay-=.08;
-    if(dayStartHealth===0&&health===0)life--;else if(health>0&&R()<decay)health--;
-    if(health>=2)goodStreak++;else goodStreak=0;if(goodStreak>=3){if(R()<.23)life=Math.min(c.max,life+1);goodStreak=0;}
-    if(life<=0){death=day;break;}
+    let decay=.94;if(water)decay-=.08;
+    if(dayStart===0&&s.health===0)s.life--;else if(s.health>0&&R()<decay)s.health--;
+    if(s.health>=2)s.streak++;else s.streak=0;if(s.streak>=3){if(R()<.20)s.life=Math.min(c.max,s.life+1);s.streak=0;}
+    saveNpc(s,day,npc);if(s.life<=0){s.death=day;break;}
   }
-  return {win:life>0,death};
+  return {win:s.life>0,death:s.death};
 }
-const games=Number(process.argv[2]||10000);let total=0;
-for(const c of chars){let wins=0,deathSum=0;for(let i=0;i<games;i++){const z=run(c);if(z.win)wins++;else deathSum+=z.death;}total+=wins;const losses=games-wins;console.log(`${c.name}: 胜率 ${(wins/games*100).toFixed(1)}% | 失败局平均死亡日 ${losses?(deathSum/losses).toFixed(1):'-'}`);}
-console.log(`\n六角色平均胜率：${(total/(games*chars.length)*100).toFixed(1)}%`);
-console.log('说明：这是近似压力测试，剧情选择、关系互助、营地建设速度和真实卡牌组合会让真人结果产生波动。');
+const games=Number(process.argv[2]||20000);let total=0;
+console.log(`每个角色模拟 ${games} 局（普通难度）\n`);
+for(const c of chars){let wins=0,npc30=0,npc50=0,deathSum=0,loss=0;for(let i=0;i<games;i++){
+  const p=run(c,false);if(p.win)wins++;else{loss++;deathSum+=p.death;}
+  const n=run(c,true);if(!n.win&&n.death<=30)npc30++;if(!n.win&&n.death<=50)npc50++;
+}total+=wins;console.log(`${c.name}: 玩家胜率 ${(wins/games*100).toFixed(1)}% | NPC≤30天死亡 ${(npc30/games*100).toFixed(1)}% | NPC≤50天死亡 ${(npc50/games*100).toFixed(1)}% | 失败平均日 ${loss?(deathSum/loss).toFixed(1):'-'}`);}
+console.log(`\n玩家六角色平均通关率：${(total/(games*chars.length)*100).toFixed(1)}%`);
+console.log('目标：约50%；NPC≤30天<20%，NPC≤50天<50%。');

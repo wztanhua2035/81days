@@ -105,3 +105,38 @@ body{min-height:100dvh;background:radial-gradient(circle at top,#1b3230 0,#0d171
   .starterBadge{font-size:7px;padding:2px 3px}
   .locationBrief .event-text{font-size:13px}
 }
+
+/* v1.6：地图细节、每日双行动、文字与反馈优化 */
+body{font-size:15px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-feature-settings:"kern" 1,"liga" 1}
+.paper,.card{letter-spacing:.005em}
+.event-title{font-size:23px;line-height:1.35;letter-spacing:.02em;text-wrap:balance}
+.event-text{font-size:15px;line-height:1.9;color:#3d392f;text-wrap:pretty;word-break:break-word}
+.result{font-size:14px;line-height:1.75}
+.section-title{line-height:1.5}
+.choice{font-size:15px;line-height:1.45;padding:14px 14px;box-shadow:0 4px 10px #0000000d}
+.choice small{font-size:12px;line-height:1.5;margin-top:5px}
+.itemName{font-weight:900;color:#9b5b16;background:#fff0b8;padding:0 3px;border-radius:4px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.interactionSceneTitle{display:inline-block;margin:2px 0 10px;padding:4px 9px;border-radius:999px;background:#dceee7;color:#356455;font-size:12px;font-weight:850;letter-spacing:.05em}
+.dailyActionStatus{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.dailyActionStatus span{font-size:10px;padding:5px 7px;border-radius:999px;background:#253b39;color:#bcd0ca;border:1px solid #38514e}.dailyActionStatus span.done{background:#214d39;color:#c8f1d3;border-color:#3f7658}
+.endDayChoice{background:#edf0ef;border-color:#aeb8b5;color:#34423f}.postButtons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.meetPerson:disabled{opacity:.45;filter:grayscale(.4);cursor:not-allowed}
+
+/* 更丰富的海岛地图 */
+.islandMap{height:355px;background:linear-gradient(180deg,#b6edff 0%,#8bd4f6 52%,#69bce8 100%);border-color:#d6f5ff;box-shadow:inset 0 0 0 1px #fff8,inset 0 -30px 60px #2799d42b,0 12px 26px #0002}
+.islandBody{background:
+  radial-gradient(circle at 43% 32%,#efffd8 0 12%,transparent 13%),
+  radial-gradient(circle at 63% 62%,#d8f5af 0 10%,transparent 11%),
+  radial-gradient(circle at 45% 38%,#dff8bf 0%,#c7e996 35%,#a8d273 66%,#87b95d 100%);box-shadow:inset 0 -18px 0 #80ad56,inset 0 18px 0 #efffd2,0 7px 18px #1a795d33}
+.mapTerrain{position:absolute;inset:8% 10% 12% 10%;width:80%;height:80%;z-index:1;pointer-events:none;transform:rotate(-8deg)}
+.mapTerrain .river{fill:none;stroke:#67c9e8;stroke-width:2.3;stroke-linecap:round;filter:drop-shadow(0 1px 0 #e7ffff)}
+.mapTerrain .trail{fill:none;stroke:#b8a16f;stroke-width:1.1;stroke-dasharray:2 2;opacity:.68}.mapTerrain .trail.alt{opacity:.48}
+.mapTerrain .sandPatch{fill:#ead89a;opacity:.78}.mapTerrain .pond{fill:#70c7d9;stroke:#c6fbff;stroke-width:.7}.mapTerrain .pond.tiny{opacity:.8}
+.terrainIcon{position:absolute;z-index:2;pointer-events:none;filter:drop-shadow(0 2px 1px #315e3d55);opacity:.86;font-size:20px}.terrainIcon.mountain{font-size:26px}.terrainIcon.m1{left:43%;top:12%}.terrainIcon.m2{left:58%;top:16%;transform:scale(.8)}.terrainIcon.p1{left:24%;top:27%}.terrainIcon.p2{left:31%;top:35%;font-size:16px}.terrainIcon.t1{left:31%;top:59%}.terrainIcon.t2{left:48%;top:49%;font-size:17px}.terrainIcon.plane{left:52%;top:20%;transform:rotate(-14deg);font-size:17px}.terrainIcon.campMark{left:49%;top:57%;font-size:17px}.terrainIcon.rocks{left:76%;top:38%;font-size:16px}
+.waveLine{position:absolute;z-index:1;color:#e8fbffb8;letter-spacing:3px;font-size:13px;pointer-events:none;text-shadow:0 1px #4ba9cf}.waveLine.w1{left:3%;top:48%;transform:rotate(-14deg)}.waveLine.w2{right:4%;bottom:20%;transform:rotate(14deg)}
+.cloudShade{position:absolute;z-index:2;width:64px;height:20px;border-radius:50%;background:#ffffff38;filter:blur(8px);pointer-events:none}.cloudShade.c1{left:9%;top:12%;transform:rotate(-10deg)}.cloudShade.c2{right:9%;top:9%;width:48px}
+.mapSpot{z-index:5}.mapSpot .pin{transition:.18s transform,.18s box-shadow}.mapSpot:active .pin{transform:scale(.94)}.mapSpot.current .pin{box-shadow:0 0 0 4px #fff8,0 7px 18px #1d704b66}.spotLabel{font-weight:750;letter-spacing:.01em}
+
+.conversionFx{position:fixed;z-index:90;left:50%;top:27%;transform:translate(-50%,-10px) scale(.96);opacity:0;min-width:240px;max-width:88vw;padding:12px 16px;border-radius:16px;background:linear-gradient(135deg,#fff4c6,#dff5df);color:#31573c;box-shadow:0 18px 42px #0006;border:1px solid #fff;pointer-events:none;transition:.25s opacity,.25s transform;text-align:center}.conversionFx.show{opacity:1;transform:translate(-50%,0) scale(1)}.conversionFx b{display:block;font-size:17px;color:#927021}.conversionFx span{display:block;margin-top:4px;font-size:12px;font-weight:700}
+
+@media(max-width:390px){
+  body{font-size:14px}.event-title{font-size:21px}.event-text{font-size:14px;line-height:1.85}.choice{font-size:14px;padding:13px 12px}.choice small{font-size:11px}.islandMap{height:315px}.terrainIcon{font-size:16px}.terrainIcon.mountain{font-size:21px}.dailyActionStatus{max-width:160px}.dailyActionStatus span{font-size:9px}.postButtons{grid-template-columns:1fr}.conversionFx{top:23%}
+}
