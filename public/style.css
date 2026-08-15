@@ -70,3 +70,38 @@ body{min-height:100dvh;background:radial-gradient(circle at top,#1b3230 0,#0d171
 .dayPortrait{width:80px;height:98px;object-fit:cover;object-position:center top;border-radius:50% 50% 44% 44%;border:2px solid #ecd58d;box-shadow:0 10px 28px #0008;margin-bottom:10px}.dayCrisis{margin-top:12px;color:#ffbda9;font-weight:800;font-size:13px}
 .homeSub{margin:10px 0 0}.homeSub+.castStrip{margin-top:0}
 .eventLocIcon{position:absolute;right:18px;top:18px;font-size:42px;opacity:.16;filter:saturate(.8);transform:rotate(6deg)}.eventPaper .section-title,.eventPaper .event-title,.eventPaper .event-text,.eventPaper .choices,.eventPaper .result{position:relative;z-index:1}
+
+/* v1.5 — 8格背包、地点行动中心、关系互动 */
+.inventory.inventory8{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.inventory8 .slot{position:relative;min-height:72px;padding:7px 4px}
+.inventory8 .slot .ico{font-size:22px}
+.inventory8 .slot .label{font-size:10px;line-height:1.25;word-break:break-all}
+.slot.starterSlot{border-style:solid;border-color:#d5b45f;background:linear-gradient(145deg,#2b2a1c,#18221d);box-shadow:inset 0 0 0 1px #f0d98422,0 4px 12px #0002}
+.starterBadge{position:absolute;right:3px;top:3px;padding:2px 4px;border-radius:999px;background:#d9b65f;color:#292217;font-size:8px;font-weight:950;letter-spacing:.03em}
+.locationBrief{position:relative;overflow:hidden;background:linear-gradient(150deg,#f5ecd7,#e7dcc2);border:1px solid #d1c19c}
+.locationBrief:after{content:'◌';position:absolute;right:14px;top:9px;font-size:58px;color:#917f5a16;pointer-events:none}
+.locationBrief .locationIcon{font-size:30px;margin-bottom:5px}
+.locationBrief .event-text{font-size:14px;color:#443d32}
+.actionHub{display:grid;gap:9px}
+.actionHint{font-size:12px;color:#a9bbb6;line-height:1.55;padding:0 2px}
+.meetList.compact{margin-top:0}
+.meetList.compact .meetPerson{min-height:72px;background:#142523;border-color:#34514c;color:#eef4f1;border-radius:13px;padding:8px 10px;text-align:left}
+.meetList.compact .meetPerson:hover{border-color:#758f87}
+.interactionPaper{position:relative;overflow:hidden}
+.interactionPaper .dialogue{background:#fff9e9;border:1px solid #d2c3a5;border-radius:12px;padding:12px 13px;line-height:1.7;white-space:pre-line;margin-top:10px}
+.interactionMeta{display:flex;gap:7px;flex-wrap:wrap;margin:7px 0 0}
+.interactionMeta span{font-size:11px;background:#e5dac2;color:#564a38;border-radius:999px;padding:4px 8px}
+.tradeChoice{position:relative;padding-right:30px}
+.tradeChoice:after{content:'⇄';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#8d6e31;font-size:18px}
+.dangerPaper{border:1px solid #8e4841;background:linear-gradient(145deg,#f5dfd3,#eac9bc);box-shadow:0 12px 30px #7f262633}
+.dangerPaper .event-title{color:#8e2f2b}
+.protectedNote{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#2b291b;border:1px solid #6e6032;color:#e7d79a;font-size:11px;line-height:1.5}
+.choice:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.45)}
+@media(max-width:390px){
+  .inventory.inventory8{gap:5px}
+  .inventory8 .slot{min-height:66px;padding:6px 2px}
+  .inventory8 .slot .ico{font-size:20px}
+  .inventory8 .slot .label{font-size:9px}
+  .starterBadge{font-size:7px;padding:2px 3px}
+  .locationBrief .event-text{font-size:13px}
+}

@@ -22,10 +22,9 @@ const DEFAULT_SETTINGS = {
   difficulty: {
     nightEventChance: 0.70,
     baseCheckModifier: 0,
-    avoidChance: 0.20,
     healthDecayChance: 1.00,
     healthyLifeRecoverChance: 0.20,
-    inventoryLimit: 4,
+    inventoryLimit: 8,
     startingBonusFood: 0
   }
 };
@@ -59,6 +58,7 @@ function normalizeConfig(raw){
     }
   }
   if(raw?.settings?.difficulty){ for(const key of Object.keys(out.settings.difficulty)){ if(raw.settings.difficulty[key] !== undefined) out.settings.difficulty[key]=raw.settings.difficulty[key]; } }
+  out.settings.difficulty.inventoryLimit = Math.max(8, Math.min(10, Number(out.settings.difficulty.inventoryLimit)||8));
   return out;
 }
 function loadConfig(){
@@ -138,10 +138,9 @@ function validateSettings(input){
   return {roleNames,difficulty:{
     nightEventChance:num('nightEventChance',.10,.90),
     baseCheckModifier:num('baseCheckModifier',-.20,.20),
-    avoidChance:num('avoidChance',.05,.60),
     healthDecayChance:num('healthDecayChance',.50,1.00),
     healthyLifeRecoverChance:num('healthyLifeRecoverChance',0,.60),
-    inventoryLimit:num('inventoryLimit',3,6,true),
+    inventoryLimit:num('inventoryLimit',8,10,true),
     startingBonusFood:num('startingBonusFood',0,2,true)
   }};
 }

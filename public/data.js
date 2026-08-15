@@ -1,48 +1,68 @@
 window.DAY81_DATA = (() => {
   const characters = [
-    {id:'linlan',portrait:'assets/avatars/linlan.jpg',name:'林岚',sex:'女',age:29,job:'急诊护士',avatar:'🩺',maxLife:3,str:2,agi:3,int:5,luck:4,startItem:'first_aid',ability:'急救本能：生命降到1后，从次日早晨起30%概率恢复1点生命；成功后冷却5天。'},
-    {id:'zhouye',portrait:'assets/avatars/zhouye.jpg',name:'周野',sex:'男',age:34,job:'消防员',avatar:'🧯',maxLife:5,str:5,agi:3,int:2,luck:4,startItem:'rope',ability:'硬汉：危险事件或战斗造成生命伤害时，25%概率抵消1点。'},
-    {id:'chenmo',portrait:'assets/avatars/chenmo.jpg',name:'陈默',sex:'男',age:41,job:'机械工程师',avatar:'🔧',maxLife:4,str:3,agi:2,int:5,luck:4,startItem:'multitool',ability:'修理专家：非消耗道具损坏时35%概率修复。'},
-    {id:'suqing',portrait:'assets/avatars/suqing.jpg',name:'苏晴',sex:'女',age:26,job:'户外摄影师',avatar:'📷',maxLife:4,str:2,agi:5,int:3,luck:4,startItem:'compass',ability:'观察者：选择事件会显示风险提示；人物遭遇躲避成功率提升至35%。'},
-    {id:'gaoyuan',portrait:'assets/avatars/gaoyuan.jpg',name:'高远',sex:'男',age:38,job:'餐厅厨师',avatar:'🍳',maxLife:4,str:4,agi:2,int:3,luck:5,startItem:'canned',ability:'精打细算：使用食品时25%概率产生效果但不消耗。'},
-    {id:'xutang',portrait:'assets/avatars/xutang.jpg',name:'许棠',sex:'女',age:32,job:'中学教师',avatar:'📚',maxLife:3,str:2,agi:3,int:4,luck:5,startItem:'notebook',ability:'冷静判断：每7天获得一次非战斗属性检定重试。'}
+    {id:'linlan',portrait:'assets/avatars/linlan.jpg',name:'林岚',sex:'女',age:29,job:'急诊护士',avatar:'🩺',maxLife:3,str:2,agi:3,int:5,luck:4,startItem:'starter_medkit',ability:'急救本能：生命降到1后，从次日早晨起30%概率恢复1点生命；成功后冷却5天。'},
+    {id:'zhouye',portrait:'assets/avatars/zhouye.jpg',name:'周野',sex:'男',age:34,job:'消防员',avatar:'🧯',maxLife:5,str:5,agi:3,int:2,luck:4,startItem:'starter_rope',ability:'硬汉：危险事件或战斗造成生命伤害时，25%概率抵消1点。'},
+    {id:'chenmo',portrait:'assets/avatars/chenmo.jpg',name:'陈默',sex:'男',age:41,job:'机械工程师',avatar:'🔧',maxLife:4,str:3,agi:2,int:5,luck:4,startItem:'starter_toolkit',ability:'修理专家：非消耗道具损坏时35%概率修复。'},
+    {id:'suqing',portrait:'assets/avatars/suqing.jpg',name:'苏晴',sex:'女',age:26,job:'户外摄影师',avatar:'📷',maxLife:4,str:2,agi:5,int:3,luck:4,startItem:'starter_compass',ability:'观察者：选择事件会显示风险提示，更适合判断探索路线中的危险。'},
+    {id:'gaoyuan',portrait:'assets/avatars/gaoyuan.jpg',name:'高远',sex:'男',age:38,job:'餐厅厨师',avatar:'🍳',maxLife:4,str:4,agi:2,int:3,luck:5,startItem:'starter_chefknife',ability:'精打细算：使用食品时25%概率产生效果但不消耗。'},
+    {id:'xutang',portrait:'assets/avatars/xutang.jpg',name:'许棠',sex:'女',age:32,job:'中学教师',avatar:'📚',maxLife:3,str:2,agi:3,int:4,luck:5,startItem:'starter_notebook',ability:'冷静判断：每7天获得一次非战斗属性检定重试。'}
   ];
 
   const items = {
-    apple:{id:'apple',name:'苹果',ico:'🍎',kind:'food',consumable:true,value:5,desc:'健康+1',effect:{health:1}},
-    coconut:{id:'coconut',name:'椰子',ico:'🥥',kind:'food',consumable:true,value:6,desc:'健康+1，20%概率额外+1',effect:{health:1,extraHealthChance:.2}},
-    canned:{id:'canned',name:'罐头',ico:'🥫',kind:'food',consumable:true,value:9,desc:'健康+2',effect:{health:2}},
-    biscuit:{id:'biscuit',name:'压缩饼干',ico:'🍘',kind:'food',consumable:true,value:9,desc:'健康+1，今晚不自然下降',effect:{health:1,skipDecay:true}},
-    grilled_fish:{id:'grilled_fish',name:'烤鱼',ico:'🐟',kind:'food',consumable:true,value:8,desc:'健康+2',effect:{health:2}},
-    berries:{id:'berries',name:'野果',ico:'🫐',kind:'food',consumable:true,value:4,desc:'75%健康+1，25%健康-1',effect:{wildFood:true}},
-    first_aid:{id:'first_aid',name:'急救包',ico:'🩹',kind:'medical',consumable:true,value:10,desc:'生命+1',effect:{life:1}},
-    painkiller:{id:'painkiller',name:'止痛药',ico:'💊',kind:'medical',consumable:true,value:7,desc:'下一次生命伤害-1',effect:{shield:1}},
-    disinfectant:{id:'disinfectant',name:'消毒药水',ico:'🧴',kind:'medical',consumable:true,value:7,desc:'抵消下一次健康或生命损失1点',effect:{generalShield:1}},
-    dagger:{id:'dagger',name:'匕首',ico:'🗡️',kind:'gear',consumable:false,value:9,desc:'战斗攻击力+1',mods:{combat:1}},
-    spear:{id:'spear',name:'木矛',ico:'🔱',kind:'gear',consumable:false,value:8,desc:'力量检定+1；战斗攻击力+1（武器不叠加）',mods:{strCheck:1,combat:1,weapon:true}},
-    rope:{id:'rope',name:'救援绳',ico:'🪢',kind:'gear',consumable:false,value:8,desc:'攀爬、悬崖、救援成功率+25%',mods:{climb:.25}},
-    multitool:{id:'multitool',name:'多功能工具钳',ico:'🛠️',kind:'gear',consumable:false,value:9,desc:'机械知识类事件成功率+20%',mods:{mechanic:.2}},
-    compass:{id:'compass',name:'指南针',ico:'🧭',kind:'gear',consumable:false,value:8,desc:'迷路类事件自动成功',mods:{navigation:true}},
-    flashlight:{id:'flashlight',name:'手电筒',ico:'🔦',kind:'gear',consumable:false,value:8,desc:'夜间负面事件概率下降',mods:{nightSafe:.15}},
-    torch:{id:'torch',name:'火把',ico:'🔥',kind:'gear',consumable:false,value:8,desc:'抵挡野兽伤害；使用后30%概率损坏',mods:{beastSafe:true}},
-    lighter:{id:'lighter',name:'打火机',ico:'🧨',kind:'gear',consumable:false,value:8,desc:'生火、取暖、驱赶动物类事件+30%',mods:{fire:.3}},
-    tarp:{id:'tarp',name:'雨布',ico:'⛺',kind:'gear',consumable:false,value:9,desc:'暴雨类健康损失无效',mods:{rainSafe:true}},
-    bottle:{id:'bottle',name:'水壶',ico:'🚰',kind:'gear',consumable:false,value:8,desc:'缺水、寻找淡水事件+25%',mods:{water:.25}},
-    fishing:{id:'fishing',name:'捕鱼线',ico:'🎣',kind:'gear',consumable:false,value:7,desc:'捕鱼成功率+30%',mods:{fish:.3}},
-    axe:{id:'axe',name:'小斧头',ico:'🪓',kind:'gear',consumable:false,value:8,desc:'力量资源事件+20%',mods:{resource:.2}},
-    drybag:{id:'drybag',name:'防水布袋',ico:'🎒',kind:'gear',consumable:false,value:8,desc:'暴雨或落水不会随机丢失道具',mods:{dry:true}},
-    whistle:{id:'whistle',name:'哨子',ico:'📣',kind:'special',consumable:false,value:6,desc:'DAY61后提高求救相关事件权重',mods:{rescue:1}},
-    mirror:{id:'mirror',name:'信号镜',ico:'🪞',kind:'special',consumable:false,value:9,desc:'DAY61后提高求救相关事件权重',mods:{rescue:2}},
-    flare:{id:'flare',name:'信号弹',ico:'🚀',kind:'special',consumable:true,value:10,desc:'DAY61后使用可增加求救评分',effect:{rescueScore:2}},
-    oldmap:{id:'oldmap',name:'旧地图',ico:'🗺️',kind:'gear',consumable:false,value:6,desc:'探索知识检定获得小幅加成',mods:{explore:.12}},
-    binoculars:{id:'binoculars',name:'望远镜',ico:'🔭',kind:'gear',consumable:false,value:8,desc:'危险选择会得到额外提示',mods:{riskHint:true}},
-    raincoat:{id:'raincoat',name:'破旧雨衣',ico:'🧥',kind:'gear',consumable:false,value:6,desc:'第一次暴雨健康伤害自动抵消，随后损坏',mods:{rainOnce:true}},
-    coin:{id:'coin',name:'幸运硬币',ico:'🪙',kind:'gear',consumable:false,value:7,desc:'幸运检定+10%',mods:{luck:.1}},
-    notebook:{id:'notebook',name:'防水笔记本',ico:'📓',kind:'gear',consumable:false,value:6,desc:'记录求生过程；最终评分略有加成',mods:{journal:true}},
-    lifevest:{id:'lifevest',name:'救生衣',ico:'🦺',kind:'gear',consumable:false,value:7,desc:'下一次落水生命伤害免除',mods:{waterShield:true}}
+    starter_medkit:{id:'starter_medkit',name:'随身急救包',ico:'🩺',kind:'starter',starter:true,consumable:false,value:99,desc:'林岚的专属初始道具。永久持有，不可交易、不可夺取、不可丢弃；医疗相关检定+15%。',mods:{medical:.15}},
+    starter_rope:{id:'starter_rope',name:'消防救援绳',ico:'🪢',kind:'starter',starter:true,consumable:false,value:99,desc:'周野的专属初始道具。永久持有；攀爬、救援类检定+25%。',mods:{climb:.25}},
+    starter_toolkit:{id:'starter_toolkit',name:'工程工具包',ico:'🧰',kind:'starter',starter:true,consumable:false,value:99,desc:'陈默的专属初始道具。永久持有；机械、维修类检定+20%。',mods:{mechanic:.20}},
+    starter_compass:{id:'starter_compass',name:'户外指南针',ico:'🧭',kind:'starter',starter:true,consumable:false,value:99,desc:'苏晴的专属初始道具。永久持有；迷路类事件自动成功。',mods:{navigation:true}},
+    starter_chefknife:{id:'starter_chefknife',name:'厨师折叠刀',ico:'🔪',kind:'starter',starter:true,consumable:false,value:99,desc:'高远的专属初始道具。永久持有；处理食物和采集类检定+15%。',mods:{foodPrep:.15,resource:.10}},
+    starter_notebook:{id:'starter_notebook',name:'防水教学笔记本',ico:'📓',kind:'starter',starter:true,consumable:false,value:99,desc:'许棠的专属初始道具。永久持有；探索、记录类检定+8%。',mods:{journal:true,explore:.08}},
+
+    apple:{id:'apple',name:'苹果',ico:'🍎',kind:'food',consumable:true,value:8,desc:'生命+1。完好的新鲜水果很难得。',effect:{life:1}},
+    coconut:{id:'coconut',name:'椰子',ico:'🥥',kind:'food',consumable:true,value:6,desc:'健康+1，20%概率额外+1。',effect:{health:1,extraHealthChance:.2}},
+    canned:{id:'canned',name:'罐头',ico:'🥫',kind:'food',consumable:true,value:9,desc:'健康+2。',effect:{health:2}},
+    biscuit:{id:'biscuit',name:'压缩饼干',ico:'🍘',kind:'food',consumable:true,value:9,desc:'健康+1，且今晚不因日常消耗下降健康。',effect:{health:1,skipDecay:true}},
+    grilled_fish:{id:'grilled_fish',name:'烤鱼',ico:'🐟',kind:'food',consumable:true,value:8,desc:'健康+2。',effect:{health:2}},
+    berries:{id:'berries',name:'可疑野果',ico:'🫐',kind:'food',consumable:true,value:4,desc:'75%健康+1，25%健康-1。',effect:{wildFood:true}},
+    banana:{id:'banana',name:'野香蕉',ico:'🍌',kind:'food',consumable:true,value:6,desc:'健康+1。',effect:{health:1}},
+    jerky:{id:'jerky',name:'密封肉干',ico:'🥩',kind:'food',consumable:true,value:8,desc:'健康+2。',effect:{health:2}},
+    energy_bar:{id:'energy_bar',name:'能量棒',ico:'🍫',kind:'food',consumable:true,value:8,desc:'健康+1，并使下一次属性检定略微提高。',effect:{health:1,nextCheckBonus:.08}},
+
+    first_aid:{id:'first_aid',name:'急救包',ico:'🩹',kind:'medical',consumable:true,value:10,desc:'生命+1。',effect:{life:1}},
+    bandage:{id:'bandage',name:'弹性绷带',ico:'🩹',kind:'medical',consumable:true,value:8,desc:'生命+1。',effect:{life:1}},
+    painkiller:{id:'painkiller',name:'止痛药',ico:'💊',kind:'medical',consumable:true,value:7,desc:'抵消下一次生命伤害1点。',effect:{shield:1}},
+    disinfectant:{id:'disinfectant',name:'消毒药水',ico:'🧴',kind:'medical',consumable:true,value:7,desc:'抵消下一次健康或生命损失1点。',effect:{generalShield:1}},
+    oral_salts:{id:'oral_salts',name:'口服补液盐',ico:'🧂',kind:'medical',consumable:true,value:7,desc:'健康+1，并使今晚不因日常消耗下降健康。',effect:{health:1,skipDecay:true}},
+
+    dagger:{id:'dagger',name:'匕首',ico:'🗡️',kind:'gear',consumable:false,value:9,desc:'战斗攻击力+1。',mods:{combat:1}},
+    spear:{id:'spear',name:'木矛',ico:'🔱',kind:'gear',consumable:false,value:8,desc:'力量类资源检定小幅提高；战斗攻击力+1（武器不叠加）。',mods:{strCheck:1,combat:1,weapon:true}},
+    rope:{id:'rope',name:'尼龙绳',ico:'🪢',kind:'gear',consumable:false,value:8,desc:'攀爬、悬崖、救援成功率+20%。',mods:{climb:.20}},
+    multitool:{id:'multitool',name:'维修工具钳',ico:'🛠️',kind:'gear',consumable:false,value:9,desc:'机械知识类事件成功率+15%。',mods:{mechanic:.15}},
+    compass:{id:'compass',name:'备用指南针',ico:'🧭',kind:'gear',consumable:false,value:8,desc:'迷路类事件成功率显著提高。',mods:{navigation:true}},
+    flashlight:{id:'flashlight',name:'手电筒',ico:'🔦',kind:'gear',consumable:false,value:8,desc:'降低夜间负面事件影响。',mods:{nightSafe:.12}},
+    torch:{id:'torch',name:'火把',ico:'🔥',kind:'gear',consumable:false,value:8,desc:'可吓退野兽；成功抵挡后30%概率损坏。',mods:{beastSafe:true}},
+    lighter:{id:'lighter',name:'打火机',ico:'🔥',kind:'gear',consumable:false,value:8,desc:'生火、取暖、驱赶动物类事件+25%。',mods:{fire:.25}},
+    tarp:{id:'tarp',name:'防水雨布',ico:'⛺',kind:'gear',consumable:false,value:9,desc:'抵挡大部分暴雨造成的健康损失。',mods:{rainSafe:true}},
+    bottle:{id:'bottle',name:'水壶',ico:'🚰',kind:'gear',consumable:false,value:8,desc:'寻找淡水类事件+20%。',mods:{water:.20}},
+    fishing:{id:'fishing',name:'捕鱼线',ico:'🎣',kind:'gear',consumable:false,value:7,desc:'捕鱼类事件成功率+25%。',mods:{fish:.25}},
+    axe:{id:'axe',name:'小斧头',ico:'🪓',kind:'gear',consumable:false,value:8,desc:'采集木材等力量资源事件+15%。',mods:{resource:.15}},
+    drybag:{id:'drybag',name:'防水布袋',ico:'🎒',kind:'gear',consumable:false,value:8,desc:'暴雨或落水时不会随机丢失普通道具。',mods:{dry:true}},
+    oldmap:{id:'oldmap',name:'旧地图',ico:'🗺️',kind:'gear',consumable:false,value:6,desc:'探索类检定+10%。',mods:{explore:.10}},
+    binoculars:{id:'binoculars',name:'望远镜',ico:'🔭',kind:'gear',consumable:false,value:8,desc:'危险选择会得到额外风险提示。',mods:{riskHint:true}},
+    raincoat:{id:'raincoat',name:'破旧雨衣',ico:'🧥',kind:'gear',consumable:false,value:6,desc:'第一次受到暴雨健康伤害时自动抵消，随后损坏。',mods:{rainOnce:true}},
+    coin:{id:'coin',name:'幸运硬币',ico:'🪙',kind:'gear',consumable:false,value:7,desc:'幸运检定+10%。',mods:{luck:.1}},
+    notebook:{id:'notebook',name:'空白防水笔记本',ico:'📔',kind:'gear',consumable:false,value:6,desc:'记录线索；探索检定小幅提高。',mods:{journal:true,explore:.04}},
+    lifevest:{id:'lifevest',name:'救生衣',ico:'🦺',kind:'gear',consumable:false,value:7,desc:'下一次落水造成的生命伤害免除。',mods:{waterShield:true}},
+    work_gloves:{id:'work_gloves',name:'耐磨手套',ico:'🧤',kind:'gear',consumable:false,value:7,desc:'采集、搬运类资源检定+10%。',mods:{resource:.10}},
+    insect_repellent:{id:'insect_repellent',name:'驱虫喷雾',ico:'🦟',kind:'gear',consumable:false,value:7,desc:'降低虫群、沼泽类事件的不良影响。',mods:{insectSafe:true}},
+    waterproof_matches:{id:'waterproof_matches',name:'防水火柴',ico:'🔥',kind:'gear',consumable:false,value:7,desc:'生火类事件+20%。',mods:{fire:.20}},
+    hammock:{id:'hammock',name:'轻便吊床',ico:'🛏️',kind:'gear',consumable:false,value:7,desc:'选择休整时更容易保持良好状态。',mods:{restBonus:true}},
+    water_filter:{id:'water_filter',name:'便携滤水器',ico:'💧',kind:'gear',consumable:false,value:9,desc:'淡水、饮水类事件+25%。',mods:{water:.25}},
+
+    whistle:{id:'whistle',name:'哨子',ico:'📣',kind:'special',consumable:false,value:6,desc:'DAY61后提高求救相关事件权重。',mods:{rescue:1}},
+    mirror:{id:'mirror',name:'信号镜',ico:'🪞',kind:'special',consumable:false,value:9,desc:'DAY61后提高求救相关事件权重。',mods:{rescue:2}},
+    flare:{id:'flare',name:'信号弹',ico:'🚀',kind:'special',consumable:true,value:10,desc:'DAY61后使用可增加求救评分。',effect:{rescueScore:2}}
   };
 
-  const itemPool = Object.keys(items);
+  const itemPool = Object.keys(items).filter(id=>!items[id].starter);
   const foodPool = itemPool.filter(id=>items[id].kind==='food');
   const medicalPool = itemPool.filter(id=>items[id].kind==='medical');
   const gearPool = itemPool.filter(id=>items[id].kind==='gear');
@@ -56,7 +76,7 @@ window.DAY81_DATA = (() => {
     E('stream','小溪','你找到一段清澈的小溪，终于能痛快喝水。',{type:'instant',effect:{health:1}}),
     E('cave','山洞','阴凉的山洞深处传来轻微响动。',{type:'choice',choices:[{text:'进去看看',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{beast:true},risk:'危险',tags:['explore']},{text:'不冒险',action:'none',risk:'安全'}]}),
     E('boar','野猪','树丛突然剧烈晃动，一头野猪冲了出来。',{type:'hazard',hazard:'beast',stat:'agi'}),
-    E('turtle_eggs','海龟蛋','沙坑里露出几枚海龟蛋。你犹豫了一下，最后还是决定先活下去。',{type:'instant',effect:{health:1}}),
+    E('turtle_tracks','海龟爬痕','沙滩上留着新鲜的海龟爬痕。沿着潮线搜索，也许能找到被冲来的物资。',{type:'check',stat:'luck',difficulty:'easy',success:{randomItemChance:.7},fail:{none:true}}),
     E('storm','突然暴雨','云层压低，暴雨几乎在一瞬间倾泻下来。',{type:'hazard',hazard:'rain'}),
     E('fishing_day','浅湾里的鱼','浅湾水面不时闪过鱼鳞。',{type:'check',stat:'luck',difficulty:'normal',success:{item:'grilled_fish'},fail:{none:true},tags:['fish']}),
     E('hive','蜂巢','低矮树枝上挂着一个蜂巢。',{type:'choice',choices:[{text:'冒险取蜂蜜',action:'check',stat:'agi',difficulty:'hard',success:{health:2},fail:{health:-1},risk:'危险'},{text:'离开',action:'none',risk:'安全'}]}),
@@ -84,7 +104,7 @@ window.DAY81_DATA = (() => {
     E('radio','废弃无线电','一台破损无线电埋在座椅残骸下。',{type:'check',stat:'int',difficulty:'hard',success:{achievement:'rescue_hope',rescueScore:1},fail:{none:true},tags:['mechanic']}),
     E('door','坠落的机舱门','一块沉重舱门下面似乎压着什么。',{type:'check',stat:'str',difficulty:'normal',success:{randomItem:1},fail:{none:true},tags:['resource']}),
     E('crevice','岩缝','狭窄岩缝里卡着一个塑料袋。',{type:'check',stat:'agi',difficulty:'normal',success:{randomItem:1},fail:{health:-1}}),
-    E('rabbit','落单的野兔','一只野兔从你脚边窜过。',{type:'check',stat:'luck',difficulty:'hard',success:{health:2},fail:{none:true}}),
+    E('crabs','礁石螃蟹','几只螃蟹躲进礁石缝里。',{type:'check',stat:'agi',difficulty:'normal',success:{health:1},fail:{none:true},tags:['fish']}),
     E('hilltop','山顶','你终于找到一条通往岛上高地的路。',{type:'check',stat:'agi',difficulty:'normal',success:{achievement:'watch_sea',rescueScore:1},fail:{health:-1},tags:['climb','explore']}),
     E('headache','突发头痛','你一整天都昏昏沉沉，可能是脱水，也可能是压力。',{type:'instant',effect:{health:-1}}),
     E('freshwater','淡水洼','岩石凹槽里积着一汪干净的雨水。',{type:'instant',effect:{health:2}}),
@@ -99,7 +119,7 @@ window.DAY81_DATA = (() => {
     E('ship_shadow','远方船影','海平线尽头真的出现了一艘船。你拼命挥手，但它最终消失在暮色里。',{type:'instant',effect:{rescueScore:1},minDay:61,rescue:true}),
     E('fallen_palm','倒下的椰树','一棵被风刮倒的椰树横在林边，树冠里还挂着几只椰子。',{type:'check',stat:'str',difficulty:'easy',success:{item:'coconut'},fail:{none:true},tags:['resource']}),
     E('rain_pool','岩石水坑','昨夜的雨在岩石凹槽里积成了一小汪清水。',{type:'instant',effect:{health:1}}),
-    E('seabird_nest','海鸟巢','峭壁低处有一窝海鸟蛋，伸手似乎能够得到。',{type:'choice',choices:[{text:'冒险去拿',action:'check',stat:'agi',difficulty:'hard',success:{randomFood:1},fail:{health:-1},risk:'危险',tags:['climb']},{text:'算了',action:'none',risk:'安全'}]}),
+    E('seabird_forage','海鸟觅食处','一群海鸟不断落向崖下浅水区，那里可能有鱼群。',{type:'choice',choices:[{text:'顺着海鸟去找鱼',action:'check',stat:'agi',difficulty:'normal',success:{item:'grilled_fish'},fail:{health:-1,chance:.25},risk:'一般',tags:['climb','fish']},{text:'只观察潮水',action:'effect',effect:{nextCheckBonus:.05},risk:'安全'}]}),
     E('tangled_net','缠住的渔网','礁石间卡着一团旧渔网，里面也许还有能用的线。',{type:'check',stat:'int',difficulty:'normal',success:{item:'fishing'},fail:{none:true},tags:['resource']}),
     E('seat_pocket','座椅夹层','一截飞机座椅被冲上岸，夹层里似乎塞着东西。',{type:'instant',effect:{randomItemChance:.72}}),
     E('thorn_path','荆棘小路','密林里有一条被荆棘遮住的小路，深处隐约能看到金属反光。',{type:'choice',choices:[{text:'钻进去看看',action:'check',stat:'agi',difficulty:'normal',success:{randomHighItem:1},fail:{health:-1},risk:'一般',tags:['explore']},{text:'绕开',action:'none',risk:'安全'}]}),
@@ -116,18 +136,18 @@ window.DAY81_DATA = (() => {
 
 
   const locations = [
-    {id:'crash_beach',name:'失事海滩',x:16,y:58,icon:'🛬',desc:'飞机碎片与行李散落最多的海滩。'},
-    {id:'coconut_grove',name:'椰林',x:28,y:31,icon:'🌴',desc:'树荫最浓的椰子林。'},
-    {id:'fresh_stream',name:'淡水溪',x:43,y:43,icon:'💧',desc:'岛上最稳定的淡水来源之一。'},
-    {id:'moon_bay',name:'月牙湾',x:67,y:65,icon:'🏖️',desc:'沙质柔软的月牙形海湾。'},
-    {id:'reef_pools',name:'潮汐礁池',x:82,y:46,icon:'🪸',desc:'退潮后会留下许多潮池。'},
-    {id:'jungle_path',name:'密林小径',x:24,y:72,icon:'🌿',desc:'通往林子深处的一条小路。'},
-    {id:'bamboo_clearing',name:'林中空地',x:51,y:58,icon:'🍃',desc:'适合短暂停留和搭简易营地。'},
-    {id:'rock_cave',name:'岩洞',x:61,y:33,icon:'🕳️',desc:'阴凉潮湿的天然洞穴。'},
-    {id:'cliff_edge',name:'断崖',x:76,y:22,icon:'🪢',desc:'面朝大海的高陡崖壁。'},
-    {id:'swamp_edge',name:'沼泽边缘',x:39,y:77,icon:'🪷',desc:'湿气很重，地面松软。'},
-    {id:'wreck_cabin',name:'机舱残骸',x:54,y:18,icon:'✈️',desc:'损毁最严重的机体区域。'},
-    {id:'ridge_hill',name:'山脊高地',x:51,y:8,icon:'⛰️',desc:'能俯瞰全岛与海平线的高点。'}
+    {id:'crash_beach',name:'失事海滩',x:16,y:58,icon:'🛬',desc:'飞机碎片与行李散落最多的海滩。',conditions:['潮水刚退，沙面上又露出一些飞机碎片。','海风很大，几件破损行李被吹得来回翻滚。','今天海面比较平静，浅滩上能看见新的漂流物。']},
+    {id:'coconut_grove',name:'椰林',x:28,y:31,icon:'🌴',desc:'树荫最浓的椰子林。',conditions:['树冠被风吹得沙沙作响，地上落着几片新鲜椰叶。','林子里比外面凉快，但蚊虫明显多了。','几棵椰树下有新掉落的果壳，附近似乎有人来过。']},
+    {id:'fresh_stream',name:'淡水溪',x:43,y:43,icon:'💧',desc:'岛上最稳定的淡水来源之一。',conditions:['溪水清亮，水位比昨天略高。','上游飘来一些枯叶，水流仍然稳定。','溪边泥地很湿，能看见新鲜脚印。']},
+    {id:'moon_bay',name:'月牙湾',x:67,y:65,icon:'🏖️',desc:'沙质柔软的月牙形海湾。',conditions:['海浪不大，沙滩上留下长长的潮线。','湾里漂着几截木头，远处偶尔能看见海鸟。','今天风向偏东，海面带来不少细小漂浮物。']},
+    {id:'reef_pools',name:'潮汐礁池',x:82,y:46,icon:'🪸',desc:'退潮后会留下许多潮池。',conditions:['潮水退得很低，礁石间露出不少潮池。','浪头时不时拍过礁石，行动要比平时小心。','几个浅水池里能看见小鱼和贝类。']},
+    {id:'jungle_path',name:'密林小径',x:24,y:72,icon:'🌿',desc:'通往林子深处的一条小路。',conditions:['昨夜的雨让小路变得泥泞，枝叶上还挂着水珠。','林子里很安静，只偶尔传来鸟叫。','有几段新折断的树枝，像是有人或动物刚经过。']},
+    {id:'bamboo_clearing',name:'林中空地',x:51,y:58,icon:'🍃',desc:'公共营地所在的开阔地。',conditions:['空地通风不错，营地设施都还完好。','地面比较干燥，适合整理物资和修建设施。','营地附近能听见其他幸存者活动的声音。']},
+    {id:'rock_cave',name:'岩洞',x:61,y:33,icon:'🕳️',desc:'阴凉潮湿的天然洞穴。',conditions:['洞口很凉，里面传来滴水声。','岩壁有些潮湿，但这里能很好地挡风。','洞里比平时更暗，深处偶尔有轻微响动。']},
+    {id:'cliff_edge',name:'断崖',x:76,y:22,icon:'🪢',desc:'面朝大海的高陡崖壁。',conditions:['崖顶风很强，海平线看得格外清楚。','岩石被海风吹得很干，但边缘十分湿滑。','远处海面能见度不错，偶尔有海鸟从崖下飞过。']},
+    {id:'swamp_edge',name:'沼泽边缘',x:39,y:77,icon:'🪷',desc:'湿气很重、地面松软的低洼区域。',conditions:['空气又湿又闷，草丛里有不少虫子。','泥地比昨天更软，走路时得不断试探。','水面很平静，但芦苇深处偶尔传来响动。']},
+    {id:'wreck_cabin',name:'机舱残骸',x:54,y:18,icon:'✈️',desc:'损毁最严重的机体区域。',conditions:['金属残片被太阳晒得发烫，舱内仍有许多缝隙没搜过。','风穿过破损机身，发出断断续续的响声。','几块内饰板又松了，下面也许压着东西。']},
+    {id:'ridge_hill',name:'山脊高地',x:51,y:8,icon:'⛰️',desc:'能俯瞰全岛与海平线的高点。',conditions:['高地视野很好，今天能看见很远的海面。','山风比下面强得多，云层移动得很快。','这里很安静，从高处能看见岛上几处活动痕迹。']}
   ];
 
   const LE=(id,location,name,text,choices,opts={})=>({id,location,name,text,type:'choice',choices,...opts});
@@ -159,10 +179,10 @@ window.DAY81_DATA = (() => {
       {text:'先喝足淡水',action:'effect',effect:{health:1},risk:'安全'},
       {text:'沿着水流往上走',action:'check',stat:'int',difficulty:'normal',success:{randomItemChance:.75},fail:{none:true},risk:'一般',tags:['explore','water']}
     ]),
-    LE('fs_herbs','fresh_stream','溪边草药','溪边长着几株带苦味的叶子，像是有药用价值。',[
-      {text:'采回去试试',action:'check',stat:'int',difficulty:'normal',success:{randomFrom:['disinfectant','painkiller']},fail:{health:-1},risk:'一般'},
+    LE('fs_herbs','fresh_stream','溪边可用植物','溪边长着一些气味清新的叶片，你不确定能不能入口，但可以用来驱虫或铺垫伤处。',[
+      {text:'仔细辨认后采一点',action:'check',stat:'int',difficulty:'normal',success:{nextCheckBonus:.06},fail:{none:true},risk:'一般'},
       {text:'只装一些水',action:'effect',effect:{health:1,skipDecay:true},risk:'安全'},
-      {text:'原地休息片刻',action:'effect',effect:{skipDecay:true},risk:'安全'}
+      {text:'收集柔软叶片做垫料',action:'effect',effect:{campMaterial:{fiber:1}},risk:'安全'}
     ]),
 
     LE('mb_crate','moon_bay','漂流木箱','月牙湾的浅滩里卡着一个木箱，边角已经被海水泡白。',[
@@ -170,10 +190,10 @@ window.DAY81_DATA = (() => {
       {text:'先观察箱体破损处',action:'check',stat:'int',difficulty:'easy',success:{pickItems:2},fail:{none:true},risk:'安全'},
       {text:'坐在沙滩晒干衣服',action:'effect',effect:{skipDecay:true},risk:'安全'}
     ]),
-    LE('mb_turtle','moon_bay','沙地凹痕','平整沙地上有新鲜凹痕，像是海龟刚离开不久。',[
-      {text:'顺着痕迹挖一挖',action:'check',stat:'luck',difficulty:'normal',success:{health:1,randomFood:1},fail:{none:true},risk:'一般'},
-      {text:'留意是否有贝类',action:'check',stat:'agi',difficulty:'easy',success:{health:1},fail:{none:true},risk:'安全'},
-      {text:'安静观海',action:'effect',effect:{rescueScore:.25},risk:'安全'}
+    LE('mb_turtle','moon_bay','海龟爬痕','沙地上有一串新鲜的海龟爬痕。附近潮线还留下了一些被冲上岸的海草和小贝类。',[
+      {text:'沿潮线找可用食物',action:'check',stat:'luck',difficulty:'normal',success:{randomFrom:['banana','coconut','grilled_fish']},fail:{none:true},risk:'一般'},
+      {text:'检查浅滩里的贝类',action:'check',stat:'int',difficulty:'easy',success:{health:1},fail:{none:true},risk:'安全'},
+      {text:'不打扰海龟痕迹，去观察海面',action:'effect',effect:{rescueScore:.25},risk:'安全'}
     ]),
 
     LE('rp_tidefish','reef_pools','退潮潮池','退潮后的礁池里困着几条小鱼和几只螃蟹。',[
@@ -209,10 +229,10 @@ window.DAY81_DATA = (() => {
       {text:'取一些清亮积水',action:'effect',effect:{health:1},risk:'安全'}
     ]),
 
-    LE('rc_bats','rock_cave','洞顶蝙蝠','岩洞顶传来扑簌簌的声音，里面也许藏着别人没发现的东西。',[
-      {text:'举着火源进去',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{beast:true},risk:'危险',tags:['explore','fire']},
+    LE('rc_bats','rock_cave','洞顶蝙蝠','岩洞顶传来扑簌簌的声音。深处可能有被风吹进去的物资，但地面很滑。',[
+      {text:'举着火源慢慢进去',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{health:-1},risk:'一般',tags:['explore','fire']},
       {text:'只在洞口翻找',action:'check',stat:'luck',difficulty:'easy',success:{randomItemChance:.72},fail:{none:true},risk:'安全'},
-      {text:'记下洞口位置',action:'effect',effect:{nextCheckBonus:.1},risk:'安全'}
+      {text:'记下干燥路线',action:'effect',effect:{nextCheckBonus:.1},risk:'安全'}
     ]),
     LE('rc_cool','rock_cave','阴凉岩棚','洞边有一块干燥平整的岩棚，能遮风，也能避太阳。',[
       {text:'在这里休息',action:'effect',effect:{skipDecay:true,health:1},risk:'安全'},
@@ -225,16 +245,16 @@ window.DAY81_DATA = (() => {
       {text:'利用绳索尝试勾取',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{none:true},risk:'一般',tags:['climb']},
       {text:'登高观察海面',action:'effect',effect:{rescueScore:.5},risk:'安全'}
     ]),
-    LE('ce_nest','cliff_edge','海鸟巢','断崖低处有一窝海鸟蛋，风很大，但似乎并不难够到。',[
-      {text:'冒险取蛋',action:'check',stat:'agi',difficulty:'hard',success:{randomFood:1,health:1},fail:{health:-1},risk:'危险',tags:['climb']},
-      {text:'等海鸟飞开再动手',action:'check',stat:'luck',difficulty:'normal',success:{randomFood:1},fail:{none:true},risk:'一般'},
-      {text:'只看看远方',action:'effect',effect:{rescueScore:.25,nextCheckBonus:.05},risk:'安全'}
+    LE('ce_nest','cliff_edge','海鸟觅食区','断崖下方有许多海鸟盘旋。它们反复飞向同一片浅滩，那里可能有鱼群。',[
+      {text:'顺着海鸟方向下去看看',action:'check',stat:'agi',difficulty:'hard',success:{item:'grilled_fish'},fail:{health:-1},risk:'危险',tags:['climb','fish']},
+      {text:'在高处判断潮汐',action:'check',stat:'luck',difficulty:'normal',success:{nextCheckBonus:.1},fail:{none:true},risk:'一般'},
+      {text:'留在安全处观察海面',action:'effect',effect:{rescueScore:.25,nextCheckBonus:.05},risk:'安全'}
     ]),
 
-    LE('se_reeds','swamp_edge','药味芦苇','沼泽边长着一片带有苦味的芦苇和草叶。',[
-      {text:'采一点带回去',action:'check',stat:'int',difficulty:'normal',success:{randomFrom:['disinfectant','painkiller']},fail:{health:-1},risk:'一般'},
-      {text:'绕边查看漂浮物',action:'check',stat:'agi',difficulty:'normal',success:{randomItemChance:.75},fail:{health:-1},risk:'一般'},
-      {text:'不深入，立刻返回',action:'effect',effect:{none:true},risk:'安全'}
+    LE('se_reeds','swamp_edge','成片芦苇','沼泽边的芦苇长得很密，茎秆和纤维可以用来修补营地，但泥地不好走。',[
+      {text:'割一些结实芦苇',action:'check',stat:'agi',difficulty:'normal',success:{campMaterial:{fiber:1}},fail:{health:-1},risk:'一般'},
+      {text:'沿边缘查看漂浮物',action:'check',stat:'luck',difficulty:'normal',success:{randomItemChance:.7},fail:{none:true},risk:'一般'},
+      {text:'不深入，原路返回',action:'effect',effect:{none:true},risk:'安全'}
     ]),
     LE('se_sink','swamp_edge','松软泥地','脚下泥地不断下陷，前方却有一小片亮闪闪的东西。',[
       {text:'快步冲过去拿',action:'check',stat:'str',difficulty:'hard',success:{randomHighItem:1},fail:{health:-1,loseItem:1},risk:'危险'},
@@ -260,11 +280,129 @@ window.DAY81_DATA = (() => {
     ]),
     LE('rh_smoke','ridge_hill','海平线上的烟','远处海平线上似乎升起一缕细烟，很像船只留下的尾迹。',[
       {text:'立刻持续观察',action:'check',stat:'luck',difficulty:'normal',success:{rescueScore:1},fail:{none:true},risk:'一般'},
-      {text:'用镜面反光尝试示警',action:'check',stat:'int',difficulty:'easy',success:{rescueScore:1, item:'mirror'},fail:{rescueScore:.25},risk:'安全'},
+      {text:'用镜面反光尝试示警',action:'check',stat:'int',difficulty:'easy',success:{rescueScore:1},fail:{rescueScore:.25},risk:'安全'},
       {text:'记住这个方向',action:'effect',effect:{rescueScore:.5,nextCheckBonus:.05},risk:'安全'}
-    ],{minDay:20})
+    ],{minDay:20}),
+
+    LE('cb_manifest','crash_beach','浸水的乘客袋','一只印着航空公司标志的小袋被卡在座椅骨架旁，拉链还完整。',[
+      {text:'仔细拆开袋子',action:'check',stat:'int',difficulty:'easy',success:{randomFrom:['energy_bar','oral_salts','bandage']},fail:{none:true},risk:'安全'},
+      {text:'把整个袋子拖到干处',action:'check',stat:'str',difficulty:'normal',success:{randomItem:1},fail:{health:-1},risk:'一般'},
+      {text:'只收集可用布料',action:'effect',effect:{campMaterial:{fiber:1}},risk:'安全'}
+    ]),
+    LE('cg_fallenfruit','coconut_grove','风落果实','昨夜的风刮落了一些果实，叶片下面还藏着几根结实的纤维。',[
+      {text:'挑成熟果实',action:'effect',effect:{randomFrom:['banana','coconut']},risk:'安全'},
+      {text:'收集椰壳和纤维',action:'effect',effect:{campMaterial:{fiber:1}},risk:'安全'},
+      {text:'往树冠深处看看',action:'check',stat:'luck',difficulty:'normal',success:{randomItemChance:.65},fail:{health:-1},risk:'一般'}
+    ]),
+    LE('fs_filter','fresh_stream','浑水支流','一条小支流被泥沙搅浑，旁边却有明显的人类脚印。',[
+      {text:'沿脚印查看上游',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{none:true},risk:'一般',tags:['explore','water']},
+      {text:'过滤后补充饮水',action:'effect',effect:{health:1,skipDecay:true},risk:'安全'},
+      {text:'收集石块加固取水点',action:'effect',effect:{campMaterial:{scrap:1}},risk:'安全'}
+    ]),
+    LE('mb_cooler','moon_bay','搁浅的保温袋','一个密封保温袋被海浪推到沙滩上，外层虽然破了，里面仍保持干燥。',[
+      {text:'检查里面的食物',action:'check',stat:'luck',difficulty:'easy',success:{randomFrom:['jerky','energy_bar','apple']},fail:{none:true},risk:'安全'},
+      {text:'把袋子拆成防水材料',action:'effect',effect:{randomFrom:['drybag','tarp']},risk:'安全'},
+      {text:'留在原地等失主',action:'effect',effect:{relationRandom:5},risk:'安全'}
+    ]),
+    LE('rp_gloves','reef_pools','礁缝里的手套','礁石缝里卡着一只耐磨手套，旁边还有几块被浪冲来的塑料片。',[
+      {text:'伸手够出来',action:'check',stat:'agi',difficulty:'normal',success:{item:'work_gloves'},fail:{health:-1},risk:'一般'},
+      {text:'等下一次退潮',action:'effect',effect:{nextCheckBonus:.08},risk:'安全'},
+      {text:'只捡塑料片',action:'effect',effect:{campMaterial:{scrap:1}},risk:'安全'}
+    ]),
+    LE('jp_mosquito','jungle_path','蚊虫密集区','前方树荫下蚊虫特别多，但地上散着一些未被翻动的行李碎片。',[
+      {text:'喷驱虫剂后搜索',action:'check',stat:'int',difficulty:'easy',success:{randomItem:1},fail:{none:true},risk:'安全'},
+      {text:'快速穿过去翻找',action:'check',stat:'agi',difficulty:'normal',success:{randomItemChance:.75},fail:{health:-1},risk:'一般'},
+      {text:'绕路采集藤条',action:'effect',effect:{campMaterial:{fiber:1}},risk:'安全'}
+    ]),
+    LE('bc_repair','bamboo_clearing','营地小修','公共营地有几处被风吹松了，附近正好散着能用的木料。',[
+      {text:'花时间加固营地',action:'effect',effect:{campMaterial:{wood:1},relationAll:3},risk:'安全'},
+      {text:'整理公共物资',action:'check',stat:'int',difficulty:'easy',success:{randomItemChance:.65},fail:{none:true},risk:'安全'},
+      {text:'躺吊床休息',action:'effect',effect:{health:1,skipDecay:true},risk:'安全'}
+    ]),
+    LE('rc_blanket','rock_cave','干燥角落','洞内一处高台没有被雨水打湿，石头后压着一块折叠织物。',[
+      {text:'搬开石头查看',action:'check',stat:'str',difficulty:'normal',success:{randomFrom:['hammock','tarp','raincoat']},fail:{none:true},risk:'一般'},
+      {text:'在干燥处休整',action:'effect',effect:{health:1,skipDecay:true},risk:'安全'},
+      {text:'检查是否适合储物',action:'effect',effect:{nextCheckBonus:.06},risk:'安全'}
+    ]),
+    LE('ce_flarecase','cliff_edge','红色防水盒','崖边一处灌木里卡着一个红色防水盒，像是飞机上的应急用品。',[
+      {text:'系好绳索去取',action:'check',stat:'agi',difficulty:'normal',success:{randomFrom:['flare','whistle','mirror']},fail:{health:-1},risk:'一般',tags:['climb']},
+      {text:'用长枝把它勾过来',action:'check',stat:'int',difficulty:'normal',success:{randomFrom:['whistle','mirror']},fail:{none:true},risk:'一般'},
+      {text:'放弃物资，只观察海面',action:'effect',effect:{rescueScore:.4},risk:'安全'}
+    ]),
+    LE('se_repellent','swamp_edge','航空洗漱包','一只小洗漱包漂在浅水边，里面散发着很浓的薄荷味。',[
+      {text:'捞起来检查',action:'check',stat:'agi',difficulty:'easy',success:{randomFrom:['insect_repellent','disinfectant','oral_salts']},fail:{none:true},risk:'安全'},
+      {text:'沿着浅水继续搜索',action:'check',stat:'luck',difficulty:'normal',success:{randomItemChance:.65},fail:{health:-1},risk:'一般'},
+      {text:'采一些结实芦苇',action:'effect',effect:{campMaterial:{fiber:1}},risk:'安全'}
+    ]),
+    LE('wc_emergency','wreck_cabin','机组应急箱','机舱上方一个标着“应急”的小柜门松开了，但内部被变形金属卡住。',[
+      {text:'慢慢拆开变形金属',action:'check',stat:'int',difficulty:'normal',success:{pickItems:3},fail:{health:-1},risk:'一般',tags:['mechanic']},
+      {text:'用力掰开柜门',action:'check',stat:'str',difficulty:'hard',success:{randomFrom:['first_aid','water_filter','waterproof_matches']},fail:{life:-1,chance:.25},risk:'危险'},
+      {text:'只拆一些可用零件',action:'effect',effect:{campMaterial:{scrap:1}},risk:'安全'}
+    ]),
+    LE('rh_weather','ridge_hill','云层变化','从高地能清楚看到远处云层和海面风向，天气似乎正在改变。',[
+      {text:'认真判断天气',action:'check',stat:'int',difficulty:'normal',success:{nextCheckBonus:.12,rescueScore:.25},fail:{none:true},risk:'安全'},
+      {text:'寻找船只或飞机',action:'check',stat:'luck',difficulty:'normal',success:{rescueScore:.75},fail:{none:true},risk:'一般'},
+      {text:'收集干燥木枝',action:'effect',effect:{campMaterial:{wood:1}},risk:'安全'}
+    ])
   ];
 
+
+  const interactionProfiles = {
+    linlan:{
+      lines:{enemy:'林岚把急救包往身后挪了挪：“有事就直说。”',cold:'林岚看了你一眼：“别硬撑，岛上可没人能替你受伤。”',normal:'林岚正在整理绷带：“你脸色还行，今天别太冒险。”',trust:'林岚朝你点点头：“要是哪里不舒服，早点说。”',bond:'林岚笑了一下：“还能一起说话，说明今天不算太糟。”'},
+      location:{fresh_stream:'她正在溪边清洗一块布，提醒你别把上游踩浑。',wreck_cabin:'她在残骸边找还能用的医疗用品。',bamboo_clearing:'她顺手检查了一遍营地里的伤药。'},
+      choices:[
+        {text:'问她有没有需要帮忙',kind:'check',stat:'int',difficulty:'easy',goodRelation:7,badRelation:0,reward:{randomFrom:['bandage','oral_salts']},risk:'安全'},
+        {text:'听听她对身体状况的建议',kind:'effect',relation:4,reward:{nextCheckBonus:.06},risk:'安全'},
+        {text:'说自己没事，不用她操心',kind:'effect',relation:-3,reward:{none:true},risk:'安全'}
+      ]
+    },
+    zhouye:{
+      lines:{enemy:'周野站直身体：“我不想再跟你起冲突，别逼我。”',cold:'周野皱着眉：“各管各的，少添麻烦。”',normal:'周野拍了拍手上的沙：“今天风不小，做事留点力气。”',trust:'周野把一捆木料放下：“有重活就叫我，别一个人逞强。”',bond:'周野咧嘴笑了笑：“咱们都撑到这儿了，再扛几天。”'},
+      location:{crash_beach:'他正把一块松动的机舱板拖到安全位置。',cliff_edge:'他站在崖边看了很久，似乎在判断下崖路线。',bamboo_clearing:'他在检查营地的支架有没有松动。'},
+      choices:[
+        {text:'帮他搬一会儿东西',kind:'check',stat:'str',difficulty:'normal',goodRelation:8,badRelation:-1,reward:{campMaterial:{wood:1}},risk:'一般'},
+        {text:'问他附近哪条路更安全',kind:'effect',relation:3,reward:{nextCheckBonus:.08},risk:'安全'},
+        {text:'打趣他管得太多',kind:'effect',relation:-4,reward:{none:true},risk:'安全'}
+      ]
+    },
+    chenmo:{
+      lines:{enemy:'陈默停下手里的工具：“别碰我的东西。”',cold:'陈默没有抬头：“要说什么就说，我还在忙。”',normal:'陈默拧了拧工具钳：“这里很多东西还能修，只是缺零件。”',trust:'陈默递给你看一块零件：“你要是见到这种，帮我留一下。”',bond:'陈默难得主动开口：“有你在，至少很多事不用我一个人算。”'},
+      location:{wreck_cabin:'他正蹲在变形的机舱面板前拆零件。',bamboo_clearing:'他在研究怎么把营地设施做得更牢。',ridge_hill:'他盯着远处海面，像是在估算什么。'},
+      choices:[
+        {text:'帮他整理零件',kind:'check',stat:'int',difficulty:'normal',goodRelation:8,badRelation:0,reward:{campMaterial:{scrap:1}},risk:'一般'},
+        {text:'问他今天有什么发现',kind:'effect',relation:4,reward:{nextCheckBonus:.08},risk:'安全'},
+        {text:'催他别总研究这些没用的',kind:'effect',relation:-6,reward:{none:true},risk:'安全'}
+      ]
+    },
+    suqing:{
+      lines:{enemy:'苏晴退后半步：“我们最好保持点距离。”',cold:'苏晴收起相机：“你走你的，我看我的。”',normal:'苏晴朝远处看了一眼：“今天能见度不错，很多地方看得更清楚。”',trust:'苏晴指了指远处：“我刚发现一条不太显眼的路线，要不要记一下？”',bond:'苏晴轻声说：“等出去以后，我一定把这座岛画下来。”'},
+      location:{ridge_hill:'她正用手遮着阳光观察海平线。',cliff_edge:'她沿着安全位置观察崖下的潮水。',moon_bay:'她在沙滩上辨认新留下的脚印。'},
+      choices:[
+        {text:'和她一起观察周围',kind:'check',stat:'luck',difficulty:'normal',goodRelation:7,badRelation:0,reward:{rescueScore:.35,nextCheckBonus:.05},risk:'一般'},
+        {text:'问她有没有发现危险路线',kind:'effect',relation:4,reward:{nextCheckBonus:.1},risk:'安全'},
+        {text:'说这些观察没什么用',kind:'effect',relation:-5,reward:{none:true},risk:'安全'}
+      ]
+    },
+    gaoyuan:{
+      lines:{enemy:'高远把折叠刀收回口袋：“别误会，我不是在等你。”',cold:'高远哼了一声：“吃的各凭本事，别指望我白送。”',normal:'高远闻了闻手里的叶子：“能不能吃，光看颜色可不够。”',trust:'高远笑道：“找到能吃的东西就带回来，我尽量别让大家吃坏肚子。”',bond:'高远拍了拍你的肩：“出去以后，我请你吃顿真的，别再吃罐头了。”'},
+      location:{coconut_grove:'他正在挑掉地上已经坏掉的果实。',reef_pools:'他蹲在潮池边辨认哪些贝类能吃。',fresh_stream:'他在溪边清理刚找到的一点食物。'},
+      choices:[
+        {text:'帮他找点能吃的东西',kind:'check',stat:'luck',difficulty:'normal',goodRelation:7,badRelation:0,reward:{randomFrom:['banana','coconut','jerky']},risk:'一般'},
+        {text:'问他怎么保存食物',kind:'effect',relation:4,reward:{skipDecay:true},risk:'安全'},
+        {text:'开玩笑说他藏了好东西',kind:'effect',relation:-4,reward:{none:true},risk:'安全'}
+      ]
+    },
+    xutang:{
+      lines:{enemy:'许棠合上笔记本：“我们今天最好不要争。”',cold:'许棠语气平静：“如果没必要，就别把话说得更难听。”',normal:'许棠翻了翻笔记：“我把这几天发生的事记了一下，规律比想象中多。”',trust:'许棠把一页笔记递给你：“我整理了几个地点的情况，你看看。”',bond:'许棠轻轻笑了笑：“每天记一页，就会觉得八十一天没那么长。”'},
+      location:{bamboo_clearing:'她正在营地旁整理每天的记录。',rock_cave:'她在洞口标记哪些地方适合避雨。',jungle_path:'她一路在树干上做简单的方向标记。'},
+      choices:[
+        {text:'和她一起整理今天的计划',kind:'check',stat:'int',difficulty:'easy',goodRelation:7,badRelation:0,reward:{nextCheckBonus:.1},risk:'安全'},
+        {text:'问她最近最担心什么',kind:'effect',relation:5,reward:{rescueScore:.2},risk:'安全'},
+        {text:'说记这些东西没必要',kind:'effect',relation:-5,reward:{none:true},risk:'安全'}
+      ]
+    }
+  };
 
   const campBuildings = [
     {id:'shelter',name:'遮雨棚',icon:'🏕️',desc:'减轻暴雨、寒夜与大型风暴造成的伤害。',cost:{wood:2,fiber:1}},
@@ -393,5 +531,5 @@ window.DAY81_DATA = (() => {
     N('distant_light','远海灯光','很远的海面上，似乎有一盏灯一闪而过。没有人敢确定那是不是船。',{rescueScore:.5},'good',{minDay:60})
   ];
 
-  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,campBuildings,storyChains,crisisTemplates,nights};
+  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,interactionProfiles,campBuildings,storyChains,crisisTemplates,nights};
 })();
