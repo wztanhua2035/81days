@@ -1,5 +1,5 @@
 {
-  "passwordHash": "c41f19414366ad83bc26611d46c424d7:46075aa7129795b6ec7138d847f795940fdb69fce315495ec300581d80f24ad84198a64dd3fd24e0a5da9142c188358a755b7e580dd2291bb7e267f7425552bf",
+  "passwordHash": "4c36616778f21a4d18270e404e28b790:e97512c317069a9c20f0a64a01fe77e564465a76600ae7adfc55aa3cd4f52cb38d7910985dedf86aee23553db976a2dccc13a820df6ffa1bca1f8b1c61ed8c1e",
   "settings": {
     "roleNames": {
       "linlan": "林岚",
@@ -10,14 +10,18 @@
       "xutang": "许棠"
     },
     "difficulty": {
-      "nightEventChance": 0.5,
+      "nightEventChance": 0.7,
       "baseCheckModifier": 0,
-      "encounterInterval": 5,
-      "avoidChance": 0.2,
       "healthDecayChance": 1,
       "healthyLifeRecoverChance": 0.2,
-      "inventoryLimit": 4,
-      "startingBonusFood": 0
+      "inventoryLimit": 8,
+      "startingBonusFood": 0,
+      "hostileBattleChance": 0.2,
+      "eventRecentWindow": 24,
+      "interactionRecentWindow": 12,
+      "bondThreshold": 60,
+      "npcSaveChanceDay30": 0.82,
+      "npcSaveChanceDay50": 0.52
     }
   }
 }

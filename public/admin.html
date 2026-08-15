@@ -35,14 +35,20 @@
 
       <section class="panel">
         <h2>难度设置</h2>
-        <p class="muted">难度参数在玩家“新开一局”时写入该局存档，避免一局进行到中途突然改变规则。</p>
+        <p class="muted">难度与平衡参数在玩家“新开一局”时写入该局存档，避免一局进行到中途突然改变规则。建议普通难度只做小幅调整。</p>
         <div class="settings-grid">
           <label>夜间事件触发概率（%）<input id="nightEventChance" type="number" min="10" max="90" step="1" /><small>默认70。越高越难。</small></label>
           <label>所有属性检定修正（%）<input id="baseCheckModifier" type="number" min="-20" max="20" step="1" /><small>默认0。正数更容易通过事件检定。</small></label>
           <label>每日健康自然下降概率（%）<input id="healthDecayChance" type="number" min="50" max="100" step="1" /><small>默认100。调低会明显降低难度。</small></label>
           <label>连续3天健康≥2后的回血概率（%）<input id="healthyLifeRecoverChance" type="number" min="0" max="60" step="1" /><small>默认20。</small></label>
           <label>背包容量<input id="inventoryLimit" type="number" min="8" max="10" step="1" /><small>默认8。建议保持8格，可在8—10格之间调整。</small></label>
-          <label>每人开局额外食物<input id="startingBonusFood" type="number" min="0" max="2" step="1" /><small>默认0，可额外获得0—2份基础食物。</small></label>
+          <label>每人开局额外食物<input id="startingBonusFood" type="number" min="0" max="3" step="1" /><small>默认0，可额外获得0—3份基础食物。</small></label>
+          <label>敌对同地点自动战斗概率（%）<input id="hostileBattleChance" type="number" min="0" max="50" step="1" /><small>默认20。只影响已经达到敌对关系的角色。</small></label>
+          <label>探索事件全局去重窗口<input id="eventRecentWindow" type="number" min="12" max="40" step="1" /><small>默认24。数值越大，短期内越不容易重复探索事件。</small></label>
+          <label>人物互动去重窗口<input id="interactionRecentWindow" type="number" min="6" max="24" step="1" /><small>默认12。数值越大，对话重复概率越低。</small></label>
+          <label>生死之交阈值<input id="bondThreshold" type="number" min="50" max="80" step="1" /><small>默认60。异性角色第一次达到该值时可成为情侣。</small></label>
+          <label>NPC前30天濒死保护概率（%）<input id="npcSaveChanceDay30" type="number" min="30" max="95" step="1" /><small>默认82。用于避免非主角在前期过快大量死亡。</small></label>
+          <label>NPC第31—50天濒死保护概率（%）<input id="npcSaveChanceDay50" type="number" min="15" max="85" step="1" /><small>默认52。</small></label>
         </div>
         <div class="row"><button id="saveBtn">保存角色与难度设置</button><button id="resetBtn" class="ghost" type="button">恢复标准难度</button></div>
         <div id="saveMsg" class="msg"></div>

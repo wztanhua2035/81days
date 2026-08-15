@@ -25,7 +25,13 @@ const DEFAULT_SETTINGS = {
     healthDecayChance: 1.00,
     healthyLifeRecoverChance: 0.20,
     inventoryLimit: 8,
-    startingBonusFood: 0
+    startingBonusFood: 0,
+    hostileBattleChance: 0.20,
+    eventRecentWindow: 24,
+    interactionRecentWindow: 12,
+    bondThreshold: 60,
+    npcSaveChanceDay30: 0.82,
+    npcSaveChanceDay50: 0.52
   }
 };
 
@@ -141,7 +147,13 @@ function validateSettings(input){
     healthDecayChance:num('healthDecayChance',.50,1.00),
     healthyLifeRecoverChance:num('healthyLifeRecoverChance',0,.60),
     inventoryLimit:num('inventoryLimit',8,10,true),
-    startingBonusFood:num('startingBonusFood',0,2,true)
+    startingBonusFood:num('startingBonusFood',0,3,true),
+    hostileBattleChance:num('hostileBattleChance',0,.50),
+    eventRecentWindow:num('eventRecentWindow',12,40,true),
+    interactionRecentWindow:num('interactionRecentWindow',6,24,true),
+    bondThreshold:num('bondThreshold',50,80,true),
+    npcSaveChanceDay30:num('npcSaveChanceDay30',.30,.95),
+    npcSaveChanceDay50:num('npcSaveChanceDay50',.15,.85)
   }};
 }
 function clientIp(req){ return String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim(); }

@@ -1,4 +1,4 @@
-/** 《八十一天》v1.6 近似平衡回归测试。
+/** 《八十一天》v1.7 近似平衡回归测试。
  * 普通难度目标：玩家平均通关率约50%；NPC DAY30前死亡率<20%，DAY50前<50%。
  * 这是简化压力模型，用于调参回归，不代替上线后的真实玩家统计。
  */
@@ -8,13 +8,13 @@ const chars=[
   {id:'chenmo',name:'陈默',max:4,agi:2,luck:4},
   {id:'suqing',name:'苏晴',max:4,agi:5,luck:4},
   {id:'gaoyuan',name:'高远',max:4,agi:2,luck:5},
-  {id:'xutang',name:'许棠',max:3,agi:3,luck:5}
+  {id:'xutang',name:'许棠',max:4,agi:3,luck:5}
 ];
 const R=Math.random;
-function gainHealth(s,n){for(let i=0;i<n;i++){if(s.health>=3){s.health=1;s.life=Math.min(s.max,s.life+1);}else s.health++;}}
+function gainHealth(s,n){const target=s.health+n;if(target<=3)s.health=target;else if(s.life<s.max){s.life++;s.health=1;}else s.health=3;}
 function saveNpc(s,day,npc){if(!npc||s.life>0)return;const p=day<=30?.82:day<=50?.52:0;if(p&&R()<p)s.life=1;}
 function run(c,npc=false){
-  const s={life:c.max,max:c.max,health:3,foods:2,meds:c.id==='linlan'?1:0,linCd:0,streak:0,death:81};
+  const s={life:c.max,max:c.max,health:3,foods:1,meds:c.id==='linlan'?1:0,linCd:0,streak:0,death:81};
   let shelter=false,water=false,trap=false;
   for(let day=1;day<=80;day++){
     if(day>=18&&R()<.08)shelter=true;if(day>=25&&R()<.06)water=true;if(day>=30&&R()<.05)trap=true;if(trap&&day%4===0)s.foods++;
@@ -40,7 +40,7 @@ function run(c,npc=false){
     if([23,40,55,71].includes(day)&&R()<.28&&!shelter)s.health=Math.max(0,s.health-1);
     saveNpc(s,day,npc);if(s.life<=0){s.death=day;break;}
 
-    let decay=.94;if(water)decay-=.08;
+    let decay=1.0;if(water)decay-=.08;
     if(dayStart===0&&s.health===0)s.life--;else if(s.health>0&&R()<decay)s.health--;
     if(s.health>=2)s.streak++;else s.streak=0;if(s.streak>=3){if(R()<.20)s.life=Math.min(c.max,s.life+1);s.streak=0;}
     saveNpc(s,day,npc);if(s.life<=0){s.death=day;break;}

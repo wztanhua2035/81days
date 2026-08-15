@@ -140,3 +140,12 @@ body{font-size:15px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLe
 @media(max-width:390px){
   body{font-size:14px}.event-title{font-size:21px}.event-text{font-size:14px;line-height:1.85}.choice{font-size:14px;padding:13px 12px}.choice small{font-size:11px}.islandMap{height:315px}.terrainIcon{font-size:16px}.terrainIcon.mountain{font-size:21px}.dailyActionStatus{max-width:160px}.dailyActionStatus span{font-size:9px}.postButtons{grid-template-columns:1fr}.conversionFx{top:23%}
 }
+
+/* v1.7 关键信息高亮与情侣关系 */
+.roleName{color:#2f78b8;font-weight:900;background:#dff1ff;border-radius:5px;padding:0 3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.placeName{color:#2f7c57;font-weight:900;background:#e2f5e8;border-radius:5px;padding:0 3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.keyState{color:#a33d55;font-weight:900;background:#ffe2e8;border-radius:5px;padding:0 3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.relCouple{color:#d4497d!important}
+.relationBadge.relCouple{background:#ffe3ef;border:1px solid #f4acc9;border-radius:999px;padding:2px 7px;width:max-content}
+.interactionSceneTitle{font-weight:900;letter-spacing:.03em;color:#8d5a20;margin:6px 0 10px;font-size:16px}
+.event-text .roleName,.event-text .itemName,.event-text .placeName,.event-text .keyState,.richResult .roleName,.richResult .itemName,.richResult .placeName,.richResult .keyState{white-space:nowrap}
