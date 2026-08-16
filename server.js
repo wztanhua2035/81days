@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS = {
     startingBonusFood: 0,
     hostileBattleChance: 0.20,
     eventRecentWindow: 24,
-    interactionRecentWindow: 12,
+    interactionRecentWindow: 18,
     bondThreshold: 60,
     npcSaveChanceDay30: 0.82,
     npcSaveChanceDay50: 0.52
