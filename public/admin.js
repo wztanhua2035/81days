@@ -1,7 +1,7 @@
 (() => {
   const ids=['linlan','zhouye','chenmo','suqing','gaoyuan','xutang'];
   const labels={linlan:'急诊护士',zhouye:'消防员',chenmo:'机械工程师',suqing:'户外摄影师',gaoyuan:'餐厅厨师',xutang:'中学教师'};
-  const standard={nightEventChance:.70,baseCheckModifier:0,healthDecayChance:1,healthyLifeRecoverChance:.20,inventoryLimit:8,startingBonusFood:0,hostileBattleChance:.20,eventRecentWindow:24,interactionRecentWindow:18,bondThreshold:60,npcSaveChanceDay30:.82,npcSaveChanceDay50:.52};
+  const standard={nightEventChance:.70,baseCheckModifier:0,healthDecayChance:1,healthyLifeRecoverChance:.20,inventoryLimit:8,startingBonusFood:0,hostileBattleChance:.20,eventRecentWindow:24,interactionRecentWindow:24,bondThreshold:60,npcSaveChanceDay30:.82,npcSaveChanceDay50:.52};
   const $=id=>document.getElementById(id);
   const pct=x=>Math.round(Number(x)*100);
   const unpct=x=>Number(x)/100;

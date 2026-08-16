@@ -1,4 +1,4 @@
-/** 《八十一天》v2.1 近似平衡回归测试。
+/** 《八十一天》v2.2 近似平衡回归测试。
  * 普通难度目标：在原约50%的基础上略微提高；NPC DAY30前死亡率<20%，DAY50前<50%。
  * 这是简化压力模型，用于调参回归，不代替上线后的真实玩家统计。
  */
@@ -32,8 +32,12 @@ function run(c,npc=false){
     else if(x<foodP+.30)s.health=Math.max(0,s.health-1);
     else if(x<foodP+.335){let avoid=.68+(c.agi-3)*.045+(c.luck-4)*.02;if(c.id==='xutang')avoid+=.06;if(R()>avoid&&!(c.id==='zhouye'&&R()<.25))s.life--;}
 
-    // 人物互动多为关系与小收益；敌对冲突概率低。
+    // 移动途中：假设约45%的天数会换地点；30%特别事件整体接近中性，主要增加故事变化。
+    if(R()<.135){const tr=R();if(tr<.03)s.foods++;else if(tr<.04)s.meds++;else if(tr<.06)gainHealth(s,1);else if(tr>.94)s.health=Math.max(0,s.health-1);}
+
+    // 地点互动仍保留低概率冲突，途中互动主要改变关系，额外冲突率很低。
     if(R()<.32&&R()<.038&&!(c.id==='zhouye'&&R()<.25))s.life--;
+    if(R()<.158&&R()>.988&&!(c.id==='zhouye'&&R()<.25))s.life--;
 
     // 默认70%夜间特别事件，并非所有事件都会命中该地点或造成损失。
     if(R()<.695){const n=R();if(n<.19&&!shelter)s.health=Math.max(0,s.health-1);else if(n<.215&&!shelter){if(!(c.id==='zhouye'&&R()<.25))s.life--;}else if(n>.72)gainHealth(s,1);}

@@ -18,7 +18,7 @@
       "startingBonusFood": 0,
       "hostileBattleChance": 0.2,
       "eventRecentWindow": 24,
-      "interactionRecentWindow": 18,
+      "interactionRecentWindow": 24,
       "bondThreshold": 60,
       "npcSaveChanceDay30": 0.82,
       "npcSaveChanceDay50": 0.52

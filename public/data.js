@@ -59,7 +59,38 @@ window.DAY81_DATA = (() => {
 
     whistle:{id:'whistle',name:'哨子',ico:'📣',kind:'special',consumable:false,value:6,desc:'DAY61后提高求救相关事件权重。',mods:{rescue:1}},
     mirror:{id:'mirror',name:'信号镜',ico:'🪞',kind:'special',consumable:false,value:9,desc:'DAY61后提高求救相关事件权重。',mods:{rescue:2}},
-    flare:{id:'flare',name:'信号弹',ico:'🚀',kind:'special',consumable:true,value:10,desc:'DAY61后使用可增加求救评分。',effect:{rescueScore:2}}
+    flare:{id:'flare',name:'信号弹',ico:'🚀',kind:'special',consumable:true,value:10,desc:'DAY61后使用可增加求救评分。',effect:{rescueScore:2}},
+
+    seaweed_pack:{id:'seaweed_pack',name:'烘干海苔',ico:'🌿',kind:'food',consumable:true,value:5,dropWeight:1.25,desc:'健康+1。分量不大，但容易保存。',effect:{health:1}},
+    dried_mango:{id:'dried_mango',name:'芒果干',ico:'🥭',kind:'food',consumable:true,value:6,dropWeight:1.15,desc:'健康+1，下一次检定小幅提高。',effect:{health:1,nextCheckBonus:.03}},
+    honey_sachet:{id:'honey_sachet',name:'蜂蜜小袋',ico:'🍯',kind:'food',consumable:true,value:6,dropWeight:1.05,desc:'健康+1，能稍微提振精神。',effect:{health:1,nextCheckBonus:.04}},
+    fruit_cup:{id:'fruit_cup',name:'密封水果杯',ico:'🍑',kind:'food',consumable:true,value:7,dropWeight:.95,desc:'健康+1，并降低当天体力消耗。',effect:{health:1,skipDecay:true}},
+    tuna_pouch:{id:'tuna_pouch',name:'金枪鱼软罐',ico:'🐟',kind:'food',consumable:true,value:8,dropWeight:.75,desc:'健康+2。重量轻、蛋白质充足。',effect:{health:2}},
+    instant_noodles:{id:'instant_noodles',name:'干吃面',ico:'🍜',kind:'food',consumable:true,value:6,dropWeight:1.05,desc:'健康+1，今晚不因日常消耗下降健康。',effect:{health:1,skipDecay:true}},
+    chocolate:{id:'chocolate',name:'巧克力',ico:'🍫',kind:'food',consumable:true,value:6,dropWeight:1.10,desc:'健康+1，下一次检定+5%。',effect:{health:1,nextCheckBonus:.05}},
+    sports_drink:{id:'sports_drink',name:'运动饮料',ico:'🧃',kind:'food',consumable:true,value:7,dropWeight:1.00,desc:'健康+1，并使下一次检定更稳定。',effect:{health:1,nextCheckBonus:.06}},
+    water_pouch:{id:'water_pouch',name:'应急饮水袋',ico:'💧',kind:'food',consumable:true,value:7,dropWeight:1.05,desc:'健康+1，且今晚不因日常消耗下降健康。',effect:{health:1,skipDecay:true}},
+    hard_candy:{id:'hard_candy',name:'水果硬糖',ico:'🍬',kind:'food',consumable:true,value:4,dropWeight:1.35,desc:'不直接恢复状态，但下一次检定+8%。',effect:{nextCheckBonus:.08}},
+    fish_jerky:{id:'fish_jerky',name:'鱼肉干',ico:'🐠',kind:'food',consumable:true,value:7,dropWeight:.95,desc:'健康+1；保存期长。',effect:{health:1}},
+    emergency_ration:{id:'emergency_ration',name:'高能应急口粮',ico:'📦',kind:'food',consumable:true,value:9,dropWeight:.55,desc:'健康+2，并取消今晚的日常健康消耗。',effect:{health:2,skipDecay:true}},
+
+    sterile_gauze:{id:'sterile_gauze',name:'无菌纱布',ico:'🩹',kind:'medical',consumable:true,value:6,dropWeight:1.15,desc:'抵消下一次生命伤害1点。',effect:{shield:1}},
+    medical_tape:{id:'medical_tape',name:'医用胶带',ico:'🩹',kind:'medical',consumable:true,value:5,dropWeight:1.20,desc:'抵消下一次生命伤害1点。',effect:{shield:1}},
+    antiseptic_wipe:{id:'antiseptic_wipe',name:'消毒湿巾',ico:'🧻',kind:'medical',consumable:true,value:6,dropWeight:1.15,desc:'抵消下一次健康或生命损失1点。',effect:{generalShield:1}},
+    antihistamine:{id:'antihistamine',name:'抗过敏片',ico:'💊',kind:'medical',consumable:true,value:7,dropWeight:.85,desc:'抵消下一次健康或生命损失，并小幅提高下一次检定。',effect:{generalShield:1,nextCheckBonus:.03}},
+    cooling_patch:{id:'cooling_patch',name:'退热贴',ico:'🧊',kind:'medical',consumable:true,value:6,dropWeight:1.00,desc:'今晚不因日常消耗下降健康。',effect:{skipDecay:true}},
+    glucose_gel:{id:'glucose_gel',name:'葡萄糖凝胶',ico:'🧪',kind:'medical',consumable:true,value:7,dropWeight:.95,desc:'健康+1，下一次检定+6%。',effect:{health:1,nextCheckBonus:.06}},
+    vitamin_tablet:{id:'vitamin_tablet',name:'复合维生素片',ico:'💊',kind:'medical',consumable:true,value:5,dropWeight:1.20,desc:'下一次检定+10%。',effect:{nextCheckBonus:.10}},
+    burn_gel:{id:'burn_gel',name:'烫伤凝胶',ico:'🧴',kind:'medical',consumable:true,value:6,dropWeight:1.00,desc:'抵消下一次健康或生命损失1点。',effect:{generalShield:1}},
+    oral_glucose:{id:'oral_glucose',name:'口服葡萄糖',ico:'🧃',kind:'medical',consumable:true,value:6,dropWeight:1.10,desc:'健康+1，下一次检定小幅提高。',effect:{health:1,nextCheckBonus:.04}},
+    splint:{id:'splint',name:'简易夹板',ico:'🦴',kind:'medical',consumable:true,value:8,dropWeight:.70,desc:'抵消下一次生命伤害，并取消今晚日常健康消耗。',effect:{shield:1,skipDecay:true}},
+
+    smoke_flare:{id:'smoke_flare',name:'烟雾信号棒',ico:'🧨',kind:'special',consumable:true,value:8,dropWeight:.55,desc:'增加求救努力1点。',effect:{rescueScore:1}},
+    signal_dye:{id:'signal_dye',name:'海面示位染料',ico:'🟠',kind:'special',consumable:true,value:8,dropWeight:.50,desc:'增加求救努力0.8点。',effect:{rescueScore:.8}},
+    emergency_blanket:{id:'emergency_blanket',name:'应急保温毯',ico:'🟨',kind:'special',consumable:true,value:7,dropWeight:.80,desc:'抵消下一次生命伤害，并取消今晚日常健康消耗。',effect:{shield:1,skipDecay:true}},
+    purification_tablet:{id:'purification_tablet',name:'净水片',ico:'💠',kind:'special',consumable:true,value:6,dropWeight:1.00,desc:'健康+1，今晚不因日常消耗下降健康。',effect:{health:1,skipDecay:true}},
+    charcoal_tablet:{id:'charcoal_tablet',name:'活性炭片',ico:'⚫',kind:'medical',consumable:true,value:6,dropWeight:.95,desc:'抵消下一次健康或生命损失1点。',effect:{generalShield:1}}
+
   };
 
   const itemPool = Object.keys(items).filter(id=>!items[id].starter);
@@ -463,7 +494,81 @@ window.DAY81_DATA = (() => {
       {text:'结合云层判断未来天气',action:'check',stat:'int',difficulty:'normal',success:{nextCheckBonus:.12,rescueScore:.2},fail:{none:true},risk:'安全'},
       {text:'寻找海面上的船迹',action:'check',stat:'luck',difficulty:'normal',success:{rescueScore:.7},fail:{none:true},risk:'一般'},
       {text:'加固高地求救标记',action:'effect',effect:{rescueScore:.35,campMaterial:{wood:1}},risk:'安全'}
-    ])
+    ]),
+
+    LE('cb_emergency_tag','crash_beach','应急标识牌','一块印着航班编号的塑料标识牌被海浪推到沙地上，附近还散着几只小袋子。',[
+      {text:'沿着散落方向继续找',action:'check',stat:'luck',difficulty:'normal',success:{randomItems:2},fail:{none:true},risk:'一般'},
+      {text:'只拿最近的一只小袋',action:'effect',effect:{randomItem:1},risk:'安全'},
+      {text:'把标识牌立起来做求救标记',action:'effect',effect:{rescueScore:.25},risk:'安全'}]),
+    LE('cb_hot_metal','crash_beach','晒热的金属残片','太阳把机身残片晒得发烫，一块压住的织物下面似乎有东西。',[
+      {text:'戴着手套翻开',action:'check',stat:'str',difficulty:'easy',success:{randomItem:1},fail:{health:-1},risk:'一般',tags:['resource']},
+      {text:'等它冷一些再动手',action:'effect',effect:{nextCheckBonus:.05},risk:'安全'},
+      {text:'绕到阴影处查看',action:'check',stat:'agi',difficulty:'easy',success:{randomItemChance:.65},fail:{none:true},risk:'安全'}]),
+    LE('cg_fallen_nuts_new','coconut_grove','风落椰果','一阵风过后，几枚青椰子从高处掉下来，其中一枚摔裂了。',[
+      {text:'挑完整的带走',action:'effect',effect:{item:'coconut'},risk:'安全'},
+      {text:'检查摔裂的果肉',action:'check',stat:'int',difficulty:'easy',success:{health:1},fail:{none:true},risk:'安全'},
+      {text:'顺着风落方向继续搜索',action:'check',stat:'luck',difficulty:'normal',success:{randomFood:1},fail:{none:true},risk:'一般'}]),
+    LE('cg_insect_hum','coconut_grove','树冠嗡鸣','树冠里传来持续的嗡鸣声，像是蜂群在附近活动。',[
+      {text:'保持距离绕过去',action:'effect',effect:{none:true},risk:'安全'},
+      {text:'观察蜂群去向',action:'check',stat:'int',difficulty:'normal',success:{randomFood:1},fail:{health:-1},risk:'一般'},
+      {text:'快速穿过林下空地',action:'check',stat:'agi',difficulty:'normal',success:{nextCheckBonus:.05},fail:{health:-1},risk:'一般'}]),
+    LE('fs_clear_pool','fresh_stream','清澈深潭','溪流在这里汇成一个小潭，水底能看到几件被冲来的东西。',[
+      {text:'下水摸取',action:'check',stat:'agi',difficulty:'normal',success:{randomItems:2},fail:{health:-1},risk:'一般',tags:['water']},
+      {text:'只补充饮水',action:'effect',effect:{health:1},risk:'安全'},
+      {text:'用树枝把东西勾过来',action:'check',stat:'int',difficulty:'easy',success:{randomItem:1},fail:{none:true},risk:'安全'}]),
+    LE('fs_broken_bottle','fresh_stream','碎裂水瓶','岸边卡着一只裂开的塑料瓶，旁边压着一包还没完全湿透的东西。',[
+      {text:'小心取出包裹',action:'check',stat:'agi',difficulty:'easy',success:{randomItem:1},fail:{health:-1},risk:'一般'},
+      {text:'只拿瓶盖做标记',action:'effect',effect:{nextCheckBonus:.04},risk:'安全'},
+      {text:'沿岸再找找',action:'check',stat:'luck',difficulty:'normal',success:{randomItemChance:.6},fail:{none:true},risk:'一般'}]),
+    LE('mb_shell_line','moon_bay','潮线贝壳','退潮后，一长串贝壳和漂木在沙滩上形成明显的潮线。',[
+      {text:'寻找能吃的贝类',action:'check',stat:'int',difficulty:'normal',success:{randomFood:1},fail:{health:-1},risk:'一般'},
+      {text:'翻找漂木缝隙',action:'check',stat:'luck',difficulty:'normal',success:{randomItem:1},fail:{none:true},risk:'一般'},
+      {text:'休息观察下一次潮汐',action:'effect',effect:{nextCheckBonus:.06},risk:'安全'}]),
+    LE('mb_floating_bag','moon_bay','漂来的小包','浅水里漂着一只拉链小包，海浪正在把它慢慢带回深水。',[
+      {text:'立刻涉水去拿',action:'check',stat:'agi',difficulty:'normal',success:{randomItems:2},fail:{health:-1},risk:'一般',tags:['water']},
+      {text:'等下一波浪推近',action:'check',stat:'luck',difficulty:'easy',success:{randomItem:1},fail:{none:true},risk:'安全'},
+      {text:'放弃，避免湿透',action:'effect',effect:{skipDecay:true},risk:'安全'}]),
+    LE('rp_seaweed','reef_pools','礁池海藻','几片厚实海藻附在礁石背阴面，看起来没有明显腐坏。',[
+      {text:'挑干净的收集',action:'check',stat:'int',difficulty:'easy',success:{item:'seaweed_pack'},fail:{none:true},risk:'安全'},
+      {text:'顺便查看潮池',action:'check',stat:'agi',difficulty:'normal',success:{randomFood:1},fail:{none:true},risk:'一般'},
+      {text:'不冒险食用，只观察潮水',action:'effect',effect:{nextCheckBonus:.05},risk:'安全'}]),
+    LE('rp_urchin_spines','reef_pools','海胆密区','一个狭窄潮池里聚着不少海胆，旁边却卡着一只小塑料盒。',[
+      {text:'伸手够塑料盒',action:'check',stat:'agi',difficulty:'hard',success:{randomItems:2},fail:{health:-1},risk:'危险'},
+      {text:'用木棍拨过来',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{none:true},risk:'一般'},
+      {text:'直接离开',action:'effect',effect:{none:true},risk:'安全'}]),
+    LE('jp_vine_marker','jungle_path','藤蔓标记','你发现几段藤蔓被人为折断，像是有人曾经在这里做过路线标记。',[
+      {text:'跟着标记深入',action:'check',stat:'int',difficulty:'normal',success:{randomItems:2},fail:{beast:true},risk:'危险',tags:['explore']},
+      {text:'重新整理标记',action:'effect',effect:{nextCheckBonus:.08},risk:'安全'},
+      {text:'改走更开阔的路线',action:'check',stat:'agi',difficulty:'easy',success:{none:true},fail:{health:-1},risk:'一般'}]),
+    LE('jp_wasp_nest','jungle_path','低枝马蜂窝','一只马蜂窝挂在低枝上，正好挡住最省力的路线。',[
+      {text:'悄悄绕远路',action:'check',stat:'agi',difficulty:'easy',success:{none:true},fail:{health:-1},risk:'一般'},
+      {text:'观察风向后快速通过',action:'check',stat:'int',difficulty:'normal',success:{nextCheckBonus:.06},fail:{health:-1},risk:'一般'},
+      {text:'退回去休整',action:'effect',effect:{skipDecay:true},risk:'安全'}]),
+    LE('bc_old_firepit','bamboo_clearing','旧火堆','空地边缘有一处旧火堆，灰烬下面似乎还压着一些没烧完的东西。',[
+      {text:'翻开灰烬检查',action:'check',stat:'int',difficulty:'easy',success:{randomItem:1},fail:{none:true},risk:'安全'},
+      {text:'整理成公共火堆',action:'effect',effect:{campMaterial:{wood:1},nextCheckBonus:.04},risk:'安全'},
+      {text:'把干木料收起来',action:'effect',effect:{campMaterial:{wood:1}},risk:'安全'}]),
+    LE('rc_dripstone','rock_cave','滴水岩壁','洞内一处岩壁不断滴水，下方还堆着几块被人挪动过的石头。',[
+      {text:'收集滴水',action:'effect',effect:{health:1},risk:'安全'},
+      {text:'搬开石头看看',action:'check',stat:'str',difficulty:'normal',success:{randomItems:2},fail:{health:-1},risk:'一般'},
+      {text:'观察是否有人来过',action:'check',stat:'int',difficulty:'easy',success:{fromNpc:true},fail:{none:true},risk:'安全'}]),
+    LE('ce_wind_gap','cliff_edge','强风缺口','崖边风口突然增强，几件轻小物品被吹到岩石凹处。',[
+      {text:'趁风小冲过去捡',action:'check',stat:'agi',difficulty:'hard',success:{randomItems:2},fail:{health:-1},risk:'危险'},
+      {text:'用绳子固定自己再取',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{none:true},risk:'一般',tags:['climb']},
+      {text:'不冒险，专心观察海面',action:'effect',effect:{rescueScore:.25},risk:'安全'}]),
+    LE('se_dry_patch_new','swamp_edge','干燥土丘','沼泽边缘有一小块相对干燥的高地，上面散着几片包装纸。',[
+      {text:'过去查看包装来源',action:'check',stat:'luck',difficulty:'normal',success:{randomItems:2},fail:{health:-1},risk:'一般'},
+      {text:'先试探地面承重',action:'check',stat:'int',difficulty:'easy',success:{randomItemChance:.65},fail:{none:true},risk:'安全'},
+      {text:'不进入湿地',action:'effect',effect:{skipDecay:true},risk:'安全'}]),
+    LE('wc_overhead_bin','wreck_cabin','行李舱夹层','变形的头顶行李舱还卡着几个小包，但支架明显不稳。',[
+      {text:'快速取下两个小包',action:'check',stat:'agi',difficulty:'hard',success:{randomItems:3},fail:{life:-1,chance:.25},risk:'危险',tags:['mechanic']},
+      {text:'先拆松动支架',action:'check',stat:'int',difficulty:'normal',success:{randomItems:2},fail:{health:-1},risk:'一般',tags:['mechanic']},
+      {text:'只拿外露的一件',action:'effect',effect:{randomItem:1},risk:'安全'}]),
+    LE('rh_signal_scraps','ridge_hill','高地碎布','高地灌木上挂着几条颜色鲜艳的碎布，风一吹非常显眼。',[
+      {text:'把碎布做成求救旗',action:'check',stat:'int',difficulty:'easy',success:{rescueScore:.5},fail:{none:true},risk:'安全'},
+      {text:'沿周围搜寻来源',action:'check',stat:'luck',difficulty:'normal',success:{randomItem:1},fail:{none:true},risk:'一般'},
+      {text:'用碎布包好随身物资',action:'effect',effect:{generalShield:1},risk:'安全'}])
+
   ];
 
 
@@ -611,6 +716,40 @@ window.DAY81_DATA = (() => {
     {"id":"place_swamp_route","name":"沼泽绕行","minRelation":-19,"maxRelation":100,"text":"{name}站在软泥边，问你从左边绕还是右边绕更稳。","choices":[{"text":"一起试探地面","kind":"check","stat":"int","difficulty":"normal","goodRelation":6,"badRelation":0,"reward":{"nextCheckBonus":0.08},"risk":"一般"},{"text":"让TA跟着你的脚印走","kind":"check","stat":"agi","difficulty":"normal","goodRelation":5,"badRelation":-1,"reward":{"none":true},"risk":"一般"},{"text":"建议今天别深入","kind":"effect","relation":3,"reward":{"skipDecay":true},"risk":"安全"}],"locations":["swamp_edge"]},
     {"id":"place_grove_fruit","name":"挑果子","minRelation":0,"maxRelation":100,"text":"{name}正在挑能吃的果子，显然不想再碰上一次难吃的。","choices":[{"text":"一起辨认成熟果实","kind":"check","stat":"int","difficulty":"easy","goodRelation":6,"badRelation":0,"reward":{"randomFood":1},"risk":"安全"},{"text":"帮TA够高处的果子","kind":"check","stat":"agi","difficulty":"normal","goodRelation":6,"badRelation":0,"reward":{"randomFood":1},"risk":"一般"},{"text":"提醒TA别一次拿太多","kind":"effect","relation":3,"reward":{"none":true},"risk":"安全"}],"locations":["coconut_grove","jungle_path"]},
     {"id":"place_camp_fix","name":"修一下营地","minRelation":0,"maxRelation":100,"text":"{name}正在检查公共营地的一处松动位置，手上正缺个人搭把手。","choices":[{"text":"一起修好它","kind":"check","stat":"str","difficulty":"easy","goodRelation":7,"badRelation":0,"reward":{"campMaterial":{"wood":1}},"risk":"安全"},{"text":"想个更稳的固定办法","kind":"check","stat":"int","difficulty":"easy","goodRelation":7,"badRelation":0,"reward":{"campMaterial":{"fiber":1}},"risk":"安全"},{"text":"先看看还有没有别的问题","kind":"effect","relation":4,"reward":{"nextCheckBonus":0.05},"risk":"安全"}],"locations":["bamboo_clearing"]}
+,
+
+    {id:'deep_storm_memory',name:'雷声之后',minRelation:-19,maxRelation:100,text:'远处忽然滚过一声闷雷，{name}下意识停住动作，沉默了几秒才说：“那天飞机往下掉的时候，我真的以为就到那里了。”',choices:[{text:'告诉TA你当时也很害怕',kind:'effect',relation:7,reward:{nextCheckBonus:.04},risk:'安全'},{text:'问TA现在最担心什么',kind:'effect',relation:6,reward:{none:true},risk:'安全'},{text:'把话题转回今天的生存计划',kind:'check',stat:'int',difficulty:'easy',goodRelation:4,badRelation:0,reward:{nextCheckBonus:.06},risk:'安全'}]},
+    {id:'deep_missing_family',name:'没说完的家人',minRelation:25,maxRelation:100,text:'{name}望着海面，忽然提起家里的人。话说到一半又停住：“算了，先活着回去再说。”',choices:[{text:'安静听TA把话说完',kind:'effect',relation:8,reward:{skipDecay:true},risk:'安全'},{text:'也说一点自己的牵挂',kind:'effect',relation:8,reward:{rescueScore:.12},risk:'安全'},{text:'约定获救后互相报平安',kind:'effect',relation:9,reward:{nextCheckBonus:.04},risk:'安全'}]},
+    {id:'deep_small_conflict',name:'谁都累了',minRelation:-19,maxRelation:59,text:'{name}因为一件小事语气有点冲，刚说完就移开视线。看得出来，TA也只是累了。',choices:[{text:'先让一步，不把小事放大',kind:'effect',relation:6,reward:{none:true},risk:'安全'},{text:'把自己的不满说清楚',kind:'check',stat:'int',difficulty:'normal',goodRelation:5,badRelation:-4,reward:{none:true},risk:'一般'},{text:'先各自冷静一会儿',kind:'effect',relation:1,reward:{skipDecay:true},risk:'安全'}]},
+    {id:'deep_share_route',name:'路线争论',minRelation:0,maxRelation:100,text:'{name}指着地上的简易地图，说TA觉得明天应该换一条路线。你们对哪个方向更安全有不同判断。',choices:[{text:'一起把理由逐条说清楚',kind:'check',stat:'int',difficulty:'normal',goodRelation:7,badRelation:0,reward:{nextCheckBonus:.09},risk:'安全'},{text:'相信TA这一次的判断',kind:'effect',relation:6,reward:{nextCheckBonus:.05},risk:'安全'},{text:'坚持自己的路线',kind:'effect',relation:-2,reward:{rescueScore:.08},risk:'安全'}]},
+    {id:'deep_food_ethics',name:'最后一口食物',minRelation:25,maxRelation:100,text:'{name}看着只剩一点的食物，低声问：“如果明天有人真的撑不住，我们该先给谁？”这个问题听起来比想象中沉重。',choices:[{text:'先给最虚弱的人',kind:'effect',relation:7,reward:{none:true},risk:'安全'},{text:'按每天的贡献公平分',kind:'effect',relation:3,reward:{nextCheckBonus:.04},risk:'安全'},{text:'现在先别替明天做决定',kind:'effect',relation:2,reward:{skipDecay:true},risk:'安全'}]},
+    {id:'deep_rescue_doubt',name:'救援真的会来吗',minRelation:25,maxRelation:100,text:'{name}看着海平线很久，突然问：“如果第八十一天什么都没有呢？”TA说得很轻，却明显不是随口一问。',choices:[{text:'告诉TA我们会继续发信号',kind:'effect',relation:7,reward:{rescueScore:.2},risk:'安全'},{text:'承认自己也不确定，但不会停下',kind:'effect',relation:9,reward:{nextCheckBonus:.05},risk:'安全'},{text:'用已经发现的搜救迹象安慰TA',kind:'check',stat:'int',difficulty:'easy',goodRelation:6,badRelation:1,reward:{rescueScore:.12},risk:'安全'}]},
+    {id:'deep_injury_check',name:'别硬撑',minRelation:25,maxRelation:100,text:'{name}注意到你的动作有点僵，皱着眉说：“你是不是哪里不舒服？别等真倒下了才说。”',choices:[{text:'让TA简单检查一下',kind:'effect',relation:7,reward:{health:1},risk:'安全'},{text:'说自己还能撑，让TA放心',kind:'effect',relation:3,reward:{nextCheckBonus:.04},risk:'安全'},{text:'反问TA是不是也在硬撑',kind:'effect',relation:6,reward:{none:true},risk:'安全'}]},
+    {id:'deep_watch_shift',name:'今晚谁守着',minRelation:25,maxRelation:100,text:'{name}提到今晚的安排：“我可以多醒一会儿，你白天已经够累了。”TA的语气不像客套。',choices:[{text:'接受TA的好意',kind:'effect',relation:6,reward:{skipDecay:true},risk:'安全'},{text:'坚持两个人轮流守',kind:'effect',relation:8,reward:{nextCheckBonus:.06},risk:'安全'},{text:'让TA先休息，自己来',kind:'effect',relation:7,reward:{rescueScore:.08},risk:'安全'}]},
+    {id:'deep_found_photo',name:'一张湿照片',minRelation:0,maxRelation:100,text:'沙地里露出一角湿透的照片，{name}捡起来看了看，没有认出上面的人。两个人都沉默了一会儿。',choices:[{text:'把照片擦干收好，等救援后寻找家属',kind:'effect',relation:6,reward:{rescueScore:.1},risk:'安全'},{text:'放在显眼处，也许有人认识',kind:'effect',relation:4,reward:{none:true},risk:'安全'},{text:'不多看，继续做眼前的事',kind:'effect',relation:1,reward:{nextCheckBonus:.03},risk:'安全'}],locations:['crash_beach','wreck_cabin','moon_bay']},
+    {id:'deep_camp_argument',name:'营地该怎么用',minRelation:-19,maxRelation:100,text:'{name}觉得公共营地的物资应该留给最需要的人，而你担心没人负责就会越用越乱。',choices:[{text:'提出先记下每天的取用情况',kind:'check',stat:'int',difficulty:'easy',goodRelation:7,badRelation:0,reward:{nextCheckBonus:.06},risk:'安全'},{text:'同意优先照顾虚弱的人',kind:'effect',relation:6,reward:{none:true},risk:'安全'},{text:'认为各自管好自己更现实',kind:'effect',relation:-3,reward:{none:true},risk:'安全'}],locations:['bamboo_clearing']},
+    {id:'deep_lost_sound',name:'林子里的声音',minRelation:-19,maxRelation:100,text:'远处树丛传来两次短促响动。{name}压低声音：“不像风。你听见了吗？”',choices:[{text:'两个人一起确认来源',kind:'check',stat:'agi',difficulty:'normal',goodRelation:6,badRelation:0,reward:{randomItemChance:.35},risk:'一般'},{text:'先退到开阔处观察',kind:'effect',relation:4,reward:{nextCheckBonus:.07},risk:'安全'},{text:'告诉TA可能只是动物，不必紧张',kind:'effect',relation:1,reward:{none:true},risk:'安全'}],locations:['jungle_path','coconut_grove','swamp_edge']},
+    {id:'deep_water_priority',name:'一壶水怎么分',minRelation:0,maxRelation:100,text:'{name}晃了晃手里不多的水：“如果今晚更热，这点根本不够。”TA在认真考虑怎么分配。',choices:[{text:'先给健康更差的人',kind:'effect',relation:6,reward:{health:1},risk:'安全'},{text:'每个人留一样多',kind:'effect',relation:3,reward:{skipDecay:true},risk:'安全'},{text:'先去找更多水再讨论',kind:'check',stat:'int',difficulty:'normal',goodRelation:5,badRelation:0,reward:{nextCheckBonus:.05},risk:'一般'}],locations:['fresh_stream','bamboo_clearing','moon_bay']},
+    {id:'deep_after_battle',name:'冲突之后',minRelation:-100,maxRelation:-20,text:'{name}看着你，语气很硬：“之前的事我没忘。你最好别装作什么都没发生。”空气一下变得紧绷。',choices:[{text:'承认自己做得过火',kind:'effect',relation:8,reward:{none:true},risk:'安全'},{text:'只谈眼前安全，不谈过去',kind:'effect',relation:2,reward:{nextCheckBonus:.04},risk:'安全'},{text:'告诉TA你并不后悔',kind:'effect',relation:-8,reward:{none:true},risk:'危险'}]},
+    {id:'deep_enemy_truce',name:'暂时停手',minRelation:-100,maxRelation:-50,text:'{name}盯着你看了几秒：“我不信你，但现在不是互相拖死的时候。”TA提出至少今天别再找麻烦。',choices:[{text:'答应今天互不干扰',kind:'effect',relation:5,reward:{skipDecay:true},risk:'安全'},{text:'要求先把话说明白',kind:'check',stat:'int',difficulty:'hard',goodRelation:7,badRelation:-5,reward:{none:true},risk:'一般'},{text:'拒绝任何约定',kind:'effect',relation:-5,reward:{none:true},risk:'危险'}]},
+    {id:'deep_shelter_help',name:'窝棚的门板',minRelation:25,maxRelation:100,text:'{name}看了看你的窝棚，说门口那块板固定得不太稳：“我现在有空，要不要一起弄一下？”',choices:[{text:'一起加固',kind:'check',stat:'str',difficulty:'easy',goodRelation:7,badRelation:0,reward:{campMaterial:{wood:1}},risk:'安全'},{text:'让TA帮忙看看还有哪里不稳',kind:'check',stat:'int',difficulty:'easy',goodRelation:6,badRelation:0,reward:{nextCheckBonus:.06},risk:'安全'},{text:'谢过TA，自己以后处理',kind:'effect',relation:3,reward:{none:true},risk:'安全'}]},
+    {id:'deep_skill_exchange',name:'互相教一点',minRelation:25,maxRelation:100,text:'{name}说起自己工作里最熟的一件事，又笑了笑：“在这里也不知道还算不算有用。你想学一点吗？”',choices:[{text:'认真听TA讲',kind:'effect',relation:7,reward:{nextCheckBonus:.10},risk:'安全'},{text:'也把自己会的东西教给TA',kind:'effect',relation:8,reward:{rescueScore:.08},risk:'安全'},{text:'说等闲下来再学',kind:'effect',relation:2,reward:{none:true},risk:'安全'}]},
+    {id:'deep_cooking_smell',name:'一点熟食的味道',minRelation:0,maxRelation:100,text:'空气里飘来一点熟食的味道。{name}忍不住说：“这种时候闻到这个，简直是在折磨人。”说完自己先笑了。',choices:[{text:'一起想办法把食物做得更好吃',kind:'check',stat:'int',difficulty:'easy',goodRelation:5,badRelation:0,reward:{health:1},risk:'安全'},{text:'拿这件事开个玩笑',kind:'effect',relation:5,reward:{nextCheckBonus:.03},risk:'安全'},{text:'提醒食物必须省着用',kind:'effect',relation:2,reward:{none:true},risk:'安全'}],roles:['gaoyuan']},
+    {id:'deep_nurse_tired',name:'护士也会累',minRelation:25,maxRelation:100,text:'林岚把急救包扣好，靠着树坐下：“大家一有事都来找我。其实我也会怕自己判断错。”她很少这样说。',choices:[{text:'告诉她没人要求她什么都做对',kind:'effect',relation:9,reward:{nextCheckBonus:.05},risk:'安全'},{text:'问她今天有没有好好休息',kind:'effect',relation:7,reward:{skipDecay:true},risk:'安全'},{text:'提出以后医疗物资一起整理',kind:'check',stat:'int',difficulty:'easy',goodRelation:7,badRelation:0,reward:{generalShield:1},risk:'安全'}],roles:['linlan']},
+    {id:'deep_firefighter_burden',name:'总得有人顶上去',minRelation:25,maxRelation:100,text:'周野看着远处，低声说：“以前出任务，知道后面还有队友。现在有时候我也不知道自己该不该第一个上。”',choices:[{text:'告诉他不用每次都一个人顶',kind:'effect',relation:9,reward:{nextCheckBonus:.05},risk:'安全'},{text:'说真正危险时大家一起上',kind:'effect',relation:8,reward:{rescueScore:.08},risk:'安全'},{text:'提醒他先判断风险再行动',kind:'check',stat:'int',difficulty:'easy',goodRelation:6,badRelation:1,reward:{nextCheckBonus:.08},risk:'安全'}],roles:['zhouye']},
+    {id:'deep_engineer_failure',name:'修不好的东西',minRelation:25,maxRelation:100,text:'陈默盯着一块已经完全变形的零件，忽然说：“有些东西不是认真就能修回来。”他像是在说零件，又不完全是在说零件。',choices:[{text:'问他是不是想起了什么',kind:'effect',relation:8,reward:{none:true},risk:'安全'},{text:'告诉他已经修好的东西更多',kind:'effect',relation:7,reward:{nextCheckBonus:.06},risk:'安全'},{text:'陪他把能用的零件分类',kind:'check',stat:'int',difficulty:'easy',goodRelation:7,badRelation:0,reward:{campMaterial:{scrap:1}},risk:'安全'}],roles:['chenmo']},
+    {id:'deep_photographer_memory',name:'没有按下快门',minRelation:25,maxRelation:100,text:'苏晴举起相机似的手势，又放下来：“以前看到这种光，我肯定先拍。现在我有时候觉得，记住就够了。”',choices:[{text:'问她最想留下哪个画面',kind:'effect',relation:8,reward:{rescueScore:.08},risk:'安全'},{text:'说活着回去以后再慢慢拍',kind:'effect',relation:8,reward:{nextCheckBonus:.05},risk:'安全'},{text:'让她继续记录岛上的变化',kind:'check',stat:'int',difficulty:'easy',goodRelation:6,badRelation:0,reward:{nextCheckBonus:.08},risk:'安全'}],roles:['suqing']},
+    {id:'deep_chef_home',name:'最想做的一顿饭',minRelation:25,maxRelation:100,text:'高远忽然问：“真回去了，你第一顿想吃什么？”没等你回答，他自己先报了三个菜名，越说越认真。',choices:[{text:'认真点一道最想吃的菜',kind:'effect',relation:7,reward:{health:1},risk:'安全'},{text:'让他回去以后请大家吃一顿',kind:'effect',relation:8,reward:{rescueScore:.08},risk:'安全'},{text:'提醒他先把今天这点食物弄好',kind:'effect',relation:4,reward:{nextCheckBonus:.04},risk:'安全'}],roles:['gaoyuan']},
+    {id:'deep_teacher_students',name:'想起学生',minRelation:25,maxRelation:100,text:'许棠翻着笔记本，忽然笑了一下：“我班上那群孩子要是知道我被困在岛上，大概会先问我有没有布置作业。”笑完她的眼神又安静下来。',choices:[{text:'让她讲讲班里的趣事',kind:'effect',relation:8,reward:{skipDecay:true},risk:'安全'},{text:'说他们一定在等她回去',kind:'effect',relation:9,reward:{rescueScore:.1},risk:'安全'},{text:'请她把岛上的知识继续记下来',kind:'check',stat:'int',difficulty:'easy',goodRelation:7,badRelation:0,reward:{nextCheckBonus:.10},risk:'安全'}],roles:['xutang']},
+    {id:'deep_tide_decision',name:'潮水还在涨',minRelation:-19,maxRelation:100,text:'潮水比昨天高了一截，{name}皱眉看着岸边：“再涨一点，我们放在低处的东西就得搬。”',choices:[{text:'现在就一起搬高',kind:'check',stat:'str',difficulty:'normal',goodRelation:6,badRelation:0,reward:{generalShield:1},risk:'一般'},{text:'先做潮位标记再决定',kind:'check',stat:'int',difficulty:'easy',goodRelation:5,badRelation:0,reward:{nextCheckBonus:.08},risk:'安全'},{text:'认为暂时没必要紧张',kind:'effect',relation:-1,reward:{none:true},risk:'安全'}],locations:['moon_bay','crash_beach','reef_pools']},
+    {id:'deep_cave_dark',name:'洞里太安静',minRelation:0,maxRelation:100,text:'岩洞深处安静得异常，{name}轻声说：“我宁愿听到点动物声音，这样反而不踏实。”',choices:[{text:'一起检查洞内痕迹',kind:'check',stat:'int',difficulty:'normal',goodRelation:6,badRelation:0,reward:{randomItemChance:.3},risk:'一般'},{text:'把火源留在两人中间',kind:'effect',relation:5,reward:{skipDecay:true},risk:'安全'},{text:'建议今晚别往深处走',kind:'effect',relation:4,reward:{nextCheckBonus:.05},risk:'安全'}],locations:['rock_cave']},
+    {id:'deep_cliff_view',name:'高处的沉默',minRelation:25,maxRelation:100,text:'站在高处看海时，{name}很久没说话。最后TA问：“你有没有哪一刻，真的觉得我们会回去？”',choices:[{text:'说出自己最有希望的一次',kind:'effect',relation:8,reward:{rescueScore:.15},risk:'安全'},{text:'承认也有完全绝望的时候',kind:'effect',relation:9,reward:{nextCheckBonus:.05},risk:'安全'},{text:'指着海面说救援还没结束',kind:'check',stat:'luck',difficulty:'easy',goodRelation:6,badRelation:1,reward:{rescueScore:.2},risk:'安全'}],locations:['cliff_edge','ridge_hill']},
+    {id:'deep_swamp_fear',name:'脚下突然一沉',minRelation:-19,maxRelation:100,text:'你脚下的泥突然一沉，{name}立刻伸手拉住你。等站稳以后，TA有点生气：“这种地方别只顾着往前看。”',choices:[{text:'认真道谢',kind:'effect',relation:7,reward:{nextCheckBonus:.04},risk:'安全'},{text:'说下次换你拉TA',kind:'effect',relation:6,reward:{none:true},risk:'安全'},{text:'觉得TA反应过度',kind:'effect',relation:-4,reward:{none:true},risk:'安全'}],locations:['swamp_edge']},
+    {id:'deep_wreck_names',name:'座位上的名字',minRelation:0,maxRelation:100,text:'残骸里一张登机牌还卡在座椅缝里。{name}念出上面的名字后，谁都没有立刻说话。',choices:[{text:'把登机牌收好',kind:'effect',relation:6,reward:{rescueScore:.1},risk:'安全'},{text:'和TA一起继续寻找其他身份物品',kind:'check',stat:'int',difficulty:'normal',goodRelation:6,badRelation:0,reward:{randomItemChance:.35},risk:'一般'},{text:'先离开这片残骸缓一缓',kind:'effect',relation:4,reward:{skipDecay:true},risk:'安全'}],locations:['wreck_cabin','crash_beach']},
+    {id:'deep_rain_wait',name:'等雨小一点',minRelation:0,maxRelation:100,text:'雨突然密起来，你和{name}只能暂时挤在一处遮蔽物下。距离近得有些尴尬，但至少不用淋雨。',choices:[{text:'聊聊今天各自遇到的事',kind:'effect',relation:6,reward:{nextCheckBonus:.05},risk:'安全'},{text:'一起检查背包有没有进水',kind:'check',stat:'int',difficulty:'easy',goodRelation:5,badRelation:0,reward:{generalShield:1},risk:'安全'},{text:'安静听雨，不勉强找话题',kind:'effect',relation:4,reward:{skipDecay:true},risk:'安全'}]},
+    {id:'deep_shared_laugh',name:'难得笑出来',minRelation:25,maxRelation:100,text:'一个很小的意外让{name}突然笑出声。TA笑了好一会儿才说：“我都快忘了，原来还能这样笑。”',choices:[{text:'顺着TA的玩笑继续说',kind:'effect',relation:8,reward:{skipDecay:true},risk:'安全'},{text:'说能笑出来是好事',kind:'effect',relation:7,reward:{nextCheckBonus:.04},risk:'安全'},{text:'把这件事记进今天的日志',kind:'effect',relation:6,reward:{rescueScore:.05},risk:'安全'}]},
+    {id:'deep_near_miss',name:'差一点出事',minRelation:0,maxRelation:100,text:'刚才有块石头从高处滚下来，离{name}只差一点。TA嘴上说“没事”，但手还在微微发抖。',choices:[{text:'陪TA坐一会儿再走',kind:'effect',relation:8,reward:{skipDecay:true},risk:'安全'},{text:'检查TA有没有受伤',kind:'effect',relation:7,reward:{health:1},risk:'安全'},{text:'重新确认周围安全路线',kind:'check',stat:'int',difficulty:'easy',goodRelation:6,badRelation:0,reward:{nextCheckBonus:.08},risk:'安全'}]},
+    {id:'deep_promise',name:'一个很小的约定',minRelation:60,maxRelation:100,text:'{name}忽然伸出手：“别说什么一定能活着回去。就答应我，明天还在的时候，先来打个招呼。”',choices:[{text:'和TA击掌答应',kind:'effect',relation:10,reward:{nextCheckBonus:.06},risk:'安全'},{text:'说不只是明天，第八十一天也要见',kind:'effect',relation:10,reward:{rescueScore:.2},risk:'安全'},{text:'笑着说TA要求真低',kind:'effect',relation:7,reward:{skipDecay:true},risk:'安全'}]}
 
   ];
 
@@ -623,6 +762,38 @@ window.DAY81_DATA = (() => {
     {id:'couple_argument',name:'小小争执',text:'{name}觉得你刚才的做法太冒险，你却觉得TA管得有点多。',choices:[{text:'先承认自己确实冒险了',kind:'effect',relation:6,reward:{nextCheckBonus:.04},risk:'安全'},{text:'把自己的理由解释清楚',kind:'check',stat:'int',difficulty:'normal',goodRelation:7,badRelation:-2,reward:{none:true},risk:'一般'},{text:'赌气不说话',kind:'effect',relation:-5,reward:{none:true},risk:'安全'}]},
     {id:'couple_future',name:'回去以后去哪',text:'{name}忽然问：“如果真的回去，我们第一天去哪里？”',choices:[{text:'认真想一个地方',kind:'effect',relation:8,reward:{rescueScore:.2},risk:'安全'},{text:'说只要不是荒岛都行',kind:'effect',relation:6,reward:{nextCheckBonus:.04},risk:'安全'},{text:'让TA先选，你负责跟着',kind:'effect',relation:9,reward:{none:true},risk:'安全'}]},
     {id:'couple_watch',name:'轮流守一会儿',text:'{name}说今天状态还行，可以替你多留意一阵周围的动静。',choices:[{text:'接受TA的照应',kind:'effect',relation:6,reward:{skipDecay:true},risk:'安全'},{text:'坚持两个人轮流来',kind:'effect',relation:8,reward:{nextCheckBonus:.08},risk:'安全'},{text:'让TA多休息，自己看着',kind:'effect',relation:7,reward:{rescueScore:.1},risk:'安全'}]}
+  ];
+
+
+  const travelEvents = [
+    {id:'travel_dropped_pouch',name:'路边的小布袋',type:'instant',text:'走在两处地点之间时，你在草丛边看到一只被雨淋过的小布袋。',effect:{randomItem:1}},
+    {id:'travel_fallen_coconut',name:'滚落的椰子',type:'instant',text:'一枚椰子从坡上滚下来，停在你脚边。',effect:{item:'coconut'}},
+    {id:'travel_fresh_water',name:'石缝清水',type:'instant',text:'经过一片岩壁时，你发现石缝里还积着一点干净雨水。',effect:{health:1}},
+    {id:'travel_scrap',name:'闪光的金属片',type:'instant',text:'路边泥土里露出一点金属反光，你顺手挖出几件能用的小东西。',effect:{randomItemChance:.7}},
+    {id:'travel_bird_cache',name:'海鸟落下的东西',type:'instant',text:'一只海鸟从头顶掠过，落下一个从别处叼来的小包装。',effect:{randomItemChance:.65}},
+    {id:'travel_thorns',name:'荆棘划伤',type:'instant',text:'一段被叶子遮住的荆棘勾住了你的衣服。你摆脱时还是被划了一下。',effect:{health:-1}},
+    {id:'travel_slip',name:'湿石打滑',type:'check',text:'一段岩石被水汽打湿，你脚下一滑，险些摔倒。',stat:'agi',difficulty:'easy',success:{none:true},fail:{health:-1}},
+    {id:'travel_wasp',name:'马蜂惊扰',type:'check',text:'你无意间惊动了低枝上的马蜂，嗡鸣声突然逼近。',stat:'agi',difficulty:'normal',success:{none:true},fail:{health:-1}},
+    {id:'travel_sudden_shower',name:'短时阵雨',type:'instant',text:'路上突然落下一阵急雨。你找到一棵大树暂时躲了一会儿。',effect:{skipDecay:true}},
+    {id:'travel_old_wrapper',name:'旧包装袋',type:'instant',text:'路边挂着一只褪色包装袋，里面居然还剩一点没有进水的东西。',effect:{randomFrom:['hard_candy','vitamin_tablet','antiseptic_wipe','medical_tape']}},
+    {id:'travel_bee_hum',name:'蜂群绕路',type:'choice',text:'前方小路旁有一群蜂虫盘旋，最短路线正好从它们旁边经过。',choices:[
+      {text:'绕远一点走',action:'effect',effect:{none:true},risk:'安全'},
+      {text:'低头快速通过',action:'check',stat:'agi',difficulty:'normal',success:{nextCheckBonus:.03},fail:{health:-1},risk:'一般'},
+      {text:'观察风向后再走',action:'check',stat:'int',difficulty:'easy',success:{nextCheckBonus:.06},fail:{none:true},risk:'安全'}]},
+    {id:'travel_stream_cross',name:'临时过水',type:'choice',text:'一条原本很浅的水沟涨了起来，挡住了你前进的方向。',choices:[
+      {text:'踩石头快速过去',action:'check',stat:'agi',difficulty:'normal',success:{none:true},fail:{health:-1},risk:'一般'},
+      {text:'找更浅的地方绕过',action:'check',stat:'int',difficulty:'easy',success:{nextCheckBonus:.04},fail:{none:true},risk:'安全'},
+      {text:'停一下补充水分',action:'effect',effect:{health:1},risk:'安全'}]},
+    {id:'travel_shiny_box',name:'坡下反光',type:'choice',text:'坡下草丛里有一小块规则的反光，看起来像是人工制品。',choices:[
+      {text:'下去捡回来',action:'check',stat:'agi',difficulty:'normal',success:{randomItems:2},fail:{health:-1},risk:'一般'},
+      {text:'用树枝勾过来',action:'check',stat:'int',difficulty:'normal',success:{randomItem:1},fail:{none:true},risk:'一般'},
+      {text:'不耽误时间，继续赶路',action:'effect',effect:{nextCheckBonus:.03},risk:'安全'}]},
+    {id:'travel_animal_tracks',name:'新鲜兽迹',type:'choice',text:'泥地上出现一串很新的动物脚印，正横穿你的路线。',choices:[
+      {text:'顺着脚印找一小段',action:'check',stat:'luck',difficulty:'normal',success:{randomFood:1},fail:{beast:true},risk:'危险'},
+      {text:'避开脚印方向',action:'effect',effect:{none:true},risk:'安全'},
+      {text:'停下观察周围',action:'check',stat:'int',difficulty:'easy',success:{nextCheckBonus:.06},fail:{none:true},risk:'安全'}]},
+    {id:'travel_torn_pack',name:'被挂破的背包',type:'instant',text:'一只破背包挂在树枝上，里面只剩几件轻小物品。',effect:{randomItems:2}},
+    {id:'travel_warm_sun',name:'难得的好天气',type:'instant',text:'这一段路阳光温和、风也不大，你走得比平时轻松。',effect:{nextCheckBonus:.05,skipDecay:true}}
   ];
 
   const campBuildings = [
@@ -774,5 +945,5 @@ window.DAY81_DATA = (() => {
     N('distant_light','远海灯光','很远的海面上，似乎有一盏灯一闪而过。没有人敢确定那是不是船。',{rescueScore:.5},'good',{minDay:60})
   ];
 
-  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,interactionProfiles,interactionEvents,coupleInteractionEvents,campBuildings,shelterLevels,shelterFacilities,nightInteractionEvents,storyChains,crisisTemplates,nights};
+  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,interactionProfiles,interactionEvents,coupleInteractionEvents,travelEvents,campBuildings,shelterLevels,shelterFacilities,nightInteractionEvents,storyChains,crisisTemplates,nights};
 })();

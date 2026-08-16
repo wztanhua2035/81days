@@ -194,7 +194,7 @@ body{font-size:15px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLe
   .gameScreen{gap:4px}.mobileHud{gap:4px}.hudIdentity b{font-size:12px}.hudIdentity small{font-size:8px}.hudPortrait{width:35px;height:35px}.hudVitals{gap:2px}.hudVitals span{font-size:9px;padding:4px 5px}.hudIcons button{width:27px;height:28px}.quickDock{gap:2px}.quickDock button{font-size:8px}.gameScreen .sceneImageWrap{aspect-ratio:16/6.7}.compactActions{gap:3px}.quickAction{font-size:15px}.actionPerson{flex-basis:57px}.modalInventory{gap:5px}
 }
 
-/* v2.1：无页面滚动的满屏布局、可读性、双人互动、结构损坏 */
+/* v2.2：无页面滚动的满屏布局、可读性、双人互动、结构损坏 */
 #app:has(.gameScreen){overflow:hidden}
 .gameScreen{font-size:13px}
 .gameStage{overflow:hidden!important;scrollbar-width:none;padding-bottom:2px}
@@ -240,13 +240,39 @@ body{font-size:15px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLe
 .slot{position:relative}.stackBadge{position:absolute;right:4px;top:4px;background:#d6b35e;color:#1d1a15;font-size:10px;font-weight:900;border-radius:999px;padding:2px 5px;box-shadow:0 2px 5px #0005}
 .damageTag{display:inline-block!important;color:#ffaaa2!important;background:#612f2d;padding:1px 5px;border-radius:999px;font-size:9px!important;margin-left:3px}.campBuild.damaged,.shelterFacility.damaged{border-color:#9f4f49!important;background:#2e1d1c!important}.structureDamage{display:grid;gap:6px;background:#4a2422;border:1px solid #9d514b;border-radius:11px;padding:9px;margin:8px 0}.structureDamage b{color:#ffb0a8}.structureDamage span{font-size:11px;color:#e3c3c0}.shelterResources{grid-template-columns:repeat(5,1fr)!important}.shelterResources span{font-size:10px;padding:6px 3px}
 
-/* v2.1 较小屏仍优先可读，不再把文字压到 8px */
+/* v2.2 较小屏仍优先可读，不再把文字压到 8px */
 @media(max-height:700px){
   .hudPortrait{width:39px;height:39px}.hudIdentity b{font-size:13px}.hudIdentity small{font-size:10px}.hudVitals span{font-size:10px}.quickDock button{min-height:41px;font-size:9px}.quickDock button span{font-size:15px}.phase-morning .sceneImageWrap,.phase-location .sceneImageWrap{min-height:150px}.gameScreen .sceneBrief{font-size:12px!important;max-height:76px}.interactionVisual{flex-basis:190px;min-height:150px}.interactionBigPortrait{width:76px;height:92px}.dialogueTranscript{max-height:92px}.dialogueLine span{font-size:11px}.compactChoices .choice{min-height:40px;padding:7px 8px}
 }
 @media(max-width:390px){
   .gameScreen{font-size:12px}.hudPortrait{width:39px;height:39px}.gameScreen .sceneAvatar{width:35px;height:35px}.gameScreen .scenePerson span{font-size:10px}.interactionBigPortrait{width:82px;height:100px}.interactionDuo{left:8px;right:8px}.interactionUtility button{font-size:15px}.shelterResources{grid-template-columns:repeat(3,1fr)!important}
 }
-/* v2.1 首日沉浸式开场需要稍多文字空间，但仍保持单屏 */
+/* v2.2 首日沉浸式开场需要稍多文字空间，但仍保持单屏 */
 .phase-morning .sceneBrief{max-height:132px}
 @media(max-height:700px){.phase-morning .sceneBrief{max-height:108px!important}}
+
+/* v2.2：把叙事信息叠加到场景画面，提升手机单屏信息密度 */
+.sceneBriefOverlay{position:absolute;z-index:4;left:8px;right:8px;bottom:8px;max-height:44%;overflow:auto;background:linear-gradient(135deg,#071413e8,#102827d4);border:1px solid #ffffff38;border-radius:11px;padding:8px 10px;color:#f1f7f4;font-size:14px;line-height:1.65;text-shadow:0 1px 2px #000;backdrop-filter:blur(5px);box-shadow:0 6px 18px #0005}
+.phase-morning .scenePeople,.phase-location .scenePeople{left:auto!important;right:8px!important;top:8px!important;bottom:auto!important;max-width:55%;z-index:6}
+.phase-morning .scenePeopleRow,.phase-location .scenePeopleRow{justify-content:flex-end}
+.phase-morning .scenePerson,.phase-location .scenePerson{background:#071b1bdc}
+.gameScreen .sceneBriefOverlay .roleName,.gameScreen .sceneBriefOverlay .itemName,.gameScreen .sceneBriefOverlay .placeName,.gameScreen .sceneBriefOverlay .keyState{font-size:inherit}
+
+.eventSceneStrip{flex:0 0 132px!important}.eventSceneStrip .sceneStripImage{height:104px!important}.sceneStripShade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,#04111018 0,#04111032 30%,#041110d5 100%)}
+.sceneEventOverlay{position:absolute;z-index:4;left:8px;right:8px;bottom:7px;max-height:72%;overflow:auto;background:#081a19dc;border:1px solid #ffffff35;border-radius:10px;padding:7px 9px;color:#fff;backdrop-filter:blur(4px);box-shadow:0 5px 14px #0005}.sceneEventOverlay>b{display:block;color:#ffe2a3;font-size:16px;margin-bottom:3px}.sceneEventOverlay>div{font-size:14px;line-height:1.62;text-shadow:0 1px 2px #000}.eventSceneStrip .sceneStripPeople{top:5px;bottom:auto;right:5px;left:auto;z-index:5}
+.phase-event .eventPaper{flex:1;min-height:0;overflow:auto}.phase-event .eventPaper .section-title{font-size:11px}.phase-event .compactChoices .choice{font-size:14px;line-height:1.35}
+.phase-post .sceneEventOverlay>div,.phase-post_action .sceneEventOverlay>div{font-size:13px}
+
+.interactionSceneTalk{position:absolute;z-index:4;top:40px;left:8px;right:8px;max-height:36%;overflow:auto;display:grid;gap:4px;padding:6px 7px;background:#071615d5;border:1px solid #ffffff33;border-radius:10px;backdrop-filter:blur(4px);box-shadow:0 5px 14px #0005}.sceneTalkLine{font-size:13px;line-height:1.48;color:#f4f7f5}.sceneTalkLine b{color:#ffe1a0;margin-right:5px}.sceneTalkLine span{color:#f2f7f5}.dialogueLine span{font-size:13px!important;line-height:1.62!important}.dialogueLine b{font-size:11px!important}.interactionSceneTitle{font-size:17px!important}.interactionStoryChoices .choice{font-size:13px!important}
+
+.phase-travel{display:flex;flex-direction:column;min-height:0}.phase-travel .eventSceneStrip{flex:0 0 150px!important}.phase-travel .travelPaper{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}.travelPaper .result{font-size:14px;line-height:1.65}.travelPaper .choice{font-size:14px}
+
+@media(max-height:700px){
+  .sceneBriefOverlay{font-size:12.5px;line-height:1.5;max-height:42%;padding:6px 8px}
+  .eventSceneStrip{flex-basis:112px!important}.eventSceneStrip .sceneStripImage{height:86px!important}.sceneEventOverlay>b{font-size:14px}.sceneEventOverlay>div{font-size:12.5px;line-height:1.48}
+  .interactionSceneTalk{top:34px;max-height:34%;padding:5px 6px}.sceneTalkLine{font-size:11.5px;line-height:1.4}.dialogueLine span{font-size:12px!important}.interactionSceneTitle{font-size:15px!important}
+  .phase-travel .eventSceneStrip{flex-basis:120px!important}
+}
+@media(max-width:390px){
+  .sceneBriefOverlay{font-size:13px;line-height:1.52}.sceneEventOverlay>div{font-size:13px}.sceneEventOverlay>b{font-size:15px}.sceneTalkLine{font-size:12px}.phase-morning .scenePeople,.phase-location .scenePeople{max-width:60%}
+}
