@@ -1,11 +1,11 @@
 window.DAY81_DATA = (() => {
   const characters = [
-    {id:'linlan',portrait:'assets/avatars/linlan.jpg',name:'林岚',sex:'女',age:29,job:'急诊护士',avatar:'🩺',maxLife:3,str:2,agi:3,int:5,luck:4,startItem:'starter_medkit',ability:'急救本能：生命降到1后，从次日早晨起30%概率恢复1点生命；成功后冷却5天。'},
-    {id:'zhouye',portrait:'assets/avatars/zhouye.jpg',name:'周野',sex:'男',age:34,job:'消防员',avatar:'🧯',maxLife:5,str:5,agi:3,int:2,luck:4,startItem:'starter_rope',ability:'硬汉：危险事件或战斗造成生命伤害时，25%概率抵消1点。'},
-    {id:'chenmo',portrait:'assets/avatars/chenmo.jpg',name:'陈默',sex:'男',age:41,job:'机械工程师',avatar:'🔧',maxLife:4,str:3,agi:2,int:5,luck:4,startItem:'starter_toolkit',ability:'修理专家：非消耗道具损坏时35%概率修复。'},
-    {id:'suqing',portrait:'assets/avatars/suqing.jpg',name:'苏晴',sex:'女',age:26,job:'户外摄影师',avatar:'📷',maxLife:4,str:2,agi:5,int:3,luck:4,startItem:'starter_compass',ability:'观察者：选择事件会显示风险提示，更适合判断探索路线中的危险。'},
-    {id:'gaoyuan',portrait:'assets/avatars/gaoyuan.jpg',name:'高远',sex:'男',age:38,job:'餐厅厨师',avatar:'🍳',maxLife:4,str:4,agi:2,int:3,luck:5,startItem:'starter_chefknife',ability:'精打细算：使用食品时25%概率产生效果但不消耗。'},
-    {id:'xutang',portrait:'assets/avatars/xutang.jpg',name:'许棠',sex:'女',age:32,job:'中学教师',avatar:'📚',maxLife:4,str:2,agi:3,int:4,luck:5,startItem:'starter_notebook',ability:'冷静判断：每5天可获得一次非战斗属性检定重试。'}
+    {id:'linlan',portrait:'assets/avatars/linlan.jpg',name:'林岚',sex:'女',age:29,job:'急诊护士',avatar:'🩺',maxLife:3,str:2,agi:3,int:5,luck:4,startItem:'starter_medkit',aiLevel:5,aiLabel:'很高',ability:'急救专家：生命低于上限时，清晨有60%概率恢复1点生命，成功后冷却3天；使用医疗道具时额外提高效果。'},
+    {id:'zhouye',portrait:'assets/avatars/zhouye.jpg',name:'周野',sex:'男',age:34,job:'消防员',avatar:'🧯',maxLife:5,str:5,agi:3,int:2,luck:4,startItem:'starter_rope',aiLevel:4,aiLabel:'较高',ability:'救援专家：受到生命伤害时有55%概率抵消1点；战斗攻击力额外+2，攀爬和救援事件进一步获得加成。'},
+    {id:'chenmo',portrait:'assets/avatars/chenmo.jpg',name:'陈默',sex:'男',age:41,job:'机械工程师',avatar:'🔧',maxLife:4,str:3,agi:2,int:5,luck:4,startItem:'starter_toolkit',aiLevel:5,aiLabel:'很高',ability:'工程大师：非消耗道具损坏时70%概率修复；机械类检定额外+20%，窝棚升级和设施制作更省材料。'},
+    {id:'suqing',portrait:'assets/avatars/suqing.jpg',name:'苏晴',sex:'女',age:26,job:'户外摄影师',avatar:'📷',maxLife:4,str:2,agi:5,int:3,luck:4,startItem:'starter_compass',aiLevel:5,aiLabel:'很高',ability:'自然感知：探索类检定额外+18%，危险选项显示风险提示；首次进入新地点时有35%概率直接发现一份普通物资。'},
+    {id:'gaoyuan',portrait:'assets/avatars/gaoyuan.jpg',name:'高远',sex:'男',age:38,job:'餐厅厨师',avatar:'🍳',maxLife:4,str:4,agi:2,int:3,luck:5,startItem:'starter_chefknife',aiLevel:4,aiLabel:'较高',ability:'料理大师：食品恢复效果额外+1，使用食品时60%概率不消耗；采集食物相关检定额外+15%。'},
+    {id:'xutang',portrait:'assets/avatars/xutang.jpg',name:'许棠',sex:'女',age:32,job:'中学教师',avatar:'📚',maxLife:4,str:2,agi:3,int:4,luck:5,startItem:'starter_notebook',aiLevel:5,aiLabel:'很高',ability:'知识洞博：所有非战斗属性检定额外+10%；每3天可自动重试一次失败检定，并保留较好结果。'}
   ];
 
   const items = {
@@ -632,6 +632,28 @@ window.DAY81_DATA = (() => {
     {id:'rescue_tower',name:'求救台',icon:'📡',desc:'立即提高求救努力，并强化后期救援相关事件。',cost:{wood:2,fiber:1,scrap:2}}
   ];
 
+
+  const shelterLevels = [
+    {level:1,name:'简易窝棚',image:'assets/shelters/shelter_lv1.jpg',desc:'用树枝、藤条和防水材料搭起的临时住处。',cost:{wood:2,fiber:2}},
+    {level:2,name:'遮风小屋',image:'assets/shelters/shelter_lv2.jpg',desc:'结构更稳，能挡住大部分风雨，内部也有了真正的休息区。',cost:{wood:3,fiber:2,scrap:1}},
+    {level:3,name:'坚固木屋',image:'assets/shelters/shelter_lv3.jpg',desc:'经过反复加固的长期住所，夜晚更加安全舒适。',cost:{wood:4,fiber:3,scrap:2}}
+  ];
+  const shelterFacilities = [
+    {id:'hammock',name:'舒适吊床',icon:'🛏️',desc:'在自己的窝棚过夜时，降低日常健康消耗，并获得次日检定加成。',cost:{wood:1,fiber:2}},
+    {id:'water_filter',name:'净水装置',icon:'💧',desc:'在自己的窝棚过夜时，有30%概率恢复1点健康。',cost:{fiber:1,scrap:2}},
+    {id:'drying_rack',name:'干燥架',icon:'☀️',desc:'窝棚主人受到“食物腐坏”类效果时，可保护一份食物。',cost:{wood:2,fiber:1}},
+    {id:'stove',name:'简易炉灶',icon:'🍲',desc:'窝棚主人使用食品时，健康恢复额外+1。',cost:{wood:2,scrap:2}},
+    {id:'medical_corner',name:'医疗角',icon:'🩹',desc:'在窝棚过夜且生命未满时，每5天有25%概率恢复1点生命。',cost:{fiber:2,scrap:2}}
+  ];
+  const nightInteractionEvents = [
+    {id:'night_chat',text:'{a}和{b}借着微弱的光聊了几句白天的经历。',positive:'两人的关系更近了一些。',negative:'话题没聊到一起，气氛有点僵。'},
+    {id:'night_share',text:'{a}整理东西时，顺手问{b}今天过得怎么样。',positive:'两人互相提醒了明天要注意的事。',negative:'两个人都太累，只草草说了几句。'},
+    {id:'night_watch',text:'夜深以后，{a}和{b}轮流留意周围的动静。',positive:'共同守夜让彼此更放心。',negative:'因为谁先休息的问题，两人有点不快。'},
+    {id:'night_home',text:'{a}和{b}谈到了各自原来的生活。',positive:'这段谈话让两人明显亲近起来。',negative:'有些话题让气氛短暂沉默。'},
+    {id:'night_food',text:'{a}翻看剩余物资时，{b}也凑过来一起盘算。',positive:'两人把明天的计划理得更清楚。',negative:'对物资怎么用，两人的看法不太一致。'},
+    {id:'night_weather',text:'风声越来越明显，{a}和{b}一起检查了附近能避风的位置。',positive:'两人合作得很默契。',negative:'两人对是否需要搬动东西产生了争执。'}
+  ];
+
   const storyChains = [
     {
       id:'footprints',name:'林中的脚印',startLocation:'jungle_path',minDay:4,startChance:.28,
@@ -752,5 +774,5 @@ window.DAY81_DATA = (() => {
     N('distant_light','远海灯光','很远的海面上，似乎有一盏灯一闪而过。没有人敢确定那是不是船。',{rescueScore:.5},'good',{minDay:60})
   ];
 
-  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,interactionProfiles,interactionEvents,coupleInteractionEvents,campBuildings,storyChains,crisisTemplates,nights};
+  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,interactionProfiles,interactionEvents,coupleInteractionEvents,campBuildings,shelterLevels,shelterFacilities,nightInteractionEvents,storyChains,crisisTemplates,nights};
 })();

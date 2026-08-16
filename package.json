@@ -1,8 +1,8 @@
 {
   "name": "day81-card-survival",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "private": true,
-  "description": "《八十一天》单人卡牌荒岛生存游戏（动漫场景、晨间地点选择、多人逐一互动、60组互动剧情、关系系统、排行榜与管理后台）",
+  "description": "《八十一天》单人卡牌荒岛生存游戏（手机单屏UI、智能NPC、个人窝棚、夜间关系互动、全岛探索奖励、排行榜与管理后台）",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
