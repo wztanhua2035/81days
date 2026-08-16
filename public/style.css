@@ -193,3 +193,60 @@ body{font-size:15px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLe
 @media(max-width:390px){
   .gameScreen{gap:4px}.mobileHud{gap:4px}.hudIdentity b{font-size:12px}.hudIdentity small{font-size:8px}.hudPortrait{width:35px;height:35px}.hudVitals{gap:2px}.hudVitals span{font-size:9px;padding:4px 5px}.hudIcons button{width:27px;height:28px}.quickDock{gap:2px}.quickDock button{font-size:8px}.gameScreen .sceneImageWrap{aspect-ratio:16/6.7}.compactActions{gap:3px}.quickAction{font-size:15px}.actionPerson{flex-basis:57px}.modalInventory{gap:5px}
 }
+
+/* v2.1：无页面滚动的满屏布局、可读性、双人互动、结构损坏 */
+#app:has(.gameScreen){overflow:hidden}
+.gameScreen{font-size:13px}
+.gameStage{overflow:hidden!important;scrollbar-width:none;padding-bottom:2px}
+.gameStage::-webkit-scrollbar{display:none}
+.mobileHud{padding:7px 8px;gap:8px}
+.hudPortrait{width:44px;height:44px}
+.hudIdentity b{font-size:15px}.hudIdentity small{font-size:11px}
+.hudVitals span{font-size:12px;padding:6px 7px}
+.hudIcons button{width:34px;height:34px;font-size:17px}
+.quickDock button{font-size:10px;min-height:46px}.quickDock button span{font-size:18px;line-height:19px}
+
+.phase-morning,.phase-location{display:flex;flex-direction:column;min-height:0}
+.phase-morning .scenePanel,.phase-location .scenePanel{flex:1;min-height:0;display:flex;flex-direction:column}
+.phase-morning .sceneImageWrap,.phase-location .sceneImageWrap{flex:1;min-height:190px;height:auto;aspect-ratio:auto}
+.phase-morning .sceneBrief,.phase-location .sceneBrief{flex:0 0 auto;max-height:92px;overflow:auto;font-size:13px!important;line-height:1.62!important;padding:8px 10px 9px!important}
+.gameScreen .sceneHead{padding:8px 10px 6px}.gameScreen .sceneHead .section-title{font-size:10px}.gameScreen .sceneName{font-size:20px}.gameScreen .sceneCount{font-size:10px;padding:4px 7px}
+.gameScreen .scenePeople{bottom:7px;left:8px;right:8px}.gameScreen .sceneAvatar{width:38px;height:38px;border-width:2px}.gameScreen .scenePerson{padding:3px 8px 3px 3px;gap:4px}.gameScreen .scenePerson span{font-size:11px}
+.compactMorning{flex:0 0 auto;padding:10px 11px}.compactMorning .section-title{font-size:11px}.twoChoices .choice{min-height:64px;font-size:14px}.twoChoices .choice small{font-size:11px}
+.compactHub{flex:0 0 auto;padding:9px 10px}.actionHubHead b{font-size:13px}.actionHubHead span{font-size:10px}.actionPerson{flex-basis:72px;padding:5px 4px}.actionPerson .meetPortrait{width:34px;height:34px}.actionPerson span{font-size:11px}.actionPerson small{font-size:9px}.quickAction{min-height:52px;font-size:19px}.quickAction span{font-size:10px}.actionHint{font-size:10px}
+
+/* 探索/结果页面内容在可用区域内自适应，不让整页上下滚 */
+.phase-event,.phase-post,.phase-post_action{display:flex;flex-direction:column;min-height:0}
+.phase-event .sceneStrip,.phase-post .sceneStrip,.phase-post_action .sceneStrip{flex:0 0 104px}
+.phase-event .compactPaper,.phase-post .resultPaper,.phase-post_action .resultPaper{flex:1;min-height:0;overflow:auto}
+.compactPaper .event-title{font-size:19px}.compactPaper .event-text{font-size:14px;line-height:1.72}.compactChoices .choice{font-size:13px;min-height:45px}.compactChoices .choice small{font-size:10px}
+.sceneStripHead b{font-size:13px}.sceneStripHead span{font-size:10px}.sceneStripImage{height:78px}.sceneStripPeople .sceneAvatar{width:31px;height:31px}.sceneStripPeople span{font-size:9px}
+
+/* 双人互动：场景图上放两张大头像 */
+.phase-interaction{display:flex;flex-direction:column;min-height:0;gap:6px}
+.interactionVisual{position:relative;flex:0 0 min(35vh,260px);min-height:180px;border-radius:15px;overflow:hidden;border:1px solid #3a5b57;background:#10201f;box-shadow:0 8px 22px #0004}
+.interactionBg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.06)}
+.interactionShade{position:absolute;inset:0;background:linear-gradient(180deg,#06111026 0,#0611107d 58%,#061110e5 100%)}
+.interactionDuo{position:absolute;left:14px;right:14px;bottom:10px;display:grid;grid-template-columns:1fr 28px 1fr;align-items:end;gap:6px;z-index:2;text-align:center}
+.interactionDuo>div{display:flex;flex-direction:column;align-items:center;gap:3px}.interactionDuo>span{font-size:18px;color:#f1d69c;padding-bottom:37px}.interactionDuo b{font-size:13px;color:white;text-shadow:0 2px 5px #000}
+.interactionBigPortrait{width:92px;height:112px;object-fit:cover;object-position:center top;border-radius:16px;border:2px solid #f0d18a;box-shadow:0 8px 20px #0008;background:#203433}
+.interactionRel{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3;background:#0a1717dd;border:1px solid #ffffff44;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:850;white-space:nowrap}
+.interactionPaper{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}.interactionSceneTitle{font-size:15px;font-weight:900;margin-bottom:5px;color:#5a4c34}.dialogueTranscript{display:grid;gap:5px;max-height:118px;overflow:auto;padding:1px 2px 4px}.dialogueLine{display:flex;align-items:flex-start;gap:6px}.dialogueLine.mine{flex-direction:row-reverse}.dialogueAvatar{width:32px;height:37px;border-radius:9px;object-fit:cover;object-position:center top;flex:none}.dialogueLine>div{max-width:82%;background:#fff8e9;border:1px solid #d4c4a3;border-radius:10px;padding:5px 7px}.dialogueLine.mine>div{background:#dceaf3;border-color:#aac5d3}.dialogueLine b{display:block;font-size:10px;margin-bottom:2px}.dialogueLine span{display:block;font-size:12px;line-height:1.55;color:#302b23}.interactionStoryChoices{overflow:auto;min-height:0;flex:1;padding-bottom:3px}.interactionUtility{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;flex:0 0 auto;padding-top:5px;border-top:1px solid #c7b99b}.interactionUtility button{border:1px solid #aa9c7d;background:#fff5df;border-radius:9px;padding:7px 3px;color:#3b3429;font-size:16px}.interactionUtility button span{display:block;font-size:10px;font-weight:800;margin-top:2px}.interactionUtility button.rob{background:#f6dddd;border-color:#dca5a5;color:#7a2929}.interactionUtility button:disabled{opacity:.38}
+
+/* 关系档次弹窗 */
+.relationAlert{text-align:center}.relationAlertPortrait{width:112px;height:136px;object-fit:cover;object-position:center top;border-radius:16px;border:2px solid #d6be7c}.relationAlertTag{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:999px;background:#334b47;color:#dcebe7;font-size:11px}.relationAlert h2{margin:8px 0 3px}.relationJump{font-size:18px;font-weight:900;color:#e2c56e}.relationAlert.negative .relationJump{color:#f18b82}.relationAlert p{font-size:12px;color:#b8cbc5}.specialDialogue{background:#f3ead6;color:#3b342a;border-radius:10px;padding:10px;margin:10px 0;text-align:left;font-size:13px;line-height:1.65}
+
+/* 堆叠道具、损坏与修复 */
+.slot{position:relative}.stackBadge{position:absolute;right:4px;top:4px;background:#d6b35e;color:#1d1a15;font-size:10px;font-weight:900;border-radius:999px;padding:2px 5px;box-shadow:0 2px 5px #0005}
+.damageTag{display:inline-block!important;color:#ffaaa2!important;background:#612f2d;padding:1px 5px;border-radius:999px;font-size:9px!important;margin-left:3px}.campBuild.damaged,.shelterFacility.damaged{border-color:#9f4f49!important;background:#2e1d1c!important}.structureDamage{display:grid;gap:6px;background:#4a2422;border:1px solid #9d514b;border-radius:11px;padding:9px;margin:8px 0}.structureDamage b{color:#ffb0a8}.structureDamage span{font-size:11px;color:#e3c3c0}.shelterResources{grid-template-columns:repeat(5,1fr)!important}.shelterResources span{font-size:10px;padding:6px 3px}
+
+/* v2.1 较小屏仍优先可读，不再把文字压到 8px */
+@media(max-height:700px){
+  .hudPortrait{width:39px;height:39px}.hudIdentity b{font-size:13px}.hudIdentity small{font-size:10px}.hudVitals span{font-size:10px}.quickDock button{min-height:41px;font-size:9px}.quickDock button span{font-size:15px}.phase-morning .sceneImageWrap,.phase-location .sceneImageWrap{min-height:150px}.gameScreen .sceneBrief{font-size:12px!important;max-height:76px}.interactionVisual{flex-basis:190px;min-height:150px}.interactionBigPortrait{width:76px;height:92px}.dialogueTranscript{max-height:92px}.dialogueLine span{font-size:11px}.compactChoices .choice{min-height:40px;padding:7px 8px}
+}
+@media(max-width:390px){
+  .gameScreen{font-size:12px}.hudPortrait{width:39px;height:39px}.gameScreen .sceneAvatar{width:35px;height:35px}.gameScreen .scenePerson span{font-size:10px}.interactionBigPortrait{width:82px;height:100px}.interactionDuo{left:8px;right:8px}.interactionUtility button{font-size:15px}.shelterResources{grid-template-columns:repeat(3,1fr)!important}
+}
+/* v2.1 首日沉浸式开场需要稍多文字空间，但仍保持单屏 */
+.phase-morning .sceneBrief{max-height:132px}
+@media(max-height:700px){.phase-morning .sceneBrief{max-height:108px!important}}

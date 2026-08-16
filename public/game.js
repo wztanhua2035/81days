@@ -3,7 +3,7 @@
 
   const D = window.DAY81_DATA;
   const NPC = window.DAY81_NPC;
-  const SAVE = 'day81_save_v9';
+  const SAVE = 'day81_save_v21';
   const ACH = 'day81_achievements_v1';
   const SOUND_KEY = 'day81_sound';
   const app = document.getElementById('app');
@@ -43,6 +43,19 @@
   function cBy(id){ return state.characters.find(c=>c.id===id); }
   function has(c,id){ return c.inventory.includes(id); }
   function item(id){ return D.items[id]; }
+  function inventorySlots(c){
+    const slots=[];const counts={};
+    for(const id of c?.inventory||[]){
+      const it=item(id);if(!it)continue;
+      if(it.consumable){counts[id]=(counts[id]||0)+1;}
+      else slots.push({id,count:1});
+    }
+    for(const [id,n] of Object.entries(counts)){for(let left=n;left>0;left-=2)slots.push({id,count:Math.min(2,left)});}
+    return slots;
+  }
+  function invUsedSlots(c){return inventorySlots(c).length;}
+  function removeInventoryUnit(c,id){const i=c?.inventory?.indexOf(id)??-1;if(i<0)return false;c.inventory.splice(i,1);return true;}
+  function canAddUnit(c,id){const it=item(id);if(!it)return false;if(it.consumable){const n=(c.inventory||[]).filter(x=>x===id).length;if(n%2===1)return true;}return invUsedSlots(c)<invLimit(c);}
   function isStarterItem(c,id){ return !!id && (id===c?.startItem || item(id)?.starter); }
   function tradableItems(c){ return (c?.inventory||[]).filter(id=>!isStarterItem(c,id) && item(id)?.tradable!==false); }
   function lootableItems(c){ return (c?.inventory||[]).filter(id=>!isStarterItem(c,id) && item(id)?.lootable!==false); }
@@ -54,13 +67,13 @@
   function load(){
     try{
       const x=JSON.parse(localStorage.getItem(SAVE)||'null');
-      if(x&&x.version===9){
+      if(x&&x.version===21){
         x.rules={...DEFAULT_GAME_CONFIG.difficulty,...(x.rules||GAME_CONFIG.difficulty)};
         x.exploredLocations=x.exploredLocations||{};
         x.movedToday=!!x.movedToday;x.exploredToday=!!x.exploredToday;x.interactedTargetsToday=x.interactedTargetsToday||[];x.interactionScenesToday=x.interactionScenesToday||{};x.travelDecisionMade=!!x.travelDecisionMade;x.locationLockedToday=!!x.locationLockedToday;x.locationBrief=x.locationBrief||'';x.interaction=x.interaction||null;x.recentInteractionEvents=x.recentInteractionEvents||[];x.recentCoupleEvents=x.recentCoupleEvents||[];x.recentLocationEvents=x.recentLocationEvents||{};x.coupleId=x.coupleId||null;
         x.leaderboard=x.leaderboard||{submitted:false};
         x.camp=x.camp||{locationId:'bamboo_clearing',materials:{wood:0,fiber:0,scrap:0},buildings:{},storedFood:0,storedWater:0,lastFoodDay:0,lastWaterDay:0};
-        x.shelters=x.shelters||{};x.completedExploreLocations=x.completedExploreLocations||{};x.allExploredRewarded=!!x.allExploredRewarded;x.deathAlerts=x.deathAlerts||[];x.nightInteractionLog=x.nightInteractionLog||[];x.characters.forEach(c=>{c.shelter=c.shelter||{locationId:null,level:0,facilities:[],lastMedicalDay:-99};c.aiExplored=c.aiExplored||{};});
+        x.shelters=x.shelters||{};x.completedExploreLocations=x.completedExploreLocations||{};x.allExploredRewarded=!!x.allExploredRewarded;x.deathAlerts=x.deathAlerts||[];x.relationAlerts=x.relationAlerts||[];x.nightInteractionLog=x.nightInteractionLog||[];x.camp.damagedBuildings=x.camp.damagedBuildings||{};x.characters.forEach(c=>{c.shelter=c.shelter||{locationId:null,level:0,facilities:[],lastMedicalDay:-99,damaged:false,damagedFacilities:[]};c.shelter.damaged=!!c.shelter.damaged;c.shelter.damagedFacilities=c.shelter.damagedFacilities||[];c.aiExplored=c.aiExplored||{};});
         x.stories=x.stories||Object.fromEntries((D.storyChains||[]).map(s=>[s.id,{started:false,step:0,nextDay:0,completed:false,branch:''}]));
         x.crises=x.crises||[];
         x.crisisNotice=x.crisisNotice||null;
@@ -83,28 +96,44 @@
     if(v==='enemy')return -100;
     return 0;
   }
+  function relationTierByScore(score){
+    const bond=Number(rules().bondThreshold||60);
+    if(score<=-50)return {key:'enemy',label:'敌对'};
+    if(score<=-20)return {key:'cold',label:'冷淡'};
+    if(score<25)return {key:'normal',label:'普通'};
+    if(score<bond)return {key:'trust',label:'信任'};
+    return {key:'bond',label:'生死之交'};
+  }
+  function queueRelationAlert(other,fromLabel,toLabel,reason='',special=''){
+    if(!other||other.dead)return;state.relationAlerts=state.relationAlerts||[];
+    const positive=['信任','生死之交','情侣'].includes(toLabel) || (fromLabel==='敌对'&&toLabel!=='敌对');
+    state.relationAlerts.push({id:other.id,name:other.name,portrait:other.portrait,from:fromLabel,to:toLabel,reason,special,positive});
+  }
   function isCouplePair(a,b){
     const p=player(); if(!p||!state.coupleId||!a||!b)return false;
     return (a.id===p.id&&b.id===state.coupleId)||(b.id===p.id&&a.id===state.coupleId);
   }
   function maybeBecomeCouple(a,b,before,after){
-    const threshold=Number(rules().bondThreshold||60);if(state.coupleId||before>=threshold||after<threshold)return;
-    const p=player(); if(!p)return;
+    const threshold=Number(rules().bondThreshold||60);if(state.coupleId||before>=threshold||after<threshold)return false;
+    const p=player();if(!p)return false;
     const other=a.id===p.id?b:b.id===p.id?a:null;
-    if(!other||other.dead||other.sex===p.sex)return;
+    if(!other||other.dead||other.sex===p.sex)return false;
     state.coupleId=other.id;
     log(`${p.name}与${other.name}的关系成为“情侣”。`);
-    toast(`❤ ${other.name}与你成为情侣`); sound('story');
+    queueRelationAlert(other,'生死之交','情侣','彼此已经把对方当成最重要的同伴',`${other.name}轻轻看着你：“等我们离开这里以后，还有很多话可以慢慢说。”`);
+    sound('story');return true;
   }
   function changeRelation(a,b,delta,reason=''){
     if(!a||!b||a.id===b.id||!delta)return;
-    const k=pairKey(a.id,b.id),before=relationScore(a,b),after=clamp(before+delta,-100,100);
+    const k=pairKey(a.id,b.id),before=relationScore(a,b),beforeTier=relationTierByScore(before),after=clamp(before+delta,-100,100),afterTier=relationTierByScore(after);
     state.relationships[k]=after;
-    maybeBecomeCouple(a,b,before,after);
-    if((a.id===state.playerId||b.id===state.playerId)&&Math.abs(after-before)>=5){
-      const other=a.id===state.playerId?b:a;
-      log(`${other.name}与你的关系${delta>0?'改善':'恶化'}${reason?`：${reason}`:''}`);
+    const involved=a.id===state.playerId||b.id===state.playerId;const other=involved?(a.id===state.playerId?b:a):null;
+    const becameCouple=maybeBecomeCouple(a,b,before,after);
+    if(involved&&beforeTier.key!==afterTier.key&&!becameCouple){
+      let special='';if(afterTier.key==='bond')special=`${other.name}沉默了一会儿，认真地说：“走到今天，我已经不只是把你当普通同伴了。”`;
+      queueRelationAlert(other,beforeTier.label,afterTier.label,reason,special);
     }
+    if(involved&&Math.abs(after-before)>=5)log(`${other.name}与你的关系${delta>0?'改善':'恶化'}${reason?`：${reason}`:''}`);
   }
   function relationLabel(a,b){if(isCouplePair(a,b))return'情侣';const s=relationScore(a,b),bond=Number(rules().bondThreshold||60);if(s<=-50)return'敌对';if(s<=-20)return'冷淡';if(s<25)return'普通';if(s<bond)return'信任';return'生死之交';}
   function relationClass(a,b){if(isCouplePair(a,b))return'relCouple';const s=relationScore(a,b);return s<=-20?'relBad':s>=25?'relGood':'relNormal';}
@@ -131,8 +160,8 @@
   }
   function campProduction(){
     const c=camp();
-    if(c.buildings.water_collector&&state.day-c.lastWaterDay>=3){c.storedWater++;c.lastWaterDay=state.day;log('集水器收集到一份净水。');}
-    if(c.buildings.fish_trap&&state.day-c.lastFoodDay>=4){c.storedFood++;c.lastFoodDay=state.day;log('捕鱼陷阱捕到一份食物。');}
+    if(c.buildings.water_collector&&!c.damagedBuildings?.water_collector&&state.day-c.lastWaterDay>=3){c.storedWater++;c.lastWaterDay=state.day;log('集水器收集到一份净水。');}
+    if(c.buildings.fish_trap&&!c.damagedBuildings?.fish_trap&&state.day-c.lastFoodDay>=4){c.storedFood++;c.lastFoodDay=state.day;log('捕鱼陷阱捕到一份食物。');}
   }
   function claimCamp(kind){
     if(player().locationId!==camp().locationId){toast('需要回到林中空地才能领取');return;}
@@ -144,15 +173,15 @@
   function campProtection(c,type){
     if(shelterProtects(c,type))return true;
     if(c.locationId!==camp().locationId)return false;
-    if(type==='rain'&&camp().buildings.shelter)return true;
-    if(type==='heat'&&camp().buildings.water_collector)return true;
-    if(type==='beast'&&camp().buildings.shelter)return true;
+    if(type==='rain'&&camp().buildings.shelter&&!camp().damagedBuildings?.shelter)return true;
+    if(type==='heat'&&camp().buildings.water_collector&&!camp().damagedBuildings?.water_collector)return true;
+    if(type==='beast'&&camp().buildings.shelter&&!camp().damagedBuildings?.shelter)return true;
     return false;
   }
 
 
 
-  function shelterOf(c){return c?.shelter||(c.shelter={locationId:null,level:0,facilities:[],lastMedicalDay:-99});}
+  function shelterOf(c){return c?.shelter||(c.shelter={locationId:null,level:0,facilities:[],lastMedicalDay:-99,damaged:false,damagedFacilities:[]});}
   function shelterLevelDef(level){return (D.shelterLevels||[]).find(x=>x.level===level)||null;}
   function effectiveCost(c,cost){
     const out={...cost};
@@ -165,8 +194,12 @@
   }
   function canAffordMaterials(cost){return Object.entries(cost||{}).every(([k,v])=>(camp().materials[k]||0)>=v);}
   function payMaterials(cost){for(const [k,v] of Object.entries(cost||{}))camp().materials[k]=Math.max(0,(camp().materials[k]||0)-v);}
+  function halfCost(cost){const out={};for(const [k,v] of Object.entries(cost||{}))out[k]=Math.max(1,Math.ceil(v/2));return out;}
+  function repairCampBuilding(id){const c=camp(),b=(D.campBuildings||[]).find(x=>x.id===id);if(!b||!c.damagedBuildings?.[id])return;if(player().locationId!==c.locationId){toast('要到公共营地才能修复');return;}const cost=effectiveCost(player(),halfCost(b.cost));if(!canAffordMaterials(cost)){toast('修复材料不足');return;}payMaterials(cost);delete c.damagedBuildings[id];log(`你修复了公共营地的${b.name}。`);sound('build');save();showCamp();}
+  function repairOwnShelter(){const p=player(),s=shelterOf(p);if(!s.level||!s.damaged)return;if(p.locationId!==s.locationId){toast('要回到自己的窝棚才能修复');return;}const def=shelterLevelDef(s.level),cost=effectiveCost(p,halfCost(def.cost));if(!canAffordMaterials(cost)){toast('修复窝棚的材料不足');return;}payMaterials(cost);s.damaged=false;log(`${p.name}修复了${def.name}。`);sound('build');save();showShelter();}
+  function repairShelterFacility(id){const p=player(),s=shelterOf(p),f=(D.shelterFacilities||[]).find(x=>x.id===id);if(!f||!s.damagedFacilities?.includes(id))return;if(p.locationId!==s.locationId){toast('要回到自己的窝棚才能修复设施');return;}const cost=effectiveCost(p,halfCost(f.cost));if(!canAffordMaterials(cost)){toast('修复设施的材料不足');return;}payMaterials(cost);s.damagedFacilities=s.damagedFacilities.filter(x=>x!==id);log(`${p.name}修复了窝棚里的${f.name}。`);sound('build');save();showShelter();}
   function shelterProtects(c,type){
-    const s=shelterOf(c);if(!s.level||s.locationId!==c.locationId)return false;
+    const s=shelterOf(c);if(!s.level||s.locationId!==c.locationId||s.damaged)return false;
     if(type==='rain')return s.level>=1;
     if(type==='beast')return s.level>=2;
     if(type==='heat')return s.level>=2;
@@ -177,7 +210,7 @@
     if(!state.travelDecisionMade){toast('先决定今天停留的地点');return;}
     const def=shelterLevelDef(1),cost=effectiveCost(p,def.cost);
     if(!canAffordMaterials(cost)){toast('公共材料不足，暂时搭不起窝棚');return;}
-    payMaterials(cost);s.locationId=p.locationId;s.level=1;s.facilities=[];log(`${p.name}在${locationById(p.locationId)?.name||'这里'}搭起了自己的${def.name}。`);sound('build');save();showShelter();
+    payMaterials(cost);s.locationId=p.locationId;s.level=1;s.facilities=[];s.damaged=false;s.damagedFacilities=[];log(`${p.name}在${locationById(p.locationId)?.name||'这里'}搭起了自己的${def.name}。`);sound('build');save();showShelter();
   }
   function upgradeOwnShelter(){
     const p=player(),s=shelterOf(p);if(!s.level){buildOwnShelter();return;}if(s.level>=3){toast('窝棚已经升到最高等级');return;}if(p.locationId!==s.locationId){toast('要回到自己的窝棚所在地才能升级');return;}
@@ -190,22 +223,27 @@
   }
   function showShelter(){
     if(!state){toast('开始游戏后才能查看窝棚');return;}
-    closeModal();const p=player(),s=shelterOf(p),labels={wood:'木材',fiber:'藤条',scrap:'零件'};
+    closeModal();const p=player(),s=shelterOf(p),labels={wood:'木材',fiber:'藤条',scrap:'零件'},c=camp();
+    const resources=`<div class="campMaterials shelterResources"><span>🪵 木材 <b>${c.materials.wood||0}</b></span><span>🌿 藤条 <b>${c.materials.fiber||0}</b></span><span>⚙️ 零件 <b>${c.materials.scrap||0}</b></span><span>💧 净水 <b>${c.storedWater||0}</b></span><span>🐟 食物 <b>${c.storedFood||0}</b></span></div>`;
     if(!s.level){
       const def=shelterLevelDef(1),cost=effectiveCost(p,def.cost),txt=Object.entries(cost).map(([k,v])=>`${labels[k]}×${v}`).join(' · ');
-      modal(`<div class="row between"><h2>🏠 我的窝棚</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><p class="muted">你还没有自己的窝棚。当天确定停留地点后，可以在当前位置搭建一座永久窝棚。</p><div class="shelterBuildIntro"><img src="${def.image}" class="shelterInterior" alt="简易窝棚内部"><div><b>${def.name}</b><span>${def.desc}</span><small>需要：${txt}</small></div></div><button class="btn" ${state.travelDecisionMade&&canAffordMaterials(cost)?'':'disabled'} onclick="Game.buildOwnShelter()">在${esc(locationById(p.locationId)?.name||'当前位置')}搭建窝棚</button>`);return;
+      modal(`<div class="row between"><h2>🏠 我的窝棚</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div>${resources}<p class="muted">你还没有自己的窝棚。当天确定停留地点后，可以在当前位置搭建一座永久窝棚。</p><div class="shelterBuildIntro"><img src="${def.image}" class="shelterInterior" alt="简易窝棚内部"><div><b>${def.name}</b><span>${def.desc}</span><small>需要：${txt}</small></div></div><button class="btn" ${state.travelDecisionMade&&canAffordMaterials(cost)?'':'disabled'} onclick="Game.buildOwnShelter()">在${esc(locationById(p.locationId)?.name||'当前位置')}搭建窝棚</button>`);return;
     }
-    const def=shelterLevelDef(s.level),here=p.locationId===s.locationId,next=s.level<3?shelterLevelDef(s.level+1):null,nextCost=next?effectiveCost(p,next.cost):null;
-    const facs=(D.shelterFacilities||[]).map(f=>{const built=s.facilities.includes(f.id),cost=effectiveCost(p,f.cost),txt=Object.entries(cost).map(([k,v])=>`${labels[k]}×${v}`).join(' · ');return `<div class="shelterFacility ${built?'built':''}"><span class="facilityIcon">${f.icon}</span><div><b>${esc(f.name)}</b><small>${esc(f.desc)}</small><em>${built?'已制作':txt}</em></div>${built?'✓':`<button class="btn small" ${here&&s.facilities.length<4&&canAffordMaterials(cost)?'':'disabled'} onclick="Game.installShelterFacility('${f.id}')">制作</button>`}</div>`;}).join('');
-    modal(`<div class="row between"><h2>🏠 ${esc(def.name)} · Lv.${s.level}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><div class="shelterLocation">📍 ${esc(locationById(s.locationId)?.name||'未知地点')} ${here?'<b>· 你正在这里，可以进入内部</b>':'· 你当前不在窝棚所在地'}</div>${here?`<img src="${def.image}" class="shelterInterior" alt="${esc(def.name)}内部">`:`<div class="awayShelter">🏠 回到 ${esc(locationById(s.locationId)?.name||'窝棚所在地')} 后可进入内部、升级和制作设施。</div>`}<p class="shelterDesc">${esc(def.desc)}</p><div class="campMaterials compact"><span>🪵 ${camp().materials.wood||0}</span><span>🌿 ${camp().materials.fiber||0}</span><span>⚙️ ${camp().materials.scrap||0}</span></div>${next?`<button class="btn secondary" ${here&&canAffordMaterials(nextCost)?'':'disabled'} onclick="Game.upgradeOwnShelter()">升级为 ${esc(next.name)}<small>${Object.entries(nextCost).map(([k,v])=>` ${labels[k]}×${v}`).join('')}</small></button>`:'<div class="maxShelter">★ 已达到最高等级</div>'}<div class="section-title" style="margin-top:14px">内部设施 ${s.facilities.length}/4</div><div class="shelterFacilityList">${facs}</div>`);
+    const def=shelterLevelDef(s.level),here=p.locationId===s.locationId,next=s.level<3?shelterLevelDef(s.level+1):null,nextCost=next?effectiveCost(p,next.cost):null,repairCost=effectiveCost(p,halfCost(def.cost));
+    const repairTxt=Object.entries(repairCost).map(([k,v])=>`${labels[k]}×${v}`).join(' · ');
+    const facs=(D.shelterFacilities||[]).map(f=>{
+      const built=s.facilities.includes(f.id),damaged=s.damagedFacilities?.includes(f.id),cost=effectiveCost(p,f.cost),repair=effectiveCost(p,halfCost(f.cost)),txt=Object.entries(cost).map(([k,v])=>`${labels[k]}×${v}`).join(' · '),repairText=Object.entries(repair).map(([k,v])=>`${labels[k]}×${v}`).join(' · ');
+      return `<div class="shelterFacility ${built?'built':''} ${damaged?'damaged':''}"><span class="facilityIcon">${f.icon}</span><div><b>${esc(f.name)} ${damaged?'<em class="damageTag">受损</em>':''}</b><small>${esc(f.desc)}</small><em>${damaged?'损坏期间效果失效 · 修复 '+repairText:built?'已制作':txt}</em></div>${damaged?`<button class="btn small danger" ${here&&canAffordMaterials(repair)?'':'disabled'} onclick="Game.repairShelterFacility('${f.id}')">修复</button>`:built?'✓':`<button class="btn small" ${here&&s.facilities.length<4&&canAffordMaterials(cost)?'':'disabled'} onclick="Game.installShelterFacility('${f.id}')">制作</button>`}</div>`;
+    }).join('');
+    modal(`<div class="row between"><h2>🏠 ${esc(def.name)} · Lv.${s.level}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div>${resources}<div class="shelterLocation">📍 ${esc(locationById(s.locationId)?.name||'未知地点')} ${here?'<b>· 你正在这里，可以进入内部</b>':'· 你当前不在窝棚所在地'}</div>${here?`<img src="${def.image}" class="shelterInterior" alt="${esc(def.name)}内部">`:`<div class="awayShelter">🏠 回到 ${esc(locationById(s.locationId)?.name||'窝棚所在地')} 后可进入内部、升级和制作设施。</div>`}${s.damaged?`<div class="structureDamage"><b>⚠ 窝棚受损</b><span>损坏期间防护效果失效。修复需要：${repairTxt}</span><button class="btn small danger" ${here&&canAffordMaterials(repairCost)?'':'disabled'} onclick="Game.repairOwnShelter()">修复窝棚</button></div>`:''}<p class="shelterDesc">${esc(def.desc)}</p>${next?`<button class="btn secondary" ${here&&!s.damaged&&canAffordMaterials(nextCost)?'':'disabled'} onclick="Game.upgradeOwnShelter()">升级为 ${esc(next.name)}<small>${Object.entries(nextCost).map(([k,v])=>` ${labels[k]}×${v}`).join('')}</small></button>`:'<div class="maxShelter">★ 已达到最高等级</div>'}<div class="section-title" style="margin-top:14px">内部设施 ${s.facilities.length}/4</div><div class="shelterFacilityList">${facs}</div>`);
   }
   function applyShelterNightBenefits(){
     for(const c of alive()){
       const s=shelterOf(c);if(!s.level||c.locationId!==s.locationId)continue;
-      const baseProtect=[0,.18,.35,.52][s.level]||0;if(chance(baseProtect))c.skipDecay=true;
-      if(s.facilities.includes('hammock')){c.nextCheckBonus=Math.max(c.nextCheckBonus,.08);if(chance(.28))c.skipDecay=true;}
-      if(s.facilities.includes('water_filter')&&chance(.30))gainHealth(c,1);
-      if(s.facilities.includes('medical_corner')&&c.life<c.maxLife&&state.day-(s.lastMedicalDay||-99)>=5&&chance(.25)){addLife(c,1);s.lastMedicalDay=state.day;log(`${c.name}在自己的窝棚医疗角恢复了1点生命。`);}
+      const baseProtect=s.damaged?0:([0,.18,.35,.52][s.level]||0);if(chance(baseProtect))c.skipDecay=true;
+      if(s.facilities.includes('hammock')&&!s.damagedFacilities?.includes('hammock')){c.nextCheckBonus=Math.max(c.nextCheckBonus,.08);if(chance(.28))c.skipDecay=true;}
+      if(s.facilities.includes('water_filter')&&!s.damagedFacilities?.includes('water_filter')&&chance(.30))gainHealth(c,1);
+      if(s.facilities.includes('medical_corner')&&!s.damagedFacilities?.includes('medical_corner')&&c.life<c.maxLife&&state.day-(s.lastMedicalDay||-99)>=5&&chance(.25)){addLife(c,1);s.lastMedicalDay=state.day;log(`${c.name}在自己的窝棚医疗角恢复了1点生命。`);}
     }
   }
   function npcUseCampSupplies(c){
@@ -216,9 +254,11 @@
   }
   function npcShelterDecision(c){
     if(c.dead)return;const s=shelterOf(c),ai=Number(c.aiLevel||3);
+    if(s.damaged&&c.locationId===s.locationId){const def=shelterLevelDef(s.level),cost=effectiveCost(c,halfCost(def.cost));if(canAffordMaterials(cost)&&chance(.025*ai)){payMaterials(cost);s.damaged=false;log(`${c.name}修好了自己的${def.name}。`);return;}}
+    if(s.damagedFacilities?.length&&c.locationId===s.locationId&&chance(.02*ai)){const id=s.damagedFacilities[0],f=(D.shelterFacilities||[]).find(x=>x.id===id),cost=f?effectiveCost(c,halfCost(f.cost)):null;if(f&&canAffordMaterials(cost)){payMaterials(cost);s.damagedFacilities.shift();log(`${c.name}修好了窝棚里的${f.name}。`);return;}}
     // 高智能NPC会在资源充足时搭建/升级自己的窝棚，但不会无节制抢光公共材料。
     const total=(camp().materials.wood||0)+(camp().materials.fiber||0)+(camp().materials.scrap||0);if(total<7)return;
-    if(!s.level&&state.day>=6&&chance(.02*ai)){const def=shelterLevelDef(1),cost=effectiveCost(c,def.cost);if(canAffordMaterials(cost)){payMaterials(cost);s.locationId=c.locationId;s.level=1;s.facilities=[];log(`${c.name}在${locationById(c.locationId)?.name||'岛上'}搭起了自己的${def.name}。`);}return;}
+    if(!s.level&&state.day>=6&&chance(.02*ai)){const def=shelterLevelDef(1),cost=effectiveCost(c,def.cost);if(canAffordMaterials(cost)){payMaterials(cost);s.locationId=c.locationId;s.level=1;s.facilities=[];s.damaged=false;s.damagedFacilities=[];log(`${c.name}在${locationById(c.locationId)?.name||'岛上'}搭起了自己的${def.name}。`);}return;}
     if(s.level&&s.level<3&&c.locationId===s.locationId&&state.day>=12*s.level&&chance(.012*ai)){const def=shelterLevelDef(s.level+1),cost=effectiveCost(c,def.cost);if(canAffordMaterials(cost)){payMaterials(cost);s.level++;log(`${c.name}把自己的窝棚升级成了${def.name}。`);}}
     if(s.level&&s.facilities.length<4&&c.locationId===s.locationId&&chance(.01*ai)){const choices=(D.shelterFacilities||[]).filter(f=>!s.facilities.includes(f.id));if(choices.length){const f=[...choices].sort((a,b)=>NPC.itemValue({value:Object.values(b.cost).reduce((x,y)=>x+y,0)},c,state.day)-NPC.itemValue({value:Object.values(a.cost).reduce((x,y)=>x+y,0)},c,state.day))[0],cost=effectiveCost(c,f.cost);if(canAffordMaterials(cost)){payMaterials(cost);s.facilities.push(f.id);log(`${c.name}在自己的窝棚里做了${f.name}。`);}}}
   }
@@ -356,10 +396,10 @@
     // v1.6 平衡目标：普通难度约50%通关；NPC前30/50天死亡率分别控制在20%/50%以下。
     if(key==='easy') return {...b,nightEventChance:clamp(b.nightEventChance-.10,.30,.80),baseCheckModifier:clamp(b.baseCheckModifier+.10,-.20,.30),healthDecayChance:clamp(b.healthDecayChance-.22,.45,.90),healthyLifeRecoverChance:clamp(b.healthyLifeRecoverChance+.10,0,.70),startingBonusFood:clamp((b.startingBonusFood||0)+3,0,5)};
     if(key==='hard') return {...b,nightEventChance:clamp(b.nightEventChance+.08,.40,.90),baseCheckModifier:clamp(b.baseCheckModifier-.06,-.25,.20),healthDecayChance:clamp(b.healthDecayChance,0.70,1),healthyLifeRecoverChance:clamp(b.healthyLifeRecoverChance-.08,0,.55),startingBonusFood:clamp(b.startingBonusFood||0,0,3)};
-    return {...b,nightEventChance:b.nightEventChance,baseCheckModifier:clamp(b.baseCheckModifier,-.20,.20),healthDecayChance:clamp(b.healthDecayChance,.50,1),healthyLifeRecoverChance:clamp(b.healthyLifeRecoverChance,0,.55),startingBonusFood:clamp((b.startingBonusFood||0)+1,0,5)};
+    return {...b,nightEventChance:clamp(b.nightEventChance-.02,.45,.85),baseCheckModifier:clamp(b.baseCheckModifier+.025,-.20,.22),healthDecayChance:clamp(b.healthDecayChance-.04,.48,.96),healthyLifeRecoverChance:clamp(b.healthyLifeRecoverChance+.03,0,.58),startingBonusFood:clamp((b.startingBonusFood||0)+1,0,5)};
   }
 
-  function makeChar(base){ return {...base,life:base.maxLife,health:3,inventory:[base.startItem],locationId:null,dead:false,deathDay:null,deathCause:'',healthyStreak:0,abilityCooldown:0,lowLifeSeen:false,skipDecay:false,damageShield:0,generalShield:0,nextCheckBonus:0,dayStartHealth:3,raincoatUsed:false,lifevestUsed:false,shelter:{locationId:null,level:0,facilities:[],lastMedicalDay:-99},aiExplored:{},stats:{battles:0,wins:0,trades:0,avoids:0,itemsFound:1,itemsUsed:0}}; }
+  function makeChar(base){ return {...base,life:base.maxLife,health:3,inventory:[base.startItem],locationId:null,dead:false,deathDay:null,deathCause:'',healthyStreak:0,abilityCooldown:0,lowLifeSeen:false,skipDecay:false,damageShield:0,generalShield:0,nextCheckBonus:0,dayStartHealth:3,raincoatUsed:false,lifevestUsed:false,shelter:{locationId:null,level:0,facilities:[],lastMedicalDay:-99,damaged:false,damagedFacilities:[]},aiExplored:{},stats:{battles:0,wins:0,trades:0,avoids:0,itemsFound:1,itemsUsed:0}}; }
   function newState(playerId,difficultyKey){
     const seed=`${Date.now()}-${Math.random()}`;
     let rs=hashSeed(seed);
@@ -367,9 +407,9 @@
     for(const c of chars){ const step=randStep(rs); rs=step[0]; c.locationId=D.locations[Math.floor(step[1]*D.locations.length)].id; }
     const currentRules=difficultyRules(difficultyKey);
     const crisisGen=generateCrises(rs); rs=crisisGen.rngState;
-    const s={version:9,seed,rngState:rs,day:1,phase:'PREPARE',playerId,difficultyKey,difficultyLabel:DIFFICULTY_META[difficultyKey]?.label||'正常',characters:chars,rules:currentRules,relationships:{},freeTrades:{},recentPlayerEvents:[],recentNpcEvents:[],recentInteractionEvents:[],recentLocationEvents:{},currentEvent:null,eventResolved:false,currentResult:'',nightDanger:0,rescueScore:0,history:[],statistics:{battles:0,battleWins:0,trades:0,itemsUsed:0,itemsFound:0,foodUsed:0,risksTaken:0},pending:null,lastNight:null,score:null,selectedLocationId:null,exploredLocations:{},completedExploreLocations:{},movedToday:false,exploredToday:false,interactedTargetsToday:[],interactionScenesToday:{},travelDecisionMade:false,locationLockedToday:false,locationBrief:'',interaction:null,recentCoupleEvents:[],coupleId:null,leaderboard:{submitted:false},camp:{locationId:'bamboo_clearing',materials:{wood:0,fiber:0,scrap:0},buildings:{},storedFood:0,storedWater:0,lastFoodDay:0,lastWaterDay:0},allExploredRewarded:false,deathAlerts:[],nightInteractionLog:[],stories:Object.fromEntries((D.storyChains||[]).map(s=>[s.id,{started:false,step:0,nextDay:0,completed:false,branch:''}])),crises:crisisGen.crises,crisisNotice:null};
+    const s={version:21,seed,rngState:rs,day:1,phase:'PREPARE',playerId,difficultyKey,difficultyLabel:DIFFICULTY_META[difficultyKey]?.label||'正常',characters:chars,rules:currentRules,relationships:{},freeTrades:{},recentPlayerEvents:[],recentNpcEvents:[],recentInteractionEvents:[],recentLocationEvents:{},currentEvent:null,eventResolved:false,currentResult:'',nightDanger:0,rescueScore:0,history:[],statistics:{battles:0,battleWins:0,trades:0,itemsUsed:0,itemsFound:0,foodUsed:0,risksTaken:0},pending:null,lastNight:null,score:null,selectedLocationId:null,exploredLocations:{},completedExploreLocations:{},movedToday:false,exploredToday:false,interactedTargetsToday:[],interactionScenesToday:{},travelDecisionMade:false,locationLockedToday:false,locationBrief:'',interaction:null,recentCoupleEvents:[],coupleId:null,leaderboard:{submitted:false},camp:{locationId:'bamboo_clearing',materials:{wood:0,fiber:0,scrap:0},buildings:{},damagedBuildings:{},storedFood:0,storedWater:0,lastFoodDay:0,lastWaterDay:0},allExploredRewarded:false,deathAlerts:[],relationAlerts:[],nightInteractionLog:[],stories:Object.fromEntries((D.storyChains||[]).map(s=>[s.id,{started:false,step:0,nextDay:0,completed:false,branch:''}])),crises:crisisGen.crises,crisisNotice:null};
     const bonusFoods=['coconut','banana'].slice(0,currentRules.startingBonusFood||0);
-    s.characters.forEach(c=>{ c.inventoryLimit=currentRules.inventoryLimit; for(const id of bonusFoods){ if(c.inventory.length<currentRules.inventoryLimit)c.inventory.push(id); } });
+    s.characters.forEach(c=>{ c.inventoryLimit=currentRules.inventoryLimit; for(const id of bonusFoods){ if(canAddUnit(c,id))c.inventory.push(id); } });
     const pc=s.characters.find(c=>c.id===playerId); s.exploredLocations[pc.locationId]=true;
     return s;
   }
@@ -407,14 +447,24 @@
   function kill(c,cause){ c.life=0;c.dead=true;c.deathDay=state.day;c.deathCause=cause;c.inventory=[];log(`${c.name}在DAY ${state.day}死亡：${cause}`);if(c.id!==state?.playerId){state.deathAlerts=state.deathAlerts||[];state.deathAlerts.push({id:c.id,name:c.name,portrait:c.portrait,day:state.day,cause});} }
   function breakItem(c,id,reason='损坏'){ if(!has(c,id)||isStarterItem(c,id))return false;if(c.id==='chenmo'&&chance(.70)){log(`${c.name}修好了${item(id).name}`);return false;}c.inventory.splice(c.inventory.indexOf(id),1);log(`${c.name}的${item(id).name}${reason}`);return true; }
   function gainItem(c,id,source='获得'){
-    if(!D.items[id])return;
-    if(c.inventory.includes(id)&&!item(id).consumable){if(c.id===state.playerId)toast(`已有${item(id).name}，效果不能叠加`);return;}
-    if(c.inventory.length<invLimit(c)){c.inventory.push(id);c.stats.itemsFound++;if(c.id===state.playerId){state.statistics.itemsFound++;toast(`${source}：${item(id).name}`);sound('good');}return;}
-    if(c.id===state.playerId){state.pending={type:'replace',incoming:id};save();render();return;}
-    const candidates=discardableItems(c);if(!candidates.length)return;
-    const discard=[...candidates].sort((a,b)=>NPC.itemValue(item(a),c,state.day)-NPC.itemValue(item(b),c,state.day))[0];
-    if(NPC.itemValue(item(discard),c,state.day)>NPC.itemValue(item(id),c,state.day))return;
-    c.inventory.splice(c.inventory.indexOf(discard),1,id);
+    if(!D.items[id])return false;
+    const it=item(id);
+    if(c.inventory.includes(id)&&!it.consumable){if(c.id===state.playerId)toast(`已有${it.name}，效果不能叠加`);return false;}
+    if(canAddUnit(c,id)){c.inventory.push(id);c.stats.itemsFound++;if(c.id===state.playerId){state.statistics.itemsFound++;toast(`${source}：${it.name}`);sound('good');}return true;}
+    if(c.id===state.playerId){state.pending={type:'replace',incoming:id};save();render();return false;}
+    const candidates=discardableItems(c);if(!candidates.length)return false;
+    const discard=[...new Set(candidates)].sort((a,b)=>NPC.itemValue(item(a),c,state.day)-NPC.itemValue(item(b),c,state.day))[0];
+    if(NPC.itemValue(item(discard),c,state.day)>NPC.itemValue(it,c,state.day))return false;
+    removeInventoryUnit(c,discard);c.inventory.push(id);return true;
+  }
+  function gainItems(c,ids,source='获得'){
+    const gained=[];for(const id of (ids||[]).slice(0,3)){if(gainItem(c,id,source))gained.push(id);if(state.pending)break;}
+    return gained;
+  }
+  function maybeMultiItemReward(c,source='意外发现',chanceValue=.07,maxCount=3){
+    if(!chance(chanceValue)||invUsedSlots(c)>=invLimit(c))return '';
+    const count=1+Math.floor(rng()*Math.max(1,Math.min(3,maxCount)));const ids=[];for(let i=0;i<count;i++)ids.push(randomItem());
+    const got=gainItems(c,ids,source);return got.length?`${source}：${got.map(id=>item(id).name).join('、')}`:'';
   }
   function randomItem(filter){ if(filter)return rand(filter);const foodChance=state.day<=20?.56:state.day<=40?.52:state.day<=60?.48:.44;const x=rng();if(x<foodChance)return rand(D.foodPool);if(x<foodChance+.11)return rand(D.medicalPool);return rand(D.itemPool.filter(id=>D.items[id].kind==='gear'||D.items[id].kind==='special')); }
   function highItem(){return rand(D.itemPool.filter(id=>(item(id).value||0)>=8));}
@@ -425,7 +475,7 @@
     if(it.effect?.wildFood){if(chance(.75)){addHealth(c,1);msg='野果没问题，健康+1';}else{healthDamage(c,1);msg='野果让你不舒服，健康-1';}}
     else{if(it.effect?.health){let n=it.effect.health;if(it.effect.extraHealthChance&&chance(it.effect.extraHealthChance))n++;msg=gainHealth(c,n);}if(it.effect?.life){const n=addLife(c,it.effect.life);msg=`生命+${n}`;}if(it.effect?.skipDecay){c.skipDecay=true;msg+=(msg?'，':'')+'今晚不自然下降健康';}if(it.effect?.shield){c.damageShield+=it.effect.shield;msg='下一次生命伤害将被抵消';}if(it.effect?.generalShield){c.generalShield+=it.effect.generalShield;msg='下一次健康或生命损失将被抵消';}if(it.effect?.nextCheckBonus){c.nextCheckBonus=Math.max(c.nextCheckBonus,it.effect.nextCheckBonus);msg+=(msg?'，':'')+'下一次检定更稳';}if(it.effect?.rescueScore){state.rescueScore+=it.effect.rescueScore;msg='你在高地打出信号，求救努力+2';}}
     if(c.id==='linlan'&&it.kind==='medical'){if(it.effect?.life){const extra=addLife(c,1);if(extra)msg+=(msg?'，':'')+'急救专家：生命额外+1';}if(it.effect?.shield)c.damageShield++;if(it.effect?.generalShield)c.generalShield++;}
-    if(c.id==='gaoyuan'&&it.kind==='food'){if(it.effect?.health&&msg&&!msg.includes('生命')){const extra=gainHealth(c,1);msg+=(msg?'，':'')+`料理大师：${extra}`;}if(chance(.60))consumed=false;}else if(it.kind==='food'&&c.shelter?.facilities?.includes('stove')&&c.locationId===c.shelter.locationId&&it.effect?.health){const extra=gainHealth(c,1);msg+=(msg?'，':'')+`炉灶加成：${extra}`;}if(consumed)c.inventory.splice(idx,1);c.stats.itemsUsed++;if(c.id===state.playerId){state.statistics.itemsUsed++;if(it.kind==='food')state.statistics.foodUsed++;toast(`${it.name}：${msg}${consumed?'':'（没有消耗）'}`);}save();render();
+    if(c.id==='gaoyuan'&&it.kind==='food'){if(it.effect?.health&&msg&&!msg.includes('生命')){const extra=gainHealth(c,1);msg+=(msg?'，':'')+`料理大师：${extra}`;}if(chance(.60))consumed=false;}else if(it.kind==='food'&&c.shelter?.facilities?.includes('stove')&&!c.shelter?.damagedFacilities?.includes('stove')&&c.locationId===c.shelter.locationId&&it.effect?.health){const extra=gainHealth(c,1);msg+=(msg?'，':'')+`炉灶加成：${extra}`;}if(consumed)c.inventory.splice(idx,1);c.stats.itemsUsed++;if(c.id===state.playerId){state.statistics.itemsUsed++;if(it.kind==='food')state.statistics.foodUsed++;toast(`${it.name}：${msg}${consumed?'':'（没有消耗）'}`);}save();render();
   }
 
   function checkChance(c,stat,difficulty='normal',tags=[]){
@@ -452,9 +502,9 @@
     return ok;
   }
   function applyEffect(c,effect={},context='事件'){
-    const msgs=[];if(effect.none)msgs.push('无事发生');if(effect.health){if(effect.health>0)msgs.push(gainHealth(c,effect.health));else{const n=-healthDamage(c,-effect.health);msgs.push(`健康${n}`);}}if(effect.life){if(effect.life>0){const n=addLife(c,effect.life);msgs.push(`生命+${n}`);}else{applyDamage(c,-effect.life,context);msgs.push(`生命${effect.life}`);}}if(effect.skipDecay){c.skipDecay=true;msgs.push('今晚不自然下降健康');}if(effect.nextCheckBonus){c.nextCheckBonus=Math.max(c.nextCheckBonus,effect.nextCheckBonus);msgs.push('获得下一次检定加成');}if(effect.item){gainItem(c,effect.item);msgs.push(`获得${item(effect.item).name}`);}if(effect.randomItem){const id=randomItem();gainItem(c,id);msgs.push(`获得${item(id).name}`);}if(effect.randomHighItem){const id=highItem();gainItem(c,id);msgs.push(`获得${item(id).name}`);}if(effect.randomFood){const id=randomItem(D.foodPool);gainItem(c,id);msgs.push(`获得${item(id).name}`);}if(effect.randomFrom){const id=rand(effect.randomFrom);gainItem(c,id);msgs.push(`获得${item(id).name}`);}if(effect.randomItemChance){if(chance(effect.randomItemChance)){const id=randomItem();gainItem(c,id);msgs.push(`获得${item(id).name}`);}else msgs.push('里面什么也没有');}
+    const msgs=[];if(effect.none)msgs.push('无事发生');if(effect.health){if(effect.health>0)msgs.push(gainHealth(c,effect.health));else{const n=-healthDamage(c,-effect.health);msgs.push(`健康${n}`);}}if(effect.life){if(effect.life>0){const n=addLife(c,effect.life);msgs.push(`生命+${n}`);}else{applyDamage(c,-effect.life,context);msgs.push(`生命${effect.life}`);}}if(effect.skipDecay){c.skipDecay=true;msgs.push('今晚不自然下降健康');}if(effect.nextCheckBonus){c.nextCheckBonus=Math.max(c.nextCheckBonus,effect.nextCheckBonus);msgs.push('获得下一次检定加成');}if(effect.item){gainItem(c,effect.item);msgs.push(`获得${item(effect.item).name}`);}if(effect.items){const ids=(effect.items||[]).slice(0,3),got=gainItems(c,ids);if(got.length)msgs.push(`获得${got.map(id=>item(id).name).join('、')}`);}if(effect.randomItems){const ids=[];for(let i=0;i<Math.min(3,Number(effect.randomItems)||0);i++)ids.push(randomItem());const got=gainItems(c,ids);if(got.length)msgs.push(`获得${got.map(id=>item(id).name).join('、')}`);}if(effect.randomItem){const id=randomItem();gainItem(c,id);msgs.push(`获得${item(id).name}`);}if(effect.randomHighItem){const id=highItem();gainItem(c,id);msgs.push(`获得${item(id).name}`);}if(effect.randomFood){const id=randomItem(D.foodPool);gainItem(c,id);msgs.push(`获得${item(id).name}`);}if(effect.randomFrom){const id=rand(effect.randomFrom);gainItem(c,id);msgs.push(`获得${item(id).name}`);}if(effect.randomItemChance){if(chance(effect.randomItemChance)){const id=randomItem();gainItem(c,id);msgs.push(`获得${item(id).name}`);}else msgs.push('里面什么也没有');}
     if(effect.pickItems){const choices=[];while(choices.length<effect.pickItems){const id=randomItem();if(!choices.includes(id))choices.push(id);}if(c.id===state.playerId){state.pending={type:'pick',choices};msgs.push(`发现${effect.pickItems}件物资，可选择1件`);}else{const id=[...choices].sort((a,b)=>NPC.itemValue(item(b),c,state.day)-NPC.itemValue(item(a),c,state.day))[0];gainItem(c,id);msgs.push(`获得${item(id).name}`);}}
-    if(effect.loseItem){const lost=loseRandomItem(c);msgs.push(lost?`失去${item(lost).name}`:'没有丢失任何道具');}if(effect.loseFood){const foods=c.inventory.filter(id=>item(id).kind==='food');if(foods.length){if(c.shelter?.facilities?.includes('drying_rack')&&c.locationId===c.shelter.locationId){msgs.push('干燥架保护了食物，没有发生腐坏');}else{const id=rand(foods);c.inventory.splice(c.inventory.indexOf(id),1);msgs.push(`${item(id).name}腐坏了`);}}else msgs.push('你没有食物可坏');}if(effect.achievement)unlock(effect.achievement);if(effect.rescueScore){state.rescueScore+=effect.rescueScore;msgs.push('求救努力有所增加');}if(effect.nightDanger){state.nightDanger+=effect.nightDanger;msgs.push('今晚危险似乎增加了');}if(effect.fromNpc){const donor=alive().filter(x=>x.id!==c.id&&tradableItems(x).length);if(donor.length){const d=rand(donor),pool=tradableItems(d),iid=[...pool].sort((a,b)=>NPC.itemValue(D.items[a],d,state.day)-NPC.itemValue(D.items[b],d,state.day))[0];d.inventory.splice(d.inventory.indexOf(iid),1);gainItem(c,iid);msgs.push(`${d.name}留下了${item(iid).name}`);}else msgs.push('最后什么也没找到');}if(effect.campMaterial){addCampMaterial(effect.campMaterial);msgs.push('获得营地建设材料');}if(effect.relationTo){const o=cBy(effect.relationTo);if(o){changeRelation(c,o,effect.relation||0,'剧情选择');msgs.push(`与${o.name}关系${(effect.relation||0)>0?'提升':'下降'}`);}}if(effect.relationRandom){const o=randomOther(c);if(o){changeRelation(c,o,effect.relationRandom,'剧情选择');msgs.push(`与${o.name}关系变化`);}}if(effect.relationAll){for(const o of alive().filter(x=>x.id!==c.id))changeRelation(c,o,effect.relationAll,'共同经历');msgs.push('与其他幸存者的关系有所改善');}return msgs.join('；');
+    if(effect.loseItem){const lost=loseRandomItem(c);msgs.push(lost?`失去${item(lost).name}`:'没有丢失任何道具');}if(effect.loseFood){const foods=c.inventory.filter(id=>item(id).kind==='food');if(foods.length){if(c.shelter?.facilities?.includes('drying_rack')&&!c.shelter?.damagedFacilities?.includes('drying_rack')&&c.locationId===c.shelter.locationId){msgs.push('干燥架保护了食物，没有发生腐坏');}else{const id=rand(foods);c.inventory.splice(c.inventory.indexOf(id),1);msgs.push(`${item(id).name}腐坏了`);}}else msgs.push('你没有食物可坏');}if(effect.achievement)unlock(effect.achievement);if(effect.rescueScore){state.rescueScore+=effect.rescueScore;msgs.push('求救努力有所增加');}if(effect.nightDanger){state.nightDanger+=effect.nightDanger;msgs.push('今晚危险似乎增加了');}if(effect.fromNpc){const donor=alive().filter(x=>x.id!==c.id&&tradableItems(x).length);if(donor.length){const d=rand(donor),pool=tradableItems(d),iid=[...pool].sort((a,b)=>NPC.itemValue(D.items[a],d,state.day)-NPC.itemValue(D.items[b],d,state.day))[0];d.inventory.splice(d.inventory.indexOf(iid),1);gainItem(c,iid);msgs.push(`${d.name}留下了${item(iid).name}`);}else msgs.push('最后什么也没找到');}if(effect.campMaterial){addCampMaterial(effect.campMaterial);msgs.push('获得营地建设材料');}if(effect.relationTo){const o=cBy(effect.relationTo);if(o){changeRelation(c,o,effect.relation||0,'剧情选择');msgs.push(`与${o.name}关系${(effect.relation||0)>0?'提升':'下降'}`);}}if(effect.relationRandom){const o=randomOther(c);if(o){changeRelation(c,o,effect.relationRandom,'剧情选择');msgs.push(`与${o.name}关系变化`);}}if(effect.relationAll){for(const o of alive().filter(x=>x.id!==c.id))changeRelation(c,o,effect.relationAll,'共同经历');msgs.push('与其他幸存者的关系有所改善');}return msgs.join('；');
   }
   function loseRandomItem(c){if(has(c,'drybag'))return null;const pool=lootableItems(c);if(!pool.length)return null;const id=rand(pool);c.inventory.splice(c.inventory.indexOf(id),1);return id;}
   function beastHazard(c){if(campProtection(c,'beast'))return '营地警戒与遮蔽让野兽没有靠近';if(has(c,'torch')){if(chance(.3))breakItem(c,'torch');return '火把吓退了野兽';}const ok=checkChance(c,'agi','normal',[]);if(ok)return '成功躲开';applyDamage(c,1,'野兽袭击');return '遭到袭击，生命-1';}
@@ -491,31 +541,31 @@
   }
 
   function resolveInstantOrCheck(index=null){
-    const c=player(),e=state.currentEvent;if(!e||state.eventResolved)return;let result='';if(e.type==='instant')result=applyEffect(c,e.effect,e.name);else if(e.type==='hazard')result=e.hazard==='beast'?beastHazard(c):rainHazard(c);else if(e.type==='check'){const ok=checkChance(c,e.stat,e.difficulty,e.tags||[]);result=ok?`检定成功。${applyEffect(c,e.success,e.name)}`:`检定失败。${applyEffect(c,e.fail,e.name)}`;}else if(e.type==='choice'){const ch=e.choices[index];result=resolveChoice(c,e,ch,false);advanceStory(e,ch);}const materialMsg=gatherCampMaterial(state.selectedLocationId);if(materialMsg)result+=(result?'；':'')+materialMsg;state.completedExploreLocations=state.completedExploreLocations||{};state.completedExploreLocations[state.selectedLocationId]=true;const exploreReward=checkAllExploredReward();if(exploreReward)result+=(result?'；':'')+`全岛探索完成奖励：${exploreReward}`;state.eventResolved=true;state.phase='POST';state.currentResult=result||'无事发生';if(c.dead){endGame(false);return;}save();render();
+    const c=player(),e=state.currentEvent;if(!e||state.eventResolved)return;let result='';if(e.type==='instant')result=applyEffect(c,e.effect,e.name);else if(e.type==='hazard')result=e.hazard==='beast'?beastHazard(c):rainHazard(c);else if(e.type==='check'){const ok=checkChance(c,e.stat,e.difficulty,e.tags||[]);result=ok?`检定成功。${applyEffect(c,e.success,e.name)}`:`检定失败。${applyEffect(c,e.fail,e.name)}`;}else if(e.type==='choice'){const ch=e.choices[index];result=resolveChoice(c,e,ch,false);advanceStory(e,ch);}const materialMsg=gatherCampMaterial(state.selectedLocationId);if(materialMsg)result+=(result?'；':'')+materialMsg;const bonusLoot=maybeMultiItemReward(c,'额外发现',.08,3);if(bonusLoot)result+=(result?'；':'')+bonusLoot;state.completedExploreLocations=state.completedExploreLocations||{};state.completedExploreLocations[state.selectedLocationId]=true;const exploreReward=checkAllExploredReward();if(exploreReward)result+=(result?'；':'')+`全岛探索完成奖励：${exploreReward}`;state.eventResolved=true;state.phase='POST';state.currentResult=result||'无事发生';if(c.dead){endGame(false);return;}save();render();
   }
   function resolveChoice(c,e,ch,isNpc){
     if(!ch)return '无事发生';if(ch.risk==='危险'&&c.id===state.playerId)state.statistics.risksTaken++;if(ch.action==='none')return '你选择不冒险。';if(ch.action==='effect')return applyEffect(c,ch.effect||{},e.name)||'无事发生';if(ch.action==='check'){const ok=checkChance(c,ch.stat,ch.difficulty,ch.tags||e.tags||[]);if(ok)return `检定成功。${applyEffect(c,ch.success,e.name)}`;const f=ch.fail||{};if(f.chance&&!chance(f.chance))return '检定失败，但没有造成进一步损失。';if(f.beast)return `检定失败。${beastHazard(c)}`;return `检定失败。${applyEffect(c,f,e.name)}`;}if(ch.action==='randomFood'){const r=rng();if(r<.6){addHealth(c,1);return '味道古怪，但健康+1';}if(r<.85)return '你等了一会儿，似乎没事。';healthDamage(c,1);return '胃开始翻腾，健康-1';}if(ch.action==='gambleFood'){const r=rng();if(r<.55){addHealth(c,1);return '勉强能吃，健康+1';}if(r<.8)return '没有明显效果。';applyDamage(c,1,'食物中毒');return '情况比想象糟，生命-1';}if(ch.action==='mushroom'){const r=rng();if(r<.5){addHealth(c,2);return '居然能吃，健康+2';}if(r<.8)return '没有明显效果。';applyDamage(c,1,'误食有毒蘑菇');return '你很快意识到判断错了，生命-1';}return '无事发生';
   }
 
   function enemy(a,b){return relationScore(a,b)<=-50;}
-  function makeEnemy(a,b){state.relationships[pairKey(a.id,b.id)]=-80;}
+  function makeEnemy(a,b){const cur=relationScore(a,b);if(cur>-50)changeRelation(a,b,-200,'发生严重冲突');else state.relationships[pairKey(a.id,b.id)]=-100;}
   function combatPower(c){let weaponBonus=0;if(has(c,'dagger')||has(c,'spear'))weaponBonus=1;return c.str+c.agi+weaponBonus+(c.id==='zhouye'?2:0);}
   function fight(a,b){
-    makeEnemy(a,b);changeRelation(a,b,-25,'发生战斗');a.stats.battles++;b.stats.battles++;if(a.id===state.playerId||b.id===state.playerId)state.statistics.battles++;
+    makeEnemy(a,b);a.stats.battles++;b.stats.battles++;if(a.id===state.playerId||b.id===state.playerId)state.statistics.battles++;
     const diff=combatPower(a)-combatPower(b);const p=diff>=3?1:diff===2?.9:diff===1?.7:diff===0?.5:diff===-1?.3:diff===-2?.1:0;
     const winA=chance(p),w=winA?a:b,l=winA?b:a;w.stats.wins++;if(w.id===state.playerId)state.statistics.battleWins++;
     let loot='';const pool=lootableItems(l);if(pool.length){const id=rand(pool);l.inventory.splice(l.inventory.indexOf(id),1);gainItem(w,id,'战利品');loot=`，获得${item(id).name}`;}
     applyDamage(l,1,'与幸存者战斗');return `${w.name}占了上风${loot}；${l.name}生命-1。`;
   }
   function trade(a,b,playerGiveId=null){
-    if(relationScore(a,b)<25)return '关系还没有达到“信任”，对方不愿交换物资。';
+    if(enemy(a,b))return `${b.name}现在不愿意和你交易。`;
     const aa=tradableItems(a),bb=tradableItems(b);if(!aa.length)return `${a.name}没有可交易道具。`;if(!bb.length)return `${b.name}没有可交易道具。`;
     let giveA=a.id===state.playerId?playerGiveId:null;if(!giveA||!aa.includes(giveA))giveA=[...aa].sort((x,y)=>NPC.itemValue(item(x),a,state.day)-NPC.itemValue(item(y),a,state.day))[0];
-    const giveB=[...bb].sort((x,y)=>NPC.itemValue(item(x),b,state.day)-NPC.itemValue(item(y),b,state.day))[0];
+    const sorted=[...new Set(bb)].sort((x,y)=>NPC.itemValue(item(x),b,state.day)-NPC.itemValue(item(y),b,state.day));const rel=relationScore(a,b);let giveB=sorted[0];if(rel>=60)giveB=sorted[sorted.length-1];else if(rel>=25)giveB=sorted[Math.floor((sorted.length-1)*.65)];else if(rel>=0)giveB=sorted[Math.floor((sorted.length-1)*.35)];
     if(!giveA||!giveB)return '没有合适的交换物品。';
-    a.inventory.splice(a.inventory.indexOf(giveA),1);b.inventory.splice(b.inventory.indexOf(giveB),1);a.inventory.push(giveB);b.inventory.push(giveA);
-    a.stats.trades++;b.stats.trades++;changeRelation(a,b,6,'完成交易');sound('trade');if(a.id===state.playerId||b.id===state.playerId)state.statistics.trades++;
-    return `${a.name}交出${item(giveA).name}，${b.name}拿出${item(giveB).name}作为交换。`;
+    removeInventoryUnit(a,giveA);removeInventoryUnit(b,giveB);gainItem(a,giveB,'交易获得');gainItem(b,giveA,'交易获得');
+    a.stats.trades++;b.stats.trades++;changeRelation(a,b,rel>=25?6:3,'完成交易');sound('trade');if(a.id===state.playerId||b.id===state.playerId)state.statistics.trades++;
+    return `${a.name}拿出${item(giveA).name}，${b.name}考虑了一下，也拿出${item(giveB).name}。两人完成了交换。`;
   }
   function resolveNpcEncounter(a,b){
     const rel=relationScore(a,b),loc=locationById(a.locationId)?.name||'岛上';let r='';
@@ -556,6 +606,10 @@
     const base=rand(loc.conditions||[loc.desc]);const peers=alive().filter(c=>c.id!==state.playerId&&c.locationId===locationId);
     let extra=peers.length?peers.map(c=>`${c.name}正在${peerActivity(c,locationId)}。`).join(' '):'暂时没有看到其他幸存者。';
     const cr=state.crisisNotice;if(cr&&cr.left<=1)extra+=` ${cr.name}已经很近，今天最好谨慎一点。`;
+    if(state.day===1&&!arrival){
+      const wake={crash_beach:'你从昏迷中醒来，耳边先是海浪，再是远处金属被风吹动的碰撞声。散落的机身残片提醒你：那架民航客机真的迫降了。',coconut_grove:'你从昏迷中醒来，发现自己倒在潮湿的椰林边。衣服上全是沙和海水，远处还能看到飞机残骸的轮廓。',fresh_stream:'你从昏迷中醒来，脸侧是冰凉的溪水。你记得最后的画面，是客舱在雷暴中剧烈下坠。',moon_bay:'你从昏迷中醒来，细沙沾满手臂。海湾很安静，但远处漂着不属于这座岛的飞机碎片。',reef_pools:'你从昏迷中醒来，身边是退潮后的礁池和被浪冲来的杂物。脑海里还残留着飞机迫降时刺耳的警报声。',jungle_path:'你从昏迷中醒来，发现自己躺在密林边缘。树叶上全是雨水，身后通往海边的方向散落着行李碎片。',bamboo_clearing:'你从昏迷中醒来，四周是一片被风吹乱的林中空地。你不知道自己是怎么被冲到这里的，只记得飞机落海前最后那一下猛烈撞击。',rock_cave:'你从昏迷中醒来，洞口外的海风灌进来。身上的擦伤和湿透的衣服，让你确信这不是梦。',cliff_edge:'你从昏迷中醒来，发现自己离断崖不远。海面上散落着几个黑点，那些可能是飞机残骸。',swamp_edge:'你从昏迷中醒来，脚边是湿软泥地。空气里有浓重的雨后气味，而你只记得飞机被雷暴卷进黑暗。',wreck_cabin:'你从昏迷中醒来，身旁就是扭曲的机舱残骸。几排座椅已经被海水和撞击撕开，周围安静得让人发冷。',ridge_hill:'你从昏迷中醒来，发现自己在岛上较高的位置。远处海面散着飞机残骸，你终于意识到：你可能被困在一座无人岛上。'};
+      return `${wake[locationId]||'你从昏迷中醒来，终于意识到飞机迫降后自己被困在一座陌生海岛上。'} ${base} ${extra} 现在最重要的是保持清醒、寻找食物和淡水，设法活到救援到来的那一天。`;
+    }
     return `${arrival?'你来到':'清晨，你仍在'}${loc.name}。${base} ${extra}`;
   }
   function triggerHostileLocationBattle(){
@@ -563,7 +617,7 @@
     const hostiles=locationPeers().filter(o=>enemy(p,o));if(!hostiles.length||!chance(Number(rules().hostileBattleChance??.20)))return false;
     const o=rand(hostiles),result=fight(p,o);state.hostileIncident={targetId:o.id,result};state.phase='POST_ACTION';state.currentResult=`你刚在${locationById(p.locationId)?.name||'这里'}站稳，${o.name}就和你发生了冲突。${result}`;log(`敌对相遇：你与${o.name}发生战斗。`);sound('battle');if(p.dead){endGame(false);return true;}return true;
   }
-  function setLocationPhase(arrival=false){state.locationBrief=makeLocationBrief(player().locationId,arrival);state.phase='LOCATION';state.currentEvent=null;state.eventResolved=false;state.currentResult='';state.interaction=null;if(!triggerHostileLocationBattle()){save();render();}else{save();render();}}
+  function setLocationPhase(arrival=false){state.locationBrief=makeLocationBrief(player().locationId,arrival);state.phase='LOCATION';state.currentEvent=null;state.eventResolved=false;state.currentResult='';state.interaction=null;const hostile=triggerHostileLocationBattle();save();render();if(arrival&&!hostile){const peers=locationPeers().filter(c=>!targetInteracted(c.id));if(peers.length&&chance(.30)){const o=rand(peers);setTimeout(()=>{if(state&&state.phase==='LOCATION'&&player().locationId===o.locationId&&!targetInteracted(o.id)){toast(`${o.name}主动走过来和你说话`);beginInteraction(o.id);}},650);}}}
   function relationBucket(a,b){const s=relationScore(a,b),bond=Number(rules().bondThreshold||60);if(s<=-50)return'enemy';if(s<=-20)return'cold';if(s<25)return'normal';if(s<bond)return'trust';return'bond';}
   function buildInteractionScene(o){
     const p=player(),prof=D.interactionProfiles?.[o.id],bucket=relationBucket(p,o),loc=p.locationId,rel=relationScore(p,o);
@@ -585,11 +639,23 @@
     return {id:personalId,title:'简单交谈',text:`${local}
 ${base}`,choices:prof?.choices||[]};
   }
+  function interactionDialogue(o,scene){
+    const p=player(),bucket=relationBucket(p,o),prof=D.interactionProfiles?.[o.id];
+    const playerLine={enemy:'“我们最好把话说清楚，别再让事情更糟。”',cold:'“我只是想知道你现在怎么想。”',normal:'“说吧，我听着。也许我们能一起想办法。”',trust:'“有什么事就直说，我们已经一起撑了这么多天。”',bond:'“别一个人扛着。你说，我在。”'}[bucket]||'“你继续说。”';
+    const roleTail=prof?.lines?.[bucket]||`${o.name}看了看你，语气比刚才缓和了一点。`;
+    const playerClose={enemy:'“我不想把事情闹得更糟，但你也别逼我。”',cold:'“先把眼前的事说清楚，其他的以后再谈。”',normal:'“行，我们看看这件事怎么处理更合适。”',trust:'“你需要我做什么就说，我们一起解决。”',bond:'“我们一起走到这里了，这次也一起处理。”'}[bucket]||'“我们想想怎么办。”';
+    return [
+      {who:o.id,text:scene.text||`${o.name}主动和你说起今天的情况。`},
+      {who:p.id,text:playerLine},
+      {who:o.id,text:roleTail},
+      {who:p.id,text:playerClose}
+    ];
+  }
   function beginInteraction(targetId){
     if(!['LOCATION','POST','POST_ACTION'].includes(state.phase))return;
     if(targetInteracted(targetId)){toast('今天已经与这个人物互动过一次');return;}
     const p=player(),o=cBy(targetId);if(!o||o.dead||o.locationId!==p.locationId)return;
-    state.locationLockedToday=true;const cache=state.interactionScenesToday||(state.interactionScenesToday={});if(!cache[targetId])cache[targetId]=buildInteractionScene(o);state.interaction={targetId,scene:cache[targetId]};state.phase='INTERACTION';sound('encounter');save();render();
+    state.locationLockedToday=true;const cache=state.interactionScenesToday||(state.interactionScenesToday={});if(!cache[targetId]){cache[targetId]=buildInteractionScene(o);cache[targetId].dialogue=interactionDialogue(o,cache[targetId]);}else if(!cache[targetId].dialogue)cache[targetId].dialogue=interactionDialogue(o,cache[targetId]);state.interaction={targetId,scene:cache[targetId]};state.phase='INTERACTION';sound('encounter');save();render();
   }
   function interactionChoice(index){
     const it=state.interaction,p=player(),o=cBy(it?.targetId),ch=it?.scene?.choices?.[index];if(!it||!o||!ch)return;
@@ -599,16 +665,30 @@ ${base}`,choices:prof?.choices||[]};
       if(ok){changeRelation(p,o,ch.goodRelation||0,'一起做了点事');result=`${ch.text}：顺利完成。${applyEffect(p,ch.reward||{},'人物互动')}`;}
       else{changeRelation(p,o,ch.badRelation||0,'事情没办成');result=`${ch.text}：没有想象中顺利。`;}
     }else{changeRelation(p,o,ch.relation||0,'交谈');result=`${ch.text}。${applyEffect(p,ch.reward||{},'人物互动')}`;}
-    markInteracted(o.id);state.currentResult=result||'你们简单聊了几句。';state.phase='POST_ACTION';log(`你与${o.name}在${locationById(p.locationId)?.name||'岛上'}完成了今天的人物互动。`);save();render();
+    const interactionLoot=maybeMultiItemReward(p,'互动中意外发现',.05,2);if(interactionLoot)result+=(result?'；':'')+interactionLoot;markInteracted(o.id);state.currentResult=result||'你们简单聊了几句。';state.phase='POST_ACTION';log(`你与${o.name}在${locationById(p.locationId)?.name||'岛上'}完成了今天的人物互动。`);save();render();
   }
   function interactionTradeModal(){
     const p=player(),o=cBy(state.interaction?.targetId);if(!o)return;
-    if(relationScore(p,o)<25){toast('只有“信任”及以上关系才能交易');return;}
+    if(enemy(p,o)){toast(`${o.name}与你处于敌对状态，不愿交易`);return;}
     const mine=tradableItems(p),theirs=tradableItems(o);if(!mine.length){toast('你没有可交易的道具');return;}if(!theirs.length){toast(`${o.name}没有可交易的道具`);return;}
-    modal(`<h2>与${esc(o.name)}交易</h2><p class="muted">你只能选择自己拿出的道具。对方会自己决定拿什么交换，专属初始道具永远不能交易。</p>${mine.map(id=>`<button class="choice" onclick="Game.interactionTradeChoose('${id}')">拿出 ${item(id).ico} <b class="itemName">${esc(item(id).name)}</b></button>`).join('')}<button class="btn ghost" onclick="Game.closeModal()">取消</button>`);
+    modal(`<h2>与${esc(o.name)}交易</h2><p class="muted">你只能选择自己拿出的道具。对方会自己决定拿什么交换，专属初始道具永远不能交易。</p>${[...new Set(mine)].map(id=>`<button class="choice" onclick="Game.interactionTradeChoose('${id}')">拿出 ${item(id).ico} <b class="itemName">${esc(item(id).name)}</b></button>`).join('')}<button class="btn ghost" onclick="Game.closeModal()">取消</button>`);
   }
   function interactionTradeChoose(id){
     closeModal();const p=player(),o=cBy(state.interaction?.targetId);if(!o)return;const result=trade(p,o,id);markInteracted(o.id);state.currentResult=result;state.phase='POST_ACTION';log(`你与${o.name}进行了交易。`);save();render();
+  }
+  function interactionGiftModal(){
+    const p=player(),o=cBy(state.interaction?.targetId);if(!o)return;const mine=tradableItems(p);if(!mine.length){toast('你没有可以赠送的普通道具');return;}
+    modal(`<h2>赠送给 ${esc(o.name)}</h2><p class="muted">赠送不会换回物品，但会明显改善关系。</p>${[...new Set(mine)].map(id=>`<button class="choice" onclick="Game.interactionGiftChoose('${id}')">赠送 ${item(id).ico} <b class="itemName">${esc(item(id).name)}</b></button>`).join('')}<button class="btn ghost" onclick="Game.closeModal()">取消</button>`);
+  }
+  function interactionGiftChoose(id){
+    closeModal();const p=player(),o=cBy(state.interaction?.targetId);if(!o||!tradableItems(p).includes(id))return;removeInventoryUnit(p,id);gainItem(o,id,'收到赠送');const boost=relationScore(p,o)<0?16:12;changeRelation(p,o,boost,'收到你的赠送');markInteracted(o.id);state.currentResult=`你把${item(id).name}递给${o.name}。${o.name}愣了一下，认真收好。你们的关系明显更近了一些。`;state.phase='POST_ACTION';log(`你赠送给${o.name}${item(id).name}。`);sound('good');save();render();
+  }
+  function downgradeOneTierWithPlayer(other,reason='抢夺行为'){const p=player();if(!other||other.id===p.id||other.dead)return;const beforeLabel=isCouplePair(p,other)?'情侣':relationTierByScore(relationScore(p,other)).label;let target;const score=relationScore(p,other);if(beforeLabel==='情侣'){state.coupleId=null;target=40;}else if(score>=Number(rules().bondThreshold||60))target=40;else if(score>=25)target=0;else if(score>-20)target=-30;else target=-70;const before=relationScore(p,other);state.relationships[pairKey(p.id,other.id)]=target;const afterLabel=relationTierByScore(target).label;if(beforeLabel!==afterLabel)queueRelationAlert(other,beforeLabel,afterLabel,reason,'');log(`${other.name}因为你的抢夺行为，对你的看法变差了。`);}
+  function interactionRob(){
+    const p=player(),o=cBy(state.interaction?.targetId);if(!o)return;const pool=lootableItems(o);if(!pool.length){toast(`${o.name}没有可以抢夺的道具`);return;}
+    makeEnemy(p,o);for(const other of alive().filter(c=>c.id!==p.id&&c.id!==o.id))downgradeOneTierWithPlayer(other,'你主动抢夺了其他幸存者');
+    let result;if(chance(.30)){result=`你突然伸手想抢${o.name}的背包，但${o.name}反应很快，带着东西退开并逃走了。你什么也没抢到。`;}else{result=`抢夺立刻演变成冲突。${fight(p,o)}`;}
+    markInteracted(o.id);state.currentResult=result;state.phase='POST_ACTION';log(`你试图抢夺${o.name}的物资，双方关系变为敌对。`);sound('battle');if(p.dead){endGame(false);return;}save();render();
   }
   function cancelInteraction(){state.interaction=null;state.phase='LOCATION';save();render();}
   function restAtLocation(){
@@ -668,8 +748,11 @@ ${base}`,choices:prof?.choices||[]};
     }
     return best;
   }
+  function npcRepairCamp(c){
+    if(c.dead||c.locationId!==camp().locationId)return false;const damaged=Object.keys(camp().damagedBuildings||{}).filter(id=>camp().damagedBuildings[id]);if(!damaged.length)return false;const ai=Number(c.aiLevel||3);if(!chance(.012*ai))return false;const id=damaged[0],b=(D.campBuildings||[]).find(x=>x.id===id);if(!b)return false;const cost=effectiveCost(c,halfCost(b.cost));if(!canAffordMaterials(cost))return false;payMaterials(cost);delete camp().damagedBuildings[id];log(`${c.name}修复了公共营地的${b.name}。`);return true;
+  }
   function npcTurn(c){
-    if(c.dead)return;npcUseNeeds(c);c.locationId=chooseNpcDestination(c);c.aiExplored=c.aiExplored||{};c.aiExplored[c.locationId]=true;npcUseCampSupplies(c);
+    if(c.dead)return;npcUseNeeds(c);c.locationId=chooseNpcDestination(c);c.aiExplored=c.aiExplored||{};c.aiExplored[c.locationId]=true;npcUseCampSupplies(c);npcRepairCamp(c);
     const e=chooseLocationEvent(c.locationId,true);if(e.type==='instant')applyEffect(c,e.effect,e.name);else if(e.type==='hazard'){if(e.hazard==='beast')beastHazard(c);else rainHazard(c);}else if(e.type==='check'){const ok=checkChance(c,e.stat,e.difficulty,e.tags||[]);applyEffect(c,ok?e.success:e.fail,e.name);}else if(e.type==='choice'){const ix=NPC.eventChoice(c,e,D,rng);resolveChoice(c,e,e.choices[ix],true);}npcUseNeeds(c);npcUseCampSupplies(c);npcShelterDecision(c);
   }
 
@@ -699,11 +782,20 @@ ${base}`,choices:prof?.choices||[]};
   function runNight(){
     let trigger=(Number(rules().nightEventChance)||.70)+state.nightDanger;if(has(player(),'flashlight'))trigger-=.15;trigger=clamp(trigger,.15,.90);if(!chance(trigger))return {title:'今夜平静',text:'风从树林里穿过去。没有发生特别的事。',locationId:null};
     const eligible=D.nights.filter(n=>!n.minDay||state.day>=n.minDay);const n=rand(eligible);const ef=n.effect,living=alive();const occupied=[...new Set(living.map(c=>c.locationId))];const targetLocationId=n.scope==='location'&&occupied.length?rand(occupied):null;const affected=targetLocationId?living.filter(c=>c.locationId===targetLocationId):living;let extra=[];
-    if(ef.allHazard==='rain')affected.forEach(c=>extra.push(`${c.name}：${rainHazard(c)}`));if(ef.randomHazard==='beast'&&affected.length){const c=rand(affected);extra.push(`${c.name}：${beastHazard(c)}`);}if(ef.weakHealth)affected.filter(c=>c.health<=1).forEach(c=>{healthDamage(c,1);extra.push(`${c.name}健康-1`);});if(ef.randomLoseItem&&affected.length){const c=rand(affected),id=loseRandomItem(c);if(id)extra.push(`${c.name}失去${item(id).name}`);}if(ef.randomHealthDamage)affected.forEach(c=>{if(chance(ef.randomHealthDamage)){healthDamage(c,1);extra.push(`${c.name}健康-1`);}});if(ef.randomHealth&&affected.length){const pool=n.id==='insects'?affected.filter(c=>!gearMod(c,'insectSafe')):affected;if(pool.length){const c=rand(pool);if(ef.randomHealth>0)addHealth(c,ef.randomHealth);else healthDamage(c,-ef.randomHealth);extra.push(`${c.name}健康${ef.randomHealth>0?'+':''}${ef.randomHealth}`);}}if(ef.lowestHealth&&affected.length){const min=Math.min(...affected.map(c=>c.health));const c=rand(affected.filter(x=>x.health===min));addHealth(c,ef.lowestHealth);extra.push(`${c.name}健康+1`);}if(ef.allChanceHealth)affected.forEach(c=>{if(chance(ef.allChanceHealth)){healthDamage(c,1);extra.push(`${c.name}健康-1`);}});if(ef.randomItem&&affected.length){const c=rand(affected),id=randomItem();gainItem(c,id);extra.push(`${c.name}获得${item(id).name}`);}if(ef.nextCheckBonus)affected.forEach(c=>c.nextCheckBonus=Math.max(c.nextCheckBonus,ef.nextCheckBonus));if(ef.protectWeak)affected.filter(c=>c.health<=1).forEach(c=>c.skipDecay=true);if(ef.rescueScore)state.rescueScore+=ef.rescueScore;if(ef.relationDown&&affected.length>=2){const [a,b]=shuffle([...affected]).slice(0,2);changeRelation(a,b,-10,'夜间争吵');extra.push(`${a.name}和${b.name}之间的气氛变差了`);}if(ef.theft&&affected.length>=2&&chance(.28)){const [a,b]=shuffle([...affected]).slice(0,2),pool=lootableItems(b);if(pool.length&&a.inventory.length<invLimit(a)){const id=rand(pool);b.inventory.splice(b.inventory.indexOf(id),1);a.inventory.push(id);changeRelation(a,b,-20,'夜间失窃');extra.push(`${a.name}拿走了${b.name}的${item(id).name}`);}}
+    if(ef.allHazard==='rain')affected.forEach(c=>extra.push(`${c.name}：${rainHazard(c)}`));if(ef.randomHazard==='beast'&&affected.length){const c=rand(affected);extra.push(`${c.name}：${beastHazard(c)}`);}if(ef.weakHealth)affected.filter(c=>c.health<=1).forEach(c=>{healthDamage(c,1);extra.push(`${c.name}健康-1`);});if(ef.randomLoseItem&&affected.length){const c=rand(affected),id=loseRandomItem(c);if(id)extra.push(`${c.name}失去${item(id).name}`);}if(ef.randomHealthDamage)affected.forEach(c=>{if(chance(ef.randomHealthDamage)){healthDamage(c,1);extra.push(`${c.name}健康-1`);}});if(ef.randomHealth&&affected.length){const pool=n.id==='insects'?affected.filter(c=>!gearMod(c,'insectSafe')):affected;if(pool.length){const c=rand(pool);if(ef.randomHealth>0)addHealth(c,ef.randomHealth);else healthDamage(c,-ef.randomHealth);extra.push(`${c.name}健康${ef.randomHealth>0?'+':''}${ef.randomHealth}`);}}if(ef.lowestHealth&&affected.length){const min=Math.min(...affected.map(c=>c.health));const c=rand(affected.filter(x=>x.health===min));addHealth(c,ef.lowestHealth);extra.push(`${c.name}健康+1`);}if(ef.allChanceHealth)affected.forEach(c=>{if(chance(ef.allChanceHealth)){healthDamage(c,1);extra.push(`${c.name}健康-1`);}});if(ef.randomItem&&affected.length){const c=rand(affected),id=randomItem();gainItem(c,id);extra.push(`${c.name}获得${item(id).name}`);}if(ef.nextCheckBonus)affected.forEach(c=>c.nextCheckBonus=Math.max(c.nextCheckBonus,ef.nextCheckBonus));if(ef.protectWeak)affected.filter(c=>c.health<=1).forEach(c=>c.skipDecay=true);if(ef.rescueScore)state.rescueScore+=ef.rescueScore;if(ef.relationDown&&affected.length>=2){const [a,b]=shuffle([...affected]).slice(0,2);changeRelation(a,b,-10,'夜间争吵');extra.push(`${a.name}和${b.name}之间的气氛变差了`);}if(ef.theft&&affected.length>=2&&chance(.28)){const [a,b]=shuffle([...affected]).slice(0,2),pool=lootableItems(b);if(pool.length&&invUsedSlots(a)<invLimit(a)){const id=rand(pool);removeInventoryUnit(b,id);gainItem(a,id,'夜间取得');changeRelation(a,b,-20,'夜间失窃');extra.push(`${a.name}拿走了${b.name}的${item(id).name}`);}}
     const locName=targetLocationId?locationById(targetLocationId)?.name:null;return {title:locName?`${locName} · ${n.name}`:n.name,text:n.text+(extra.length?'\n'+extra.join('；'):''),locationId:targetLocationId};
   }
-  function settleDay(){for(const c of alive()){const beganZero=c.dayStartHealth===0;if(beganZero&&c.health===0)applyDamage(c,1,'长期缺乏食物');else if(c.health>0&&!c.skipDecay){let decay=Number(rules().healthDecayChance)??1;if(c.locationId===camp().locationId&&camp().buildings.water_collector)decay=Math.max(.35,decay-.10);if(chance(decay))healthDamage(c,1);}c.skipDecay=false;if(c.dead)continue;if(c.health>=2)c.healthyStreak++;else c.healthyStreak=0;if(c.healthyStreak>=3){if(chance(Number(rules().healthyLifeRecoverChance)??.20))addLife(c,1);c.healthyStreak=0;}}state.currentEvent=null;state.eventResolved=false;state.currentResult='';state.selectedLocationId=null;}
-  function endDay(){const p=player();if(p.dead)return;state.characters.filter(c=>!c.dead&&c.id!==state.playerId).forEach(npcTurn);applyShelterNightBenefits();const report=runCrisis()||runNight();const social=runNightInteractions();if(social.length)report.text+=(report.text?'\n':'')+'夜间相处：'+social.join('；');settleDay();if(p.dead){endGame(false);return;}if(state.day>=80){state.day=81;endGame(true);return;}state.lastNight=report;state.phase='NIGHT_REPORT';sound('night');save();render();}
+  function damageStructuresRandomly(){
+    if(!chance(.055))return '';
+    const candidates=[];const c=camp();c.damagedBuildings=c.damagedBuildings||{};
+    for(const b of (D.campBuildings||[])){if(c.buildings?.[b.id]&&!c.damagedBuildings[b.id])candidates.push({type:'camp',id:b.id,name:`公共营地的${b.name}`});}
+    for(const ch of alive()){const s=shelterOf(ch);s.damagedFacilities=s.damagedFacilities||[];if(s.level&&!s.damaged)candidates.push({type:'shelter',owner:ch.id,name:`${ch.name}的${shelterLevelDef(s.level)?.name||'窝棚'}`});for(const fid of s.facilities||[]){if(!s.damagedFacilities.includes(fid)){const f=(D.shelterFacilities||[]).find(x=>x.id===fid);if(f)candidates.push({type:'facility',owner:ch.id,id:fid,name:`${ch.name}窝棚里的${f.name}`});}}}
+    if(!candidates.length)return '';
+    const x=rand(candidates);if(x.type==='camp')c.damagedBuildings[x.id]=true;else{const s=shelterOf(cBy(x.owner));if(x.type==='shelter')s.damaged=true;else s.damagedFacilities.push(x.id);}
+    const text=`意外损坏：${x.name}在风雨、潮气或意外碰撞中受损，需要使用原建造资源的一半进行修复。`;log(text);if(x.owner===state.playerId||x.type==='camp')toast(`⚠ ${x.name}受损`);return text;
+  }
+  function settleDay(){for(const c of alive()){const beganZero=c.dayStartHealth===0;if(beganZero&&c.health===0)applyDamage(c,1,'长期缺乏食物');else if(c.health>0&&!c.skipDecay){let decay=Number(rules().healthDecayChance)??1;if(c.locationId===camp().locationId&&camp().buildings.water_collector&&!camp().damagedBuildings?.water_collector)decay=Math.max(.35,decay-.10);if(chance(decay))healthDamage(c,1);}c.skipDecay=false;if(c.dead)continue;if(c.health>=2)c.healthyStreak++;else c.healthyStreak=0;if(c.healthyStreak>=3){if(chance(Number(rules().healthyLifeRecoverChance)??.20))addLife(c,1);c.healthyStreak=0;}}state.currentEvent=null;state.eventResolved=false;state.currentResult='';state.selectedLocationId=null;}
+  function endDay(){const p=player();if(p.dead)return;state.characters.filter(c=>!c.dead&&c.id!==state.playerId).forEach(npcTurn);applyShelterNightBenefits();const report=runCrisis()||runNight();const social=runNightInteractions();if(social.length)report.text+=(report.text?'\n':'')+'夜间相处：'+social.join('；');const damageMsg=damageStructuresRandomly();if(damageMsg)report.text+=(report.text?'\n':'')+damageMsg;settleDay();if(p.dead){endGame(false);return;}if(state.day>=80){state.day=81;endGame(true);return;}state.lastNight=report;state.phase='NIGHT_REPORT';sound('night');save();render();}
   function nextDay(){state.day++;state.lastNight=null;startDay(true);}
 
   function unlock(id){let list=[];try{list=JSON.parse(localStorage.getItem(ACH)||'[]');}catch(e){}if(!list.includes(id)){list.push(id);localStorage.setItem(ACH,JSON.stringify(list));}}
@@ -713,7 +805,7 @@ ${base}`,choices:prof?.choices||[]};
   function riskHint(ch){const p=player();if(p.id==='suqing')return ch.risk?`风险：${ch.risk}`:'';if(has(p,'binoculars')&&ch.risk==='危险')return '这里似乎有危险……';return ch.stat?`${{str:'力量',agi:'敏捷',int:'知识',luck:'幸运'}[ch.stat]||''}检定`:'';}
   function hearts(c){return '❤️'.repeat(Math.max(0,c.life))+'♡'.repeat(Math.max(0,c.maxLife-c.life));}
   function healthDots(c){return '●'.repeat(c.health)+'○'.repeat(3-c.health);}
-  function invHtml(c,interactive=true){let h='';for(let i=0;i<invLimit(c);i++){const id=c.inventory[i];if(!id){h+=`<div class="slot empty"><div class="ico">＋</div><div class="label">空位</div></div>`;continue;}const it=item(id),starter=isStarterItem(c,id);h+=`<button class="slot ${starter?'starterSlot':''}" ${interactive?`onclick="Game.itemInfo('${id}')"`:''}><div class="ico">${it.ico}</div><div class="label">${esc(it.name)}</div>${starter?'<span class="starterBadge">专属</span>':''}</button>`;}return h;}
+  function invHtml(c,interactive=true){let h='';const slots=inventorySlots(c);for(let i=0;i<invLimit(c);i++){const slot=slots[i];if(!slot){h+=`<div class="slot empty"><div class="ico">＋</div><div class="label">空位</div></div>`;continue;}const id=slot.id,it=item(id),starter=isStarterItem(c,id);h+=`<button class="slot ${starter?'starterSlot':''}" ${interactive?`onclick="Game.itemInfo('${id}')"`:''}><div class="ico">${it.ico}</div><div class="label">${esc(it.name)}</div>${slot.count>1?`<span class="stackBadge">×${slot.count}</span>`:''}${starter?'<span class="starterBadge">专属</span>':''}</button>`;}return h;}
   function statusHtml(c){
     const loc=locationById(c.locationId);
     return `<section class="card heroStatus"><div class="person heroPerson"><div class="portraitWrap">${portrait(c,'portraitMain')}<span class="roleIcon">${c.avatar}</span></div><div class="heroMeta"><div class="name">${esc(c.name)} · ${esc(c.job)}</div><div class="meta">${c.sex} · ${c.age}岁 · 📍${esc(loc?.name||'未知')}</div><div class="statusLine">生命 <span class="hearts">${hearts(c)}</span></div><div class="statusLine">健康 <span class="healthdots">${healthDots(c)}</span></div></div><button class="btn small secondary" onclick="Game.survivors()">关系</button></div><div class="stats"><div class="stat">力量<b>${c.str}</b></div><div class="stat">敏捷<b>${c.agi}</b></div><div class="stat">知识<b>${c.int}</b></div><div class="stat">幸运<b>${c.luck}</b></div></div></section>`;
@@ -765,7 +857,7 @@ ${base}`,choices:prof?.choices||[]};
   }
   function personInfo(id){
     const c=cBy(id),p=player();if(!c)return;const rel=c.id===p.id?'主角':`${relationLabel(p,c)} · ${relationScore(p,c)>0?'+':''}${relationScore(p,c)}`;
-    modal(`<div class="row between"><h2>${esc(c.name)}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><div class="personInfoHero">${portrait(c,'personInfoPortrait')}<div><b>${esc(c.job)}</b><div class="meta">${esc(c.sex)} · ${c.age}岁</div><div class="relationText ${c.id===p.id?'':relationClass(p,c)}">${esc(rel)}</div></div></div><div class="personInfoStats"><span>生命 ${hearts(c)}</span><span>健康 ${healthDots(c)}</span><span>力量 ${c.str}</span><span>敏捷 ${c.agi}</span><span>知识 ${c.int}</span><span>幸运 ${c.luck}</span></div><p class="personAbility">${esc(c.ability||'')}</p><div class="meta">当前位置：${esc(locationById(c.locationId)?.name||'未知')} · 背包 ${c.inventory.length}/${invLimit(c)}</div><div class="personAi">${c.id===p.id?'由玩家控制':`AI智能水平：<b>${esc(c.aiLabel||'中等')}</b> · 会主动寻找食物/水、使用公共营地物资并建设自己的窝棚`}</div>${c.shelter?.level?`<div class="meta">🏠 ${esc(shelterLevelDef(c.shelter.level)?.name||'窝棚')} · ${esc(locationById(c.shelter.locationId)?.name||'未知')}</div>`:''}`);
+    modal(`<div class="row between"><h2>${esc(c.name)}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><div class="personInfoHero">${portrait(c,'personInfoPortrait')}<div><b>${esc(c.job)}</b><div class="meta">${esc(c.sex)} · ${c.age}岁</div><div class="relationText ${c.id===p.id?'':relationClass(p,c)}">${esc(rel)}</div></div></div><div class="personInfoStats"><span>生命 ${hearts(c)}</span><span>健康 ${healthDots(c)}</span><span>力量 ${c.str}</span><span>敏捷 ${c.agi}</span><span>知识 ${c.int}</span><span>幸运 ${c.luck}</span></div><p class="personAbility">${esc(c.ability||'')}</p><div class="meta">当前位置：${esc(locationById(c.locationId)?.name||'未知')} · 背包 ${invUsedSlots(c)}/${invLimit(c)}</div><div class="personAi">${c.id===p.id?'由玩家控制':`AI智能水平：<b>${esc(c.aiLabel||'中等')}</b> · 会主动寻找食物/水、使用公共营地物资并建设自己的窝棚`}</div>${c.shelter?.level?`<div class="meta">🏠 ${esc(shelterLevelDef(c.shelter.level)?.name||'窝棚')} · ${esc(locationById(c.shelter.locationId)?.name||'未知')}</div>`:''}`);
   }
   function backMorning(){if(state.phase==='MAP'&&!state.travelDecisionMade){state.phase='MORNING';save();render();}}
   function renderHome(){
@@ -795,7 +887,7 @@ ${base}`,choices:prof?.choices||[]};
     const p=player(),loc=locationById(p.locationId),s=shelterOf(p);modal(`<div class="row between"><h2>角色状态</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div>${statusHtml(p)}<div class="infoGrid"><span>难度 <b>${esc(state.difficultyLabel)}</b></span><span>位置 <b>${esc(loc?.name||'未知')}</b></span><span>AI/技能 <b>主角操控</b></span><span>窝棚 <b>${s.level?esc(shelterLevelDef(s.level)?.name):'未搭建'}</b></span></div><button class="btn ghost" onclick="Game.closeModal();Game.restartAsk()">重新开始本局</button>`);
   }
   function showInventory(){
-    const p=player();modal(`<div class="row between"><h2>🎒 背包 ${p.inventory.length}/${invLimit(p)}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><div class="inventory inventory8 modalInventory">${invHtml(p,true)}</div><p class="muted">点击道具查看效果。专属初始道具永久持有。</p>`);
+    const p=player();modal(`<div class="row between"><h2>🎒 背包 ${invUsedSlots(p)}/${invLimit(p)}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><div class="inventory inventory8 modalInventory">${invHtml(p,true)}</div><p class="muted">点击道具查看效果。专属初始道具永久持有。</p>`);
   }
   function showOverview(){
     const s=activeStoryTarget(),cr=state.crisisNotice;modal(`<div class="row between"><h2>本局资料</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><div class="overviewList"><button class="choice" onclick="Game.closeModal();Game.showStatus()">👤 角色状态</button><button class="choice" onclick="Game.closeModal();Game.showInventory()">🎒 背包</button><button class="choice" onclick="Game.closeModal();Game.survivors()">👥 人物关系</button><button class="choice" onclick="Game.closeModal();Game.showCamp()">🏕️ 公共营地</button><button class="choice" onclick="Game.closeModal();Game.showShelter()">🏠 我的窝棚</button><button class="choice" onclick="Game.closeModal();Game.logs()">📖 生存日志</button></div>${cr?`<div class="crisisBanner now"><div class="crisisIcon">${cr.icon}</div><div><b>${esc(cr.name)}</b><span>${cr.left===0?'今晚发生':`${cr.left}天后发生`} · ${esc(cr.desc)}</span></div></div>`:''}${s?`<div class="storyHint"><span>📖</span><div><b>${esc(s.chain.name)}</b><small>${s.ready?'新线索：'+esc(locationById(s.step.location)?.name||'未知'):`等待${s.wait}天`}</small></div></div>`:''}`);
@@ -809,8 +901,9 @@ ${base}`,choices:prof?.choices||[]};
     }
     else if(state.phase==='LOCATION') center=`${sceneVisualHtml(loc,state.locationBrief||loc?.desc||'')}${availableActionsHtml()}`;
     else if(state.phase==='INTERACTION'){
-      const it=state.interaction,o=cBy(it?.targetId),scene=it?.scene,rel=relationScore(p,o),canTrade=rel>=25&&tradableItems(p).length&&tradableItems(o).length;
-      center=`${miniSceneHtml(loc)}<section class="paper encounterPaper compactPaper"><div class="interactionHeader">${portrait(o,'encounterPortrait')}<div><div class="event-title"><span class="roleName">${esc(o.name)}</span></div><div class="relationText ${relationClass(p,o)}">${relationLabel(p,o)} · ${rel>0?'+':''}${rel}</div></div></div><div class="interactionSceneTitle">${esc(scene.title||'简单交谈')}</div><div class="event-text">${richText(scene.text)}</div><div class="choices compactChoices">${scene.choices.map((ch,i)=>`<button class="choice" onclick="Game.interactionChoice(${i})">${esc(ch.text)}<small>${ch.kind==='check'?esc(riskHint({stat:ch.stat,risk:ch.risk})):esc(ch.risk||'')}</small></button>`).join('')}${rel>=25?`<button class="choice tradeChoice" ${canTrade?'':'disabled'} onclick="Game.interactionTrade()">🤝 交换道具<small>${canTrade?'由对方决定交换给你的道具':'至少一方没有可交易道具'}</small></button>`:''}<button class="choice" onclick="Game.cancelInteraction()">暂不互动</button></div></section>`;
+      const it=state.interaction,o=cBy(it?.targetId),scene=it?.scene,rel=relationScore(p,o),canTrade=!enemy(p,o)&&tradableItems(p).length&&tradableItems(o).length,canGift=tradableItems(p).length>0,canRob=lootableItems(o).length>0;
+      const dialogue=(scene.dialogue||interactionDialogue(o,scene)).map(d=>{const who=cBy(d.who),mine=d.who===p.id;return `<div class="dialogueLine ${mine?'mine':'theirs'}">${portrait(who,'dialogueAvatar')}<div><b>${esc(who.name)}</b><span>${richText(d.text)}</span></div></div>`;}).join('');
+      center=`<section class="interactionVisual"><img class="interactionBg" src="${esc(loc?.scene||'')}" alt="${esc(loc?.name||'地点')}互动场景"><div class="interactionShade"></div><div class="interactionDuo"><div>${portrait(p,'interactionBigPortrait')}<b>${esc(p.name)}</b></div><span>×</span><div>${portrait(o,'interactionBigPortrait')}<b>${esc(o.name)}</b></div></div><div class="interactionRel ${relationClass(p,o)}">${relationLabel(p,o)} · ${rel>0?'+':''}${rel}</div></section><section class="paper encounterPaper compactPaper interactionPaper"><div class="interactionSceneTitle">${esc(scene.title||'简单交谈')}</div><div class="dialogueTranscript">${dialogue}</div><div class="choices compactChoices interactionStoryChoices">${scene.choices.map((ch,i)=>`<button class="choice" onclick="Game.interactionChoice(${i})">${esc(ch.text)}<small>${ch.kind==='check'?esc(riskHint({stat:ch.stat,risk:ch.risk})):esc(ch.risk||'')}</small></button>`).join('')}</div><div class="interactionUtility"><button ${canTrade?'':'disabled'} onclick="Game.interactionTrade()">🤝<span>交易</span></button><button ${canGift?'':'disabled'} onclick="Game.interactionGift()">🎁<span>赠送</span></button><button class="rob" ${canRob?'':'disabled'} onclick="Game.interactionRob()">⚔️<span>抢夺</span></button><button onclick="Game.cancelInteraction()">↩<span>离开</span></button></div></section>`;
     }
     else if(state.phase==='EVENT'&&state.currentEvent){
       const e=state.currentEvent,key=`${state.day}-${e.id}`,shouldType=lastTypedKey!==key,controls=e.choices.map((ch,i)=>`<button class="choice" onclick="Game.resolve(${i})">${esc(ch.text)}<small>${esc(riskHint(ch))}</small></button>`).join('');
@@ -819,19 +912,19 @@ ${base}`,choices:prof?.choices||[]};
     else if(state.phase==='POST'||state.phase==='POST_ACTION'){
       const isExplore=state.phase==='POST';center=`${miniSceneHtml(loc)}<section class="paper eventPaper resultPaper"><div class="section-title">${isExplore?'探索结果':'行动结果'} · ${esc(loc?.name||'')}</div>${isExplore?`<div class="event-title">${esc(state.currentEvent?.name||'今日探索')}</div>`:''}<div class="result richResult">${richText(state.currentResult)}</div></section>${availableActionsHtml()}`;
     } else {state.phase=state.travelDecisionMade?'LOCATION':'MORNING';return renderMain();}
-    app.innerHTML=`<div class="screen gameScreen">${compactHudHtml()}<main class="gameStage">${center}</main>${quickDockHtml()}</div>`;if(state.pending)renderPending();if(typeAfter)setTimeout(typeAfter,70);setTimeout(maybeShowDeathAlert,80);
+    app.innerHTML=`<div class="screen gameScreen">${compactHudHtml()}<main class="gameStage phase-${state.phase.toLowerCase()}">${center}</main>${quickDockHtml()}</div>`;if(state.pending)renderPending();if(typeAfter)setTimeout(typeAfter,70);setTimeout(maybeShowDeathAlert,80);
   }
   function renderNight(){const loc=state.lastNight?.locationId?locationById(state.lastNight.locationId):null;const affected=loc&&player().locationId===loc.id;app.innerHTML=`<div class="screen center"><section class="paper nightPaper"><div class="section-title">DAY ${state.day} · 夜晚${loc?` · ${esc(loc.name)}`:''}</div><div class="event-title">${esc(state.lastNight.title)}</div><div class="event-text">${richText(state.lastNight.text)}</div>${loc?`<div class="nightScope ${affected?'affected':''}">${affected?'⚠ 该事件发生在你所在地点':'该事件只影响 '+esc(loc.name)+' 的幸存者'}</div>`:''}</section><button class="btn" onclick="Game.nextDay()">进入 DAY ${state.day+1}</button></div>`;}
   function renderEnd(){const p=player(),win=state.phase==='VICTORY',[title,txt]=rating(state.score),survived=win?81:Math.max(1,state.day),lb=state.leaderboard||{submitted:false};app.innerHTML=`<div class="screen center"><div class="subbrand">${win?'DAY 81 · RESCUE':'SURVIVAL ENDED'}</div><div class="brand" style="font-size:34px">${win?'救援来了':'求生结束'}</div><div class="tagline">${win?'清晨，你被一种陌生的声音惊醒。不是风，也不是海浪。是船。':`DAY ${state.day}，${esc(p.name)}倒下了。<br>原因：${esc(p.deathCause||'生命归零')}`}</div><div class="score">${state.score}</div><div class="name">${title}</div><div class="tagline" style="margin:10px auto 18px">${txt}</div><section class="card" style="text-align:left"><div class="section-title">本局记录</div><div class="row between"><span>幸存天数</span><b>${survived}天</b></div><div class="row between"><span>难度</span><b>${esc(state.difficultyLabel)}</b></div><div class="row between"><span>最终得分</span><b>${state.score}</b></div></section><section class="card leaderboardSubmit"><div class="section-title">🏆 提交排行榜</div>${lb.submitted?`<div class="rankSuccess">账号 <b>${esc(lb.account)}</b> 当前排名：<strong>#${lb.rank||'-'}</strong></div>`:`<div class="meta" style="margin-bottom:10px">输入6—8个字符的账号。相同账号只保留最好成绩。</div><div class="submitRow"><input id="rankAccount" maxlength="8" placeholder="6-8字符账号"><button class="btn small" onclick="Game.submitScore()">提交</button></div><div id="rankMsg" class="rankMsg"></div>`}<button class="btn ghost" style="margin-top:10px" onclick="Game.showLeaderboard()">查看前100名</button></section><section class="card" style="text-align:left"><div class="section-title">最终幸存者</div>${state.characters.map(c=>`<div class="row between ${c.dead?'dead':''}" style="padding:7px 0"><span class="endPerson">${portrait(c,'endPortrait')} ${esc(c.name)}</span><span>${c.dead?`DAY ${c.deathDay} · ${esc(c.deathCause)}`:'获救'}</span></div>`).join('')}</section><button class="btn" onclick="Game.selectScreen()">再来一次</button><button class="btn ghost" onclick="Game.home()">返回首页</button></div>`;}
   function renderPending(){
     const p=player();if(state.pending.type==='pick'){const opts=state.pending.choices.map(id=>`<button class="choice" onclick="Game.pickItem('${id}')">${item(id).ico} <b class="itemName">${esc(item(id).name)}</b><small>${esc(item(id).desc)}</small></button>`).join('');document.body.insertAdjacentHTML('beforeend',`<div class="modalWrap" id="pending"><div class="modal"><h2>选择一件物资</h2><p class="muted">你只能带走其中一件。</p><div class="choices">${opts}</div></div></div>`);return;}
-    const id=state.pending.incoming,it=item(id),old=discardableItems(p).map(x=>`<button class="choice" onclick="Game.replace('${x}')">丢弃 ${item(x).ico} <b class="itemName">${esc(item(x).name)}</b></button>`).join('');
+    const id=state.pending.incoming,it=item(id),old=[...new Set(discardableItems(p))].map(x=>`<button class="choice" onclick="Game.replace('${x}')">丢弃 ${item(x).ico} <b class="itemName">${esc(item(x).name)}</b></button>`).join('');
     document.body.insertAdjacentHTML('beforeend',`<div class="modalWrap" id="pending"><div class="modal"><h2>背包已满</h2><p>新获得：${it.ico} <b class="itemName">${esc(it.name)}</b></p><p class="muted">专属初始道具不可丢弃。请选择一件普通道具丢弃，或放弃新道具。</p><div class="choices">${old}<button class="choice" onclick="Game.replace('__new__')">放弃 ${esc(it.name)}</button></div></div></div>`);
   }
 
   function modal(html){document.body.insertAdjacentHTML('beforeend',`<div class="modalWrap" id="modal"><div class="modal">${html}</div></div>`);}
   function closeModal(){document.getElementById('modal')?.remove();}
-  function itemInfo(id){closeModal();const it=item(id),starter=isStarterItem(player(),id),can=it.consumable&&['LOCATION','MAP','POST','POST_ACTION'].includes(state.phase);modal(`<div class="row between"><h2>${it.ico} <span class="itemName">${esc(it.name)}</span></h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><p>${esc(it.desc)}</p><div class="muted">${starter?'角色专属 · 永久持有 · 不可交易 / 夺取 / 丢弃':it.consumable?'消耗品':'携带生效 · 同名效果不叠加'}</div>${can?`<button class="btn" style="margin-top:14px" onclick="Game.use('${id}')">使用</button>`:''}`);}
+  function itemInfo(id){closeModal();const it=item(id),starter=isStarterItem(player(),id),can=it.consumable&&['LOCATION','MAP','POST','POST_ACTION'].includes(state.phase),count=player().inventory.filter(x=>x===id).length;modal(`<div class="row between"><h2>${it.ico} <span class="itemName">${esc(it.name)}</span>${it.consumable&&count>1?` <small>×${count}</small>`:''}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><p>${esc(it.desc)}</p><div class="muted">${starter?'角色专属 · 永久持有 · 不可交易 / 夺取 / 丢弃':it.consumable?'消耗品 · 相同物品每个背包格最多叠加2个':'携带生效 · 同名效果不叠加'}</div>${can?`<button class="btn" style="margin-top:14px" onclick="Game.use('${id}')">使用1个</button>`:''}`);}
   function survivors(){
     const ploc=player().locationId,p=player();
     modal(`<div class="row between"><h2>人物关系</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><div class="list">${state.characters.map(c=>`<div class="listItem relationItem ${c.dead?'dead':''}">${portrait(c,'listPortrait')}<div class="relationBody"><div class="row between"><b>${esc(c.name)} · ${esc(c.job)}</b><span>${c.dead?'已死亡':hearts(c)}</span></div><div class="meta">${c.dead?`DAY ${c.deathDay} · ${esc(c.deathCause)}`:`健康 ${healthDots(c)} · ${c.id===state.playerId||c.locationId===ploc?'📍'+esc(locationById(c.locationId)?.name||'未知'):'位置未知'}${c.id!==state.playerId?` · AI ${esc(c.aiLabel||'中等')}`:''}`}</div>${c.id!==p.id&&!c.dead?`<div class="relationMeter"><i style="width:${clamp((relationScore(p,c)+100)/2,0,100)}%"></i></div><div class="relationText ${relationClass(p,c)}">${relationLabel(p,c)} · ${relationScore(p,c)>0?'+':''}${relationScore(p,c)}</div>`:'<div class="relationText">主角</div>'}</div></div>`).join('')}</div>`);
@@ -841,9 +934,9 @@ ${base}`,choices:prof?.choices||[]};
 
   function showCamp(){
     if(!state){toast('开始游戏后才能查看营地');return;}
-    closeModal();const c=camp(),here=player().locationId===c.locationId;const labels={wood:'木材',fiber:'藤条',scrap:'零件'};
-    const buildings=(D.campBuildings||[]).map(b=>{const built=!!c.buildings[b.id],cost=Object.entries(b.cost||{}).map(([k,v])=>`${labels[k]}×${v}`).join(' · ');return `<div class="campBuild ${built?'built':''}"><div class="campBuildIcon">${b.icon}</div><div class="campBuildText"><b>${esc(b.name)}</b><span>${esc(b.desc)}</span><small>${built?'已建成':cost}</small></div>${built?'<em>✓</em>':`<button class="btn small" ${here&&canBuild(b)?'':'disabled'} onclick="Game.buildCamp('${b.id}')">建造</button>`}</div>`;}).join('');
-    modal(`<div class="row between"><h2>🏕️ 公共营地</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><div class="campLocation">📍 林中空地 ${here?'<b>· 你正在这里</b>':'· 前往此地才能建造和领取物资'}</div><div class="campMaterials"><span>🪵 木材 <b>${c.materials.wood||0}</b></span><span>🌿 藤条 <b>${c.materials.fiber||0}</b></span><span>⚙️ 零件 <b>${c.materials.scrap||0}</b></span></div><div class="campStorage"><button class="choice" ${here&&c.storedWater>0?'':'disabled'} onclick="Game.claimCamp('water')">💧 净水储备 ×${c.storedWater||0}<small>领取后健康+1</small></button><button class="choice" ${here&&c.storedFood>0?'':'disabled'} onclick="Game.claimCamp('food')">🐟 食物储备 ×${c.storedFood||0}<small>领取一份烤鱼</small></button></div><div class="section-title" style="margin-top:16px">营地设施</div><div class="campBuildList">${buildings}</div><p class="muted" style="font-size:12px;line-height:1.6">探索时会随机获得木材、藤条和零件。设施建成后会长期影响后续生存与大危机。</p>`);
+    closeModal();const c=camp(),here=player().locationId===c.locationId;const labels={wood:'木材',fiber:'藤条',scrap:'零件'};c.damagedBuildings=c.damagedBuildings||{};
+    const buildings=(D.campBuildings||[]).map(b=>{const built=!!c.buildings[b.id],damaged=!!c.damagedBuildings[b.id],cost=Object.entries(b.cost||{}).map(([k,v])=>`${labels[k]}×${v}`).join(' · '),repair=effectiveCost(player(),halfCost(b.cost)),repairTxt=Object.entries(repair).map(([k,v])=>`${labels[k]}×${v}`).join(' · ');return `<div class="campBuild ${built?'built':''} ${damaged?'damaged':''}"><div class="campBuildIcon">${b.icon}</div><div class="campBuildText"><b>${esc(b.name)} ${damaged?'<em class="damageTag">受损</em>':''}</b><span>${esc(b.desc)}</span><small>${damaged?'损坏期间效果失效 · 修复 '+repairTxt:built?'已建成':cost}</small></div>${damaged?`<button class="btn small danger" ${here&&canAffordMaterials(repair)?'':'disabled'} onclick="Game.repairCampBuilding('${b.id}')">修复</button>`:built?'<em>✓</em>':`<button class="btn small" ${here&&canBuild(b)?'':'disabled'} onclick="Game.buildCamp('${b.id}')">建造</button>`}</div>`;}).join('');
+    modal(`<div class="row between"><h2>🏕️ 公共营地</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><div class="campLocation">📍 林中空地 ${here?'<b>· 你正在这里</b>':'· 前往此地才能建造、修复和领取物资'}</div><div class="campMaterials"><span>🪵 木材 <b>${c.materials.wood||0}</b></span><span>🌿 藤条 <b>${c.materials.fiber||0}</b></span><span>⚙️ 零件 <b>${c.materials.scrap||0}</b></span></div><div class="campStorage"><button class="choice" ${here&&c.storedWater>0?'':'disabled'} onclick="Game.claimCamp('water')">💧 净水储备 ×${c.storedWater||0}<small>领取后健康+1</small></button><button class="choice" ${here&&c.storedFood>0?'':'disabled'} onclick="Game.claimCamp('food')">🐟 食物储备 ×${c.storedFood||0}<small>领取一份烤鱼</small></button></div><div class="section-title" style="margin-top:16px">营地设施</div><div class="campBuildList">${buildings}</div><p class="muted" style="font-size:12px;line-height:1.6">少数风雨、潮气或意外碰撞可能损坏营地设施。受损设施会暂时失效，使用原建造资源约一半即可修复。</p>`);
   }
 
   async function showLeaderboard(){
@@ -864,13 +957,20 @@ ${base}`,choices:prof?.choices||[]};
   }
   function closeDeathAlert(){document.getElementById('modal')?.remove();if(state?.deathAlerts?.length)state.deathAlerts.shift();save();setTimeout(maybeShowDeathAlert,80);}
 
-  function render(){document.querySelectorAll('.modalWrap').forEach(x=>x.remove());if(!state){renderHome();return;}renderMain();if(state.pending&&!document.getElementById('pending'))renderPending();setTimeout(maybeShowDeathAlert,100);}
+  function maybeShowRelationAlert(){
+    if(!state?.relationAlerts?.length||document.querySelector('.modalWrap'))return;
+    const a=state.relationAlerts[0],c=cBy(a.id);const arrow=a.from===a.to?'→':`${esc(a.from)} → ${esc(a.to)}`;
+    modal(`<div class="relationAlert ${a.positive?'positive':'negative'}">${c?portrait(c,'relationAlertPortrait'):''}<div class="relationAlertTag">关系变化</div><h2>${esc(a.name)}</h2><div class="relationJump">${arrow}</div>${a.reason?`<p>${esc(a.reason)}</p>`:''}${a.special?`<div class="specialDialogue">${richText(a.special)}</div>`:''}<button class="btn ${a.positive?'':'danger'}" onclick="Game.closeRelationAlert()">知道了</button></div>`);sound(a.positive?'good':'bad');
+  }
+  function closeRelationAlert(){document.getElementById('modal')?.remove();if(state?.relationAlerts?.length)state.relationAlerts.shift();save();setTimeout(()=>{if(state?.deathAlerts?.length)maybeShowDeathAlert();else maybeShowRelationAlert();},80);}
+
+  function render(){document.querySelectorAll('.modalWrap').forEach(x=>x.remove());if(!state){renderHome();return;}renderMain();if(state.pending&&!document.getElementById('pending'))renderPending();setTimeout(()=>{if(state?.deathAlerts?.length)maybeShowDeathAlert();else maybeShowRelationAlert();},100);}
 
   window.Game={
     home(){state=null;renderHome();},selectScreen(){app.innerHTML='';renderSelect();},chooseDifficulty(id){renderDifficulty(id);},continueGame(){state=load();if(!state){renderHome();return;}render();},
     start(id,difficultyKey){if(load()&&!confirm('开始新游戏会覆盖旧存档，确定吗？'))return;state=newState(id,difficultyKey||'normal');log(`${player().name}成为主角。初始位置：${locationById(player().locationId).name}。`);startDay(true);},
-    exploreHere:exploreCurrent,resolve:resolveInstantOrCheck,endDay,nextDay,itemInfo,survivors,logs,closeModal,use(id){closeModal();useItem(player(),id);},toggleSound,showCamp,buildCamp,claimCamp,showShelter,buildOwnShelter,upgradeOwnShelter,installShelterFacility,showStatus,showInventory,showOverview,closeDeathAlert,
-    openMap,stayHere:chooseStay,move:moveToLocation,backLocation:backMorning,personInfo,interact:beginInteraction,interactionChoice,interactionTrade:interactionTradeModal,interactionTradeChoose,cancelInteraction,restHere:restAtLocation,
+    exploreHere:exploreCurrent,resolve:resolveInstantOrCheck,endDay,nextDay,itemInfo,survivors,logs,closeModal,use(id){closeModal();useItem(player(),id);},toggleSound,showCamp,buildCamp,claimCamp,repairCampBuilding,showShelter,buildOwnShelter,upgradeOwnShelter,installShelterFacility,repairOwnShelter,repairShelterFacility,showStatus,showInventory,showOverview,closeDeathAlert,closeRelationAlert,
+    openMap,stayHere:chooseStay,move:moveToLocation,backLocation:backMorning,personInfo,interact:beginInteraction,interactionChoice,interactionTrade:interactionTradeModal,interactionTradeChoose,interactionGift:interactionGiftModal,interactionGiftChoose,interactionRob,cancelInteraction,restHere:restAtLocation,
     replace(oldId){const p=player(),incoming=state.pending.incoming;if(oldId!=='__new__'){if(isStarterItem(p,oldId)){toast('专属初始道具不可丢弃');return;}const i=p.inventory.indexOf(oldId);if(i>=0)p.inventory.splice(i,1,incoming);toast(`丢弃${item(oldId).name}，留下${item(incoming).name}`);}else toast(`放弃${item(incoming).name}`);state.pending=null;save();render();},
     pickItem(id){state.pending=null;gainItem(player(),id,'选择获得');save();render();},restartAsk(){if(confirm('确定放弃当前进度并重新开始吗？')){localStorage.removeItem(SAVE);state=null;renderSelect();}},
     showLeaderboard,submitScore
