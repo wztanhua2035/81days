@@ -313,3 +313,43 @@ html[data-font-size="large"]{--read-body:16px;--read-detail:15px;--read-scene:17
 
 @media(max-width:390px){.gameScreen .sceneAvatar{width:46px!important;height:46px!important}.enlargedDuo .interactionBigPortrait{width:94px;height:116px}.rpgSpeakerPortrait{width:64px;height:80px}.rpgBubble{min-height:80px;padding:8px 10px 32px}.portraitMap .mapSpot{width:76px}.portraitMap .spotLabel{font-size:10px}.interactionPaper{max-height:35dvh}}
 .actionOrderLine{font-size:12px;line-height:1.5;color:#7b6d59;background:#f7edda;border:1px dashed #cdbb99;border-radius:9px;padding:6px 8px;margin:4px 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* v2.4 细节打磨：统一声音、阅读档位、窝棚提示、场景头像和结果布局 */
+html[data-font-size="small"]{--read-result:13px}
+html[data-font-size="medium"]{--read-result:15px}
+html[data-font-size="large"]{--read-result:17px}
+.richResult,.resultPaper .result,.travelPaper .result{font-size:var(--read-result,15px)!important;line-height:1.72!important}
+.richResult br{display:block;content:"";margin-top:4px}
+.materialName{color:#ffd36f;font-weight:950;background:#503a1480;border-radius:5px;padding:0 4px;white-space:nowrap}
+
+/* 到达新地点：人物放在画面中下方，既醒目又不挡顶部状况描述 */
+.phase-location .scenePeople{left:50%!important;right:auto!important;top:auto!important;bottom:12%!important;transform:translateX(-50%);max-width:92%!important;width:max-content}
+.phase-location .scenePeopleRow{justify-content:center!important;flex-wrap:nowrap!important}
+.phase-location .scenePerson{background:#071b1be8;box-shadow:0 7px 18px #0008}
+
+/* 探索/途中事件把描述区留得更完整，选项与结果框下移并压缩高度 */
+.phase-event .sceneStrip,.phase-post .sceneStrip,.phase-post_action .sceneStrip{flex:1 1 auto!important;min-height:155px!important}
+.phase-event .compactPaper,.phase-post .resultPaper,.phase-post_action .resultPaper{flex:0 0 auto!important;max-height:29dvh!important;overflow:auto;margin-top:7px}
+.phase-travel .eventSceneStrip{flex:1 1 auto!important;min-height:175px!important}
+.phase-travel .travelPaper{flex:0 0 auto!important;max-height:28dvh!important;overflow:auto;margin-top:8px}
+.phase-event .compactChoices,.phase-travel .compactChoices{margin-top:5px!important;gap:5px!important}
+.phase-event .compactChoices .choice,.phase-travel .compactChoices .choice{min-height:38px!important;padding:7px 9px!important}
+
+/* 我的窝棚：材料需求更醒目；不足/可升级直接显示在画面中央 */
+.shelterHero{align-items:stretch!important}.shelterBuildInfo{display:flex;flex-direction:column;gap:6px;min-width:0}.shelterBuildInfo>b{font-size:18px}.shelterBuildInfo>span{line-height:1.55}
+.materialTitle{font-size:14px;font-weight:950;color:#f5d27e;margin-top:3px}
+.materialCosts{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.materialNeed{font-size:14px;font-weight:900;border-radius:8px;padding:6px 8px;border:1px solid #526b66;background:#102220;color:#e9f1ee;white-space:nowrap}
+.materialNeed.enough{border-color:#4e9b70;background:#143426;color:#b8f0c8}.materialNeed.lack{border-color:#a96156;background:#3b211f;color:#ffbeb5}
+.shelterInteriorWrap{position:relative;border-radius:14px;overflow:hidden;background:#0d1b1a}.shelterInteriorWrap .shelterInterior{display:block;width:100%;margin:0!important}
+.shelterCenterNotice,.shelterCenterUpgrade{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;border-radius:12px;padding:11px 17px;font-size:18px;font-weight:950;box-shadow:0 8px 24px #0009;backdrop-filter:blur(4px);white-space:nowrap}
+.shelterCenterNotice.lack{background:#511f1fd9;color:#ffd4cf;border:1px solid #e89086}
+.shelterCenterUpgrade{border:1px solid #f0d079;background:#1f5b3ee8;color:#fff2b3;cursor:pointer}
+.shelterUpgradeNeed{margin:10px 0;padding:9px 10px;border:1px solid #36524e;border-radius:12px;background:#0f201f}
+.facilityCost{margin-top:5px}.facilityCost>.materialCosts{gap:4px}.facilityCost .materialNeed{font-size:12px;padding:4px 6px}
+
+@media(max-width:390px){
+  .phase-location .scenePeople{bottom:10%!important;max-width:96%!important}.phase-location .scenePerson span{display:none}.phase-location .sceneAvatar{width:48px!important;height:48px!important}
+  .phase-event .sceneStrip,.phase-post .sceneStrip,.phase-post_action .sceneStrip{min-height:140px!important}.phase-travel .eventSceneStrip{min-height:155px!important}
+  .materialNeed{font-size:13px;padding:5px 7px}.shelterCenterNotice,.shelterCenterUpgrade{font-size:16px;padding:9px 13px}
+}

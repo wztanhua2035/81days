@@ -261,16 +261,18 @@
     closeModal();const p=player(),s=shelterOf(p),labels={wood:'木材',fiber:'藤条',scrap:'零件'},c=camp();
     const resources=`<div class="campMaterials shelterResources"><span>🪵 木材 <b>${c.materials.wood||0}</b></span><span>🌿 藤条 <b>${c.materials.fiber||0}</b></span><span>⚙️ 零件 <b>${c.materials.scrap||0}</b></span><span>💧 净水 <b>${c.storedWater||0}</b></span><span>🐟 食物 <b>${c.storedFood||0}</b></span></div>`;
     if(!s.level){
-      const def=shelterLevelDef(1),cost=effectiveCost(p,def.cost),txt=Object.entries(cost).map(([k,v])=>`${labels[k]}×${v}`).join(' · ');
-      modal(`<div class="row between"><h2>🏠 我的窝棚</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div>${resources}<p class="muted">你还没有自己的窝棚。当天确定停留地点后，可以在当前位置搭建一座永久窝棚。</p><div class="shelterBuildIntro"><img src="${def.image}" class="shelterInterior" alt="简易窝棚内部"><div><b>${def.name}</b><span>${def.desc}</span><small>需要：${txt}</small></div></div><button class="btn" ${state.travelDecisionMade&&canAffordMaterials(cost)?'':'disabled'} onclick="Game.buildOwnShelter()">在${esc(locationById(p.locationId)?.name||'当前位置')}搭建窝棚</button>`);return;
+      const def=shelterLevelDef(1),cost=effectiveCost(p,def.cost),afford=canAffordMaterials(cost);
+      modal(`<div class="row between"><h2>🏠 我的窝棚</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div>${resources}<p class="muted">你还没有自己的窝棚。当天确定停留地点后，可以在当前位置搭建一座永久窝棚。</p><div class="shelterBuildIntro shelterHero"><div class="shelterInteriorWrap"><img src="${def.image}" class="shelterInterior" alt="简易窝棚内部">${!afford?'<div class="shelterCenterNotice lack">材料不足</div>':''}</div><div class="shelterBuildInfo"><b>${def.name}</b><span>${def.desc}</span><div class="materialTitle">需要材料</div>${materialCostHtml(cost)}</div></div><button class="btn" ${state.travelDecisionMade&&afford?'':'disabled'} onclick="Game.buildOwnShelter()">在${esc(locationById(p.locationId)?.name||'当前位置')}搭建窝棚</button>`);return;
     }
-    const def=shelterLevelDef(s.level),here=p.locationId===s.locationId,next=s.level<3?shelterLevelDef(s.level+1):null,nextCost=next?effectiveCost(p,next.cost):null,repairCost=effectiveCost(p,halfCost(def.cost));
+    const def=shelterLevelDef(s.level),here=p.locationId===s.locationId,next=s.level<3?shelterLevelDef(s.level+1):null,nextCost=next?effectiveCost(p,next.cost):null,canUpgrade=!!(next&&here&&!s.damaged&&canAffordMaterials(nextCost)),repairCost=effectiveCost(p,halfCost(def.cost));
     const repairTxt=Object.entries(repairCost).map(([k,v])=>`${labels[k]}×${v}`).join(' · ');
     const facs=(D.shelterFacilities||[]).map(f=>{
-      const built=s.facilities.includes(f.id),damaged=s.damagedFacilities?.includes(f.id),cost=effectiveCost(p,f.cost),repair=effectiveCost(p,halfCost(f.cost)),txt=Object.entries(cost).map(([k,v])=>`${labels[k]}×${v}`).join(' · '),repairText=Object.entries(repair).map(([k,v])=>`${labels[k]}×${v}`).join(' · ');
-      return `<div class="shelterFacility ${built?'built':''} ${damaged?'damaged':''}"><span class="facilityIcon">${f.icon}</span><div><b>${esc(f.name)} ${damaged?'<em class="damageTag">受损</em>':''}</b><small>${esc(f.desc)}</small><em>${damaged?'损坏期间效果失效 · 修复 '+repairText:built?'已制作':txt}</em></div>${damaged?`<button class="btn small danger" ${here&&canAffordMaterials(repair)?'':'disabled'} onclick="Game.repairShelterFacility('${f.id}')">修复</button>`:built?'✓':`<button class="btn small" ${here&&s.facilities.length<4&&canAffordMaterials(cost)?'':'disabled'} onclick="Game.installShelterFacility('${f.id}')">制作</button>`}</div>`;
+      const built=s.facilities.includes(f.id),damaged=s.damagedFacilities?.includes(f.id),cost=effectiveCost(p,f.cost),repair=effectiveCost(p,halfCost(f.cost));
+      const costHtml=materialCostHtml(damaged?repair:cost);
+      return `<div class="shelterFacility ${built?'built':''} ${damaged?'damaged':''}"><span class="facilityIcon">${f.icon}</span><div><b>${esc(f.name)} ${damaged?'<em class="damageTag">受损</em>':''}</b><small>${esc(f.desc)}</small>${built&&!damaged?'<em>已制作</em>':`<div class="facilityCost">${damaged?'修复需要':'需要'}${costHtml}</div>`}</div>${damaged?`<button class="btn small danger" ${here&&canAffordMaterials(repair)?'':'disabled'} onclick="Game.repairShelterFacility('${f.id}')">修复</button>`:built?'✓':`<button class="btn small" ${here&&s.facilities.length<4&&canAffordMaterials(cost)?'':'disabled'} onclick="Game.installShelterFacility('${f.id}')">制作</button>`}</div>`;
     }).join('');
-    modal(`<div class="row between"><h2>🏠 ${state.coupleHome?.locationId?'我们的':'我的'}${esc(def.name)} · Lv.${s.level}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div>${resources}<div class="shelterLocation">📍 ${esc(locationById(s.locationId)?.name||'未知地点')} ${here?'<b>· 你正在这里，可以进入内部</b>':'· 你当前不在窝棚所在地'}</div>${here?`<img src="${def.image}" class="shelterInterior" alt="${esc(def.name)}内部">`:`<div class="awayShelter">🏠 回到 ${esc(locationById(s.locationId)?.name||'窝棚所在地')} 后可进入内部、升级和制作设施。</div>`}${s.damaged?`<div class="structureDamage"><b>⚠ 窝棚受损</b><span>损坏期间防护效果失效。修复需要：${repairTxt}</span><button class="btn small danger" ${here&&canAffordMaterials(repairCost)?'':'disabled'} onclick="Game.repairOwnShelter()">修复窝棚</button></div>`:''}<p class="shelterDesc">${esc(def.desc)}</p>${next?`<button class="btn secondary" ${here&&!s.damaged&&canAffordMaterials(nextCost)?'':'disabled'} onclick="Game.upgradeOwnShelter()">升级为 ${esc(next.name)}<small>${Object.entries(nextCost).map(([k,v])=>` ${labels[k]}×${v}`).join('')}</small></button>`:'<div class="maxShelter">★ 已达到最高等级</div>'}<div class="section-title" style="margin-top:14px">内部设施 ${s.facilities.length}/4</div><div class="shelterFacilityList">${facs}</div>`);
+    const interior=here?`<div class="shelterInteriorWrap"><img src="${def.image}" class="shelterInterior" alt="${esc(def.name)}内部">${canUpgrade?`<button class="shelterCenterUpgrade" onclick="Game.upgradeOwnShelter()">⬆ 升级为 ${esc(next.name)}</button>`:''}</div>`:`<div class="awayShelter">🏠 回到 ${esc(locationById(s.locationId)?.name||'窝棚所在地')} 后可进入内部、升级和制作设施。</div>`;
+    modal(`<div class="row between"><h2>🏠 ${state.coupleHome?.locationId?'我们的':'我的'}${esc(def.name)} · Lv.${s.level}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div>${resources}<div class="shelterLocation">📍 ${esc(locationById(s.locationId)?.name||'未知地点')} ${here?'<b>· 你正在这里，可以进入内部</b>':'· 你当前不在窝棚所在地'}</div>${interior}${s.damaged?`<div class="structureDamage"><b>⚠ 窝棚受损</b><span>损坏期间防护效果失效。修复需要：${repairTxt}</span><button class="btn small danger" ${here&&canAffordMaterials(repairCost)?'':'disabled'} onclick="Game.repairOwnShelter()">修复窝棚</button></div>`:''}<p class="shelterDesc">${esc(def.desc)}</p>${next?`<div class="shelterUpgradeNeed"><div class="materialTitle">升级为 ${esc(next.name)} 需要</div>${materialCostHtml(nextCost)}${!canUpgrade?`<div class="meta">${!here?'回到窝棚所在地后才能升级':s.damaged?'先修好窝棚再升级':canAffordMaterials(nextCost)?'已经达到升级条件':'材料还没攒够'}</div>`:''}</div>`:'<div class="maxShelter">★ 已达到最高等级</div>'}<div class="section-title" style="margin-top:14px">内部设施 ${s.facilities.length}/4</div><div class="shelterFacilityList">${facs}</div>`);
   }
   function applyShelterNightBenefits(){
     for(const c of alive()){
@@ -353,18 +355,18 @@
     if(!['small','medium','large'].includes(size))return;fontSizePref=size;localStorage.setItem(FONT_KEY,size);applyFontSize();sound('click');closeModal();showOverview();
   }
   function ensureBgm(){
-    if(bgmChoice==='off')return null;const track=BGM_TRACKS[bgmChoice]||BGM_TRACKS.gentle_sea;
+    if(!soundEnabled||bgmChoice==='off')return null;const track=BGM_TRACKS[bgmChoice]||BGM_TRACKS.gentle_sea;
     if(!bgmAudio){bgmAudio=new Audio();bgmAudio.loop=true;bgmAudio.preload='auto';bgmAudio.playsInline=true;bgmAudio.volume=.26;}
     if(bgmAudio.dataset.track!==bgmChoice){bgmAudio.pause();bgmAudio.src=track.src;bgmAudio.dataset.track=bgmChoice;bgmAudio.load();}
     return bgmAudio;
   }
   function tryStartBgm(){
-    if(bgmChoice==='off')return;const a=ensureBgm();if(!a)return;if(a.paused)a.play().catch(()=>{});
+    if(!soundEnabled||bgmChoice==='off')return;const a=ensureBgm();if(!a)return;if(a.paused)a.play().catch(()=>{});
   }
   function setBgm(choice){
     if(!BGM_TRACKS[choice])return;bgmChoice=choice;localStorage.setItem(BGM_KEY,choice);
     if(bgmAudio){bgmAudio.pause();bgmAudio.currentTime=0;bgmAudio=null;}
-    if(choice!=='off')tryStartBgm();sound('click');closeModal();showOverview();
+    if(choice!=='off'&&soundEnabled)tryStartBgm();sound('click');closeModal();showOverview();
   }
   function pauseBgm(){if(bgmAudio&&!bgmAudio.paused)bgmAudio.pause();}
 
@@ -416,7 +418,12 @@
     if(ctx.state==='suspended'){ctx.resume().then(()=>playTone(kind)).catch(()=>{});return;}
     playTone(kind);
   }
-  function toggleSound(){ soundEnabled=!soundEnabled; localStorage.setItem(SOUND_KEY,soundEnabled?'1':'0'); if(soundEnabled){unlockAudio();sound('click');} render(); }
+  function toggleSound(){
+    soundEnabled=!soundEnabled;localStorage.setItem(SOUND_KEY,soundEnabled?'1':'0');
+    if(soundEnabled){unlockAudio();sound('click');}
+    else{pauseBgm();try{if(audioCtx&&audioCtx.state==='running')audioCtx.suspend();}catch(e){}}
+    render();
+  }
   function showStatFx(type,delta){
     if(!state||!delta) return;
     const positive=delta>0, label=type==='life'?'生命':'健康';
@@ -438,8 +445,16 @@
     for(const name of itemNames)html=html.replace(new RegExp(regexEsc(esc(name)),'g'),`<strong class="itemName">${esc(name)}</strong>`);
     for(const name of roleNames)html=html.replace(new RegExp(regexEsc(esc(name)),'g'),`<strong class="roleName">${esc(name)}</strong>`);
     for(const name of placeNames)html=html.replace(new RegExp(regexEsc(esc(name)),'g'),`<strong class="placeName">${esc(name)}</strong>`);
+    html=html.replace(/(木材|藤条|零件)([+＋×xX]?\d+)?/g,'<strong class="materialName">$1$2</strong>');
     html=html.replace(/(生命(?:值)?[+＋-]\d+|健康(?:值)?[+＋-]\d+|关系(?:提升|下降|改善|恶化)|生死之交|情侣|敌对|信任)/g,'<strong class="keyState">$1</strong>');
     return html.replace(/\n/g,'<br>');
+  }
+  function richResultText(text){
+    return richText(text||'').replace(/；/g,'<br>');
+  }
+  function materialCostHtml(cost){
+    const labels={wood:'木材',fiber:'藤条',scrap:'零件'},icons={wood:'🪵',fiber:'🌿',scrap:'⚙️'},m=camp().materials||{};
+    return `<div class="materialCosts">${Object.entries(cost||{}).map(([k,v])=>`<span class="materialNeed ${(m[k]||0)>=v?'enough':'lack'}">${icons[k]||''}<b>${labels[k]||k}</b> ${m[k]||0}/${v}</span>`).join('')}</div>`;
   }
   function typeText(el,text,done){
     if(!el){ done?.(); return; }
@@ -1063,7 +1078,7 @@ ${base}`,choices:prof?.choices||[]};
     const bgmButtons=Object.entries(BGM_TRACKS).map(([k,v])=>`<button class="settingPill ${bgmChoice===k?'active':''}" onclick="Game.setBgm('${k}')">${k==='off'?'关闭':esc(v.label)}</button>`).join('');
     modal(`<div class="row between"><h2>本局资料</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div>
       <div class="settingsBlock"><b>显示字体</b><span class="muted">可按阅读习惯切换，小/中/大三档会立即生效。</span><div class="settingPills">${fontButtons}</div></div>
-      <div class="settingsBlock"><b>背景音乐</b><span class="muted">四首原创轻音乐循环播放。手机端首次触摸后会自动解锁。</span><div class="settingPills musicPills">${bgmButtons}</div><div class="meta">当前音效：${soundEnabled?'开启':'关闭'} · 右上角扬声器可单独切换操作音效</div></div>
+      <div class="settingsBlock"><b>背景音乐</b><span class="muted">四首原创轻音乐循环播放。手机端首次触摸后会自动解锁。</span><div class="settingPills musicPills">${bgmButtons}</div><div class="meta">总声音：${soundEnabled?'开启':'静音'} · 右上角扬声器会同时控制背景音乐和音效</div></div>
       <div class="overviewList"><button class="choice" onclick="Game.closeModal();Game.showStatus()">👤 角色状态</button><button class="choice" onclick="Game.closeModal();Game.showInventory()">🎒 背包</button><button class="choice" onclick="Game.closeModal();Game.survivors()">👥 人物列表</button><button class="choice" onclick="Game.closeModal();Game.showCamp()">🏕️ 公共营地</button><button class="choice" onclick="Game.closeModal();Game.showShelter()">🏠 我的窝棚</button><button class="choice" onclick="Game.closeModal();Game.logs()">📖 生存日志</button></div>
       ${cr?`<div class="crisisBanner now"><div class="crisisIcon">${cr.icon}</div><div><b>${esc(cr.name)}</b><span>${cr.left===0?'今晚发生':`${cr.left}天后发生`} · ${esc(cr.desc)}</span></div></div>`:''}
       ${s?`<div class="storyHint"><span>📖</span><div><b>${esc(s.chain.name)}</b><small>${s.ready?'新线索：'+esc(locationById(s.step.location)?.name||'未知'):`等待${s.wait}天`}</small></div></div>`:''}`);
@@ -1078,7 +1093,7 @@ ${base}`,choices:prof?.choices||[]};
     else if(state.phase==='TRAVEL'){
       const e=state.travelEvent||{},resolved=!!state.travelEventResult;let buttons='';
       if(e.type==='choice'&&!resolved)buttons=(e.choices||[]).map((ch,i)=>`<button class="choice" onclick="Game.travelChoice(${i})">${esc(ch.text)}<small>${esc(riskHint(ch))}</small></button>`).join('');
-      center=`${miniSceneHtml(loc,e.name||'途中事件',e.text||'前往新地点的路上发生了一点意外。')}<section class="paper travelPaper compactPaper"><div class="section-title">移动途中</div>${resolved?`<div class="result richResult">${richText(state.travelEventResult)}</div><button class="btn" onclick="Game.finishTravel()">继续前往 ${esc(loc?.name||'目的地')}</button>`:`<div class="choices compactChoices">${buttons}</div>`}</section>`;
+      center=`${miniSceneHtml(loc,e.name||'途中事件',e.text||'前往新地点的路上发生了一点意外。')}<section class="paper travelPaper compactPaper"><div class="section-title">移动途中</div>${resolved?`<div class="result richResult">${richResultText(state.travelEventResult)}</div><button class="btn" onclick="Game.finishTravel()">继续前往 ${esc(loc?.name||'目的地')}</button>`:`<div class="choices compactChoices">${buttons}</div>`}</section>`;
     }
     else if(state.phase==='LOCATION') center=`${sceneVisualHtml(loc,state.locationBrief||loc?.desc||'')}${availableActionsHtml()}`;
     else if(state.phase==='INTERACTION'){
@@ -1094,7 +1109,7 @@ ${base}`,choices:prof?.choices||[]};
       center=`${miniSceneHtml(loc,e.name,e.text,shouldType)}<section class="paper eventPaper compactPaper ${e.storyChain?'storyPaper':''}"><div class="section-title">${e.storyChain?'📖 '+esc(e.storyName):'今日探索'} · ${esc(loc?.name||'')}</div><div class="choices compactChoices ${shouldType?'typingLocked':''}" id="eventChoices">${controls}</div></section>`;if(shouldType){lastTypedKey=key;typeAfter=()=>typeText(document.getElementById('eventText'),e.text);}
     }
     else if(state.phase==='POST'||state.phase==='POST_ACTION'){
-      const isExplore=state.phase==='POST';center=`${miniSceneHtml(loc,isExplore?state.currentEvent?.name:'行动结果',state.currentResult||'')}<section class="paper eventPaper resultPaper"><div class="section-title">${isExplore?'探索结果':'行动结果'} · ${esc(loc?.name||'')}</div>${isExplore?`<div class="event-title">${esc(state.currentEvent?.name||'今日探索')}</div>`:''}<div class="result richResult">${richText(state.currentResult)}</div></section>${availableActionsHtml()}`;
+      const isExplore=state.phase==='POST';center=`${miniSceneHtml(loc,isExplore?state.currentEvent?.name:'行动结果',state.currentResult||'')}<section class="paper eventPaper resultPaper"><div class="section-title">${isExplore?'探索结果':'行动结果'} · ${esc(loc?.name||'')}</div>${isExplore?`<div class="event-title">${esc(state.currentEvent?.name||'今日探索')}</div>`:''}<div class="result richResult">${richResultText(state.currentResult)}</div></section>${availableActionsHtml()}`;
     } else {state.phase=state.travelDecisionMade?'LOCATION':'MORNING';return renderMain();}
     app.innerHTML=`<div class="screen gameScreen">${compactHudHtml()}<main class="gameStage phase-${state.phase.toLowerCase()}">${center}</main>${quickDockHtml()}</div>`;if(state.pending)renderPending();if(typeAfter)setTimeout(typeAfter,70);setTimeout(maybeShowDeathAlert,80);
   }
@@ -1118,11 +1133,24 @@ ${base}`,choices:prof?.choices||[]};
   function closeModal(){document.getElementById('modal')?.remove();}
   function itemInfo(id){closeModal();const it=item(id),starter=isStarterItem(player(),id),can=it.consumable&&['LOCATION','MAP','POST','POST_ACTION'].includes(state.phase),count=player().inventory.filter(x=>x===id).length;modal(`<div class="row between"><h2>${it.ico} <span class="itemName">${esc(it.name)}</span>${it.consumable&&count>1?` <small>×${count}</small>`:''}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><p>${esc(it.desc)}</p><div class="muted">${starter?'角色专属 · 永久持有 · 不可交易 / 夺取 / 丢弃':it.consumable?'消耗品 · 相同物品每个背包格最多叠加2个':'携带生效 · 同名效果不叠加'}</div>${can?`<button class="btn" style="margin-top:14px" onclick="Game.use('${id}')">使用1个</button>`:''}`);}
   function characterCurrentScore(c){
-    const invValue=(c.inventory||[]).filter(id=>!isStarterItem(c,id)).reduce((s,id)=>s+(item(id)?.value||0),0),shel=homeShelterOf(c),explored=c.id===state.playerId?Object.keys(state.completedExploreLocations||{}).length:Object.keys(c.aiExplored||{}).length;
-    const attrs=['str','agi','int','luck'].reduce((s,k)=>s+effectiveStat(c,k),0),condition=(c.maxLife?c.life/c.maxLife:0)*220+(c.health/3)*90,performance=(c.stats?.itemsFound||0)*2+(c.stats?.trades||0)*6+(c.stats?.wins||0)*15+(c.stats?.avoids||0)*3;
-    const social=c.id===state.playerId?alive().filter(x=>x.id!==c.id).reduce((s,x)=>s+Math.max(0,relationScore(c,x)),0)*.12:Math.max(0,relationScore(player(),c))*.25;
-    const aliveBase=c.dead?Math.max(0,(c.deathDay||1)*2-100):150+state.day*2;
-    return Math.max(0,Math.round(aliveBase+condition+attrs*12+Math.min(180,invValue*3)+shel.level*45+(shel.facilities?.length||0)*15+explored*5+performance+social));
+    // 实时人物分强调“本局成长”，避免开局因满状态/基础属性直接出现数百分。
+    const survivalDays=Math.max(1,c.dead?(c.deathDay||1):state.day);
+    const invValue=(c.inventory||[]).filter(id=>!isStarterItem(c,id)).reduce((s,id)=>s+(item(id)?.value||0),0);
+    const shel=homeShelterOf(c),explored=c.id===state.playerId?Object.keys(state.completedExploreLocations||{}).length:Object.keys(c.aiExplored||{}).length;
+    const attrs=['str','agi','int','luck'].reduce((s,k)=>s+effectiveStat(c,k),0);
+    const st=c.stats||{},positiveRelations=c.id===state.playerId?alive().filter(x=>x.id!==c.id).reduce((s,x)=>s+Math.max(0,relationScore(c,x)),0):Math.max(0,relationScore(player(),c));
+    let score=20;
+    score+=(survivalDays-1)*2.4;
+    score+=explored*4;
+    score+=shel.level*18+(shel.facilities?.length||0)*7;
+    score+=Math.min(50,invValue*.35);
+    score+=Math.max(0,(st.itemsFound||0)-1)*.8+(st.trades||0)*2.5+(st.wins||0)*5+(st.avoids||0)*1.5;
+    score+=Math.min(30,positiveRelations*.06);
+    score+=Math.max(0,attrs-14)*4;
+    if(c.id===state.playerId)score+=Math.min(30,(state.rescueScore||0)*3);
+    score-=Math.max(0,c.maxLife-c.life)*8+Math.max(0,3-c.health)*3;
+    if(c.dead)score-=12;
+    return clamp(Math.round(score),0,899);
   }
   function survivors(){
     const ploc=player().locationId,p=player(),rows=[...state.characters].sort((a,b)=>characterCurrentScore(b)-characterCurrentScore(a));
