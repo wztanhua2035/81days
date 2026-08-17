@@ -570,3 +570,100 @@ html[data-font-size="large"] .phase-post .resultPaper{
     min-height:82px!important;
   }
 }
+
+/* v2.12：进一步压缩“行动完成”页空白区，优先给今日行动/结束今天留空间 */
+.phase-post_action .sceneStrip,
+.phase-post_action .eventSceneStrip{
+  flex:0 0 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:104px!important;
+}
+.phase-post_action .sceneStripHead{
+  height:23px!important;
+  min-height:23px!important;
+  padding:0 8px!important;
+}
+.phase-post_action .eventSceneStrip .sceneStripImage,
+.phase-post_action .sceneStripImage{
+  height:72px!important;
+  min-height:72px!important;
+  max-height:72px!important;
+}
+/* 行动完成页仍保留互动对象，但改为紧凑头像，避免头像本身撑高场景 */
+.phase-post_action .resultFocus{
+  top:50%!important;
+  gap:2px!important;
+}
+.phase-post_action .resultFocus img{
+  width:58px!important;
+  height:58px!important;
+  border-width:2px!important;
+  box-shadow:0 5px 14px #0008,0 0 0 2px #122f2caa!important;
+}
+.phase-post_action .resultFocus.animal img{
+  width:62px!important;
+  height:62px!important;
+  border-radius:15px!important;
+}
+.phase-post_action .resultFocus span{
+  font-size:10px!important;
+  line-height:1.15!important;
+  padding:2px 7px!important;
+  max-width:105px!important;
+}
+.phase-post_action .resultPaper{
+  margin-top:4px!important;
+  padding-top:12px!important;
+  padding-bottom:12px!important;
+  max-height:21dvh!important;
+}
+.phase-post_action .resultPaper .result{
+  margin-top:6px!important;
+  padding:8px 10px!important;
+}
+.phase-post_action .compactHub,
+.phase-post_action .actionHub{
+  margin-top:0!important;
+  gap:6px!important;
+}
+@media(max-width:390px){
+  .phase-post_action .sceneStrip,
+  .phase-post_action .eventSceneStrip{max-height:91px!important}
+  .phase-post_action .sceneStripHead{height:21px!important;min-height:21px!important}
+  .phase-post_action .eventSceneStrip .sceneStripImage,
+  .phase-post_action .sceneStripImage{height:62px!important;min-height:62px!important;max-height:62px!important}
+  .phase-post_action .resultFocus img{width:50px!important;height:50px!important}
+  .phase-post_action .resultFocus.animal img{width:54px!important;height:54px!important}
+  .phase-post_action .resultFocus span{font-size:9px!important;padding:2px 6px!important}
+  .phase-post_action .resultPaper{max-height:19dvh!important;padding-top:10px!important;padding-bottom:10px!important}
+}
+@media(max-height:760px){
+  .phase-post_action .eventSceneStrip .sceneStripImage,
+  .phase-post_action .sceneStripImage{height:58px!important;min-height:58px!important;max-height:58px!important}
+  .phase-post_action .resultFocus img{width:48px!important;height:48px!important}
+  .phase-post_action .resultFocus.animal img{width:52px!important;height:52px!important}
+  .phase-post_action .resultPaper{max-height:18dvh!important}
+}
+/* v2.12b：按反馈继续收紧，保留头像识别但不再让展示区占据大块高度 */
+.phase-post_action .sceneStrip,
+.phase-post_action .eventSceneStrip{max-height:86px!important}
+.phase-post_action .eventSceneStrip .sceneStripImage,
+.phase-post_action .sceneStripImage{height:60px!important;min-height:60px!important;max-height:60px!important}
+.phase-post_action .resultFocus img{width:46px!important;height:46px!important}
+.phase-post_action .resultFocus.animal img{width:50px!important;height:50px!important;border-radius:13px!important}
+.phase-post_action .resultFocus span{display:none!important}
+@media(max-width:430px){
+  .phase-post_action .sceneStrip,.phase-post_action .eventSceneStrip{max-height:78px!important}
+  .phase-post_action .sceneStripHead{height:20px!important;min-height:20px!important}
+  .phase-post_action .eventSceneStrip .sceneStripImage,.phase-post_action .sceneStripImage{height:52px!important;min-height:52px!important;max-height:52px!important}
+  .phase-post_action .resultFocus img{width:42px!important;height:42px!important}
+  .phase-post_action .resultFocus.animal img{width:46px!important;height:46px!important}
+  .phase-post_action .resultPaper{max-height:18dvh!important;margin-top:3px!important}
+}
+@media(max-height:760px){
+  .phase-post_action .eventSceneStrip .sceneStripImage,.phase-post_action .sceneStripImage{height:48px!important;min-height:48px!important;max-height:48px!important}
+  .phase-post_action .sceneStrip,.phase-post_action .eventSceneStrip{max-height:74px!important}
+  .phase-post_action .resultFocus img{width:40px!important;height:40px!important}
+  .phase-post_action .resultFocus.animal img{width:44px!important;height:44px!important}
+}

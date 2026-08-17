@@ -1,8 +1,8 @@
 {
   "name": "day81-card-survival",
-  "version": "2.11.0",
+  "version": "2.12.0",
   "private": true,
-  "description": "《八十一天》v2.11 单人卡牌荒岛生存游戏（行动完成页面布局修复）",
+  "description": "《八十一天》v2.12 单人卡牌荒岛生存游戏（行动完成页进一步压缩）",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
