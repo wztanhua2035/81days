@@ -353,3 +353,56 @@ html[data-font-size="large"]{--read-result:17px}
   .phase-event .sceneStrip,.phase-post .sceneStrip,.phase-post_action .sceneStrip{min-height:140px!important}.phase-travel .eventSceneStrip{min-height:155px!important}
   .materialNeed{font-size:13px;padding:5px 7px}.shelterCenterNotice,.shelterCenterUpgrade{font-size:16px;padding:9px 13px}
 }
+
+/* v2.5 显示与动物系统 */
+/* 中/大字号时扩大事件与互动内容区，减少在小框内反复滚动 */
+html[data-font-size="medium"] .phase-travel .travelPaper,
+html[data-font-size="medium"] .phase-event .eventPaper,
+html[data-font-size="medium"] .phase-post .resultPaper,
+html[data-font-size="medium"] .phase-post_action .resultPaper{max-height:40dvh!important;overflow:auto!important}
+html[data-font-size="large"] .phase-travel .travelPaper,
+html[data-font-size="large"] .phase-event .eventPaper,
+html[data-font-size="large"] .phase-post .resultPaper,
+html[data-font-size="large"] .phase-post_action .resultPaper{max-height:48dvh!important;overflow:auto!important}
+html[data-font-size="medium"] .interactionPaper{max-height:45dvh!important}
+html[data-font-size="large"] .interactionPaper{max-height:52dvh!important}
+html[data-font-size="medium"] .interactionStoryChoices{max-height:31dvh!important}
+html[data-font-size="large"] .interactionStoryChoices{max-height:36dvh!important}
+html[data-font-size="medium"] .sceneEventOverlay{max-height:82%!important}
+html[data-font-size="large"] .sceneEventOverlay{max-height:88%!important}
+html[data-font-size="medium"] .phase-travel .eventSceneStrip{min-height:205px!important}
+html[data-font-size="large"] .phase-travel .eventSceneStrip{min-height:235px!important}
+html[data-font-size="medium"] .phase-event .eventSceneStrip{min-height:180px!important}
+html[data-font-size="large"] .phase-event .eventSceneStrip{min-height:210px!important}
+
+/* 夜间 16:9 场景图 */
+.nightHero16x9{position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;border:1px solid #365d68;box-shadow:0 12px 28px #0008;flex:none}
+.nightHero16x9 img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.08) brightness(.86)}
+.nightHeroCaption{position:absolute;left:10px;bottom:8px;padding:5px 9px;border-radius:999px;background:#071322d9;color:#e9f5ff;font-size:13px;font-weight:850;letter-spacing:.05em}
+.nightScreen .nightPaper{width:100%;text-align:left}
+
+/* 设施按窝棚等级解锁 */
+.facilityLevel{display:inline-block;font-style:normal;font-size:10px;color:#ffda87;background:#473a1e;border-radius:999px;padding:1px 5px;margin-left:3px}
+.lockedFacility{opacity:.58;filter:saturate(.55)}
+.lockedFacility>div>em{color:#d5c68e!important}
+
+/* 动物：地点头像、资料与互动 */
+.animalAvatar,.animalMeetPortrait{object-fit:cover!important;object-position:center!important;border-color:#91d7a6!important;background:#183326!important}
+.animalScenePerson{border-color:#6fae81!important}
+.animalAction{border-color:#4e8d62!important;background:#153422!important}
+.animalInfoImage{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:16px;border:1px solid #4d7168;box-shadow:0 10px 24px #0006;margin:6px 0 12px}
+.animalInteractionScene{position:relative;min-height:300px;border-radius:18px;overflow:hidden;border:1px solid #43645d;background:#10221f;box-shadow:0 12px 28px #0006}
+.animalInteractionBg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.72) saturate(.95)}
+.animalInteractionShade{position:absolute;inset:0;background:linear-gradient(180deg,#0612131f 5%,#06121347 45%,#061213e8 100%)}
+.animalInteractionPortrait{position:absolute;z-index:3;left:50%;bottom:88px;transform:translateX(-50%);width:148px;height:148px;object-fit:cover;border-radius:24px;border:3px solid #d8eaa9;box-shadow:0 12px 28px #0009;background:#19362a}
+.animalDialogueCard{position:absolute;z-index:4;left:10px;right:10px;bottom:10px;background:#0b1d1bdc;border:1px solid #ffffff37;border-radius:13px;padding:10px 12px;color:#eff8f3;backdrop-filter:blur(5px)}
+.animalDialogueCard .event-title{font-size:18px;color:#ffe3a2;margin:1px 0 5px}.animalDialogueCard .event-text{font-size:var(--read-scene,15px);line-height:1.62}
+.animalChoicePaper{margin-top:8px;max-height:38dvh;overflow:auto}
+
+/* 地点画面中人物/动物区稍加宽，动物也可点击 */
+.scenePeopleRow{align-items:flex-end}.scenePerson{min-width:56px}.scenePerson .animalAvatar{width:54px!important;height:54px!important}
+
+@media(max-width:390px){
+  .animalInteractionScene{min-height:270px}.animalInteractionPortrait{width:126px;height:126px;bottom:96px}.animalDialogueCard{padding:8px 9px}
+  html[data-font-size="large"] .phase-travel .travelPaper,html[data-font-size="large"] .phase-event .eventPaper{max-height:45dvh!important}
+}

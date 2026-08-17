@@ -1,8 +1,8 @@
 {
   "name": "day81-card-survival",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "private": true,
-  "description": "《八十一天》v2.4 单人卡牌荒岛生存游戏（总静音、结果字体联动、窝棚材料/升级提示、场景人物布局与实时得分缩放优化）",
+  "description": "《八十一天》v2.5 单人卡牌荒岛生存游戏（重要日志、分级窝棚设施、动物互动、夜间场景与阅读优化）",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

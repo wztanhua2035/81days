@@ -810,12 +810,70 @@ window.DAY81_DATA = (() => {
     {level:3,name:'坚固木屋',image:'assets/shelters/shelter_lv3.jpg',desc:'经过反复加固的长期住所，夜晚更加安全舒适。',cost:{wood:4,fiber:3,scrap:2}}
   ];
   const shelterFacilities = [
-    {id:'hammock',name:'舒适吊床',icon:'🛏️',desc:'在自己的窝棚过夜时，降低日常健康消耗，并获得次日检定加成。',cost:{wood:1,fiber:2}},
-    {id:'water_filter',name:'净水装置',icon:'💧',desc:'在自己的窝棚过夜时，有30%概率恢复1点健康。',cost:{fiber:1,scrap:2}},
-    {id:'drying_rack',name:'干燥架',icon:'☀️',desc:'窝棚主人受到“食物腐坏”类效果时，可保护一份食物。',cost:{wood:2,fiber:1}},
-    {id:'stove',name:'简易炉灶',icon:'🍲',desc:'窝棚主人使用食品时，健康恢复额外+1。',cost:{wood:2,scrap:2}},
-    {id:'medical_corner',name:'医疗角',icon:'🩹',desc:'在窝棚过夜且生命未满时，每5天有25%概率恢复1点生命。',cost:{fiber:2,scrap:2}}
+    {id:'hammock',requiredLevel:1,name:'舒适吊床',icon:'🛏️',desc:'在自己的窝棚过夜时，降低日常健康消耗，并获得次日检定加成。',cost:{wood:1,fiber:2}},
+    {id:'water_filter',requiredLevel:2,name:'净水装置',icon:'💧',desc:'在自己的窝棚过夜时，有30%概率恢复1点健康。',cost:{fiber:1,scrap:2}},
+    {id:'drying_rack',requiredLevel:2,name:'干燥架',icon:'☀️',desc:'窝棚主人受到“食物腐坏”类效果时，可保护一份食物。',cost:{wood:2,fiber:1}},
+    {id:'stove',requiredLevel:3,name:'简易炉灶',icon:'🍲',desc:'窝棚主人使用食品时，健康恢复额外+1。',cost:{wood:2,scrap:2}},
+    {id:'medical_corner',requiredLevel:3,name:'医疗角',icon:'🩹',desc:'在窝棚过夜且生命未满时，每5天有25%概率恢复1点生命。',cost:{fiber:2,scrap:2}}
   ];
+
+  const animals = [
+    {id:'turtle',name:'海龟',icon:'🐢',image:'/assets/animals/turtle.jpg',temper:'温吞',desc:'行动慢悠悠的海龟，似乎并不太怕人。'},
+    {id:'eagle',name:'老鹰',icon:'🦅',image:'/assets/animals/eagle.jpg',temper:'警觉',desc:'常在高处盘旋的海岛猛禽，眼神锐利，和人保持着距离。'},
+    {id:'rabbit',name:'灰兔',icon:'🐇',image:'/assets/animals/rabbit.jpg',temper:'胆小',desc:'一只灰白色的小兔子，喜欢躲在草丛和灌木边。'},
+    {id:'wolf',name:'野狼',icon:'🐺',image:'/assets/animals/wolf.jpg',temper:'谨慎',desc:'独来独往的灰狼，危险但并不会无缘无故冲向人。'}
+  ];
+
+  const animalInteractions = [
+    // 海龟 10
+    {id:'turtle_01',animal:'turtle',name:'慢吞吞的访客',text:'海龟趴在潮线边，像一块会呼吸的石头。它抬头看了你一眼，又继续晒太阳。',choices:[{text:'蹲下来安静观察',effect:{nextCheckBonus:.05}},{text:'帮它清开缠住的海草',effect:{health:1}},{text:'不打扰它',effect:{none:true}}]},
+    {id:'turtle_02',animal:'turtle',name:'回到海里的路',text:'海龟离海水还有一小段距离，前面却横着几截漂木。',choices:[{text:'把漂木挪开',check:'str',good:{health:1},bad:{health:-1}},{text:'从旁边清出一条小路',check:'int',good:{nextCheckBonus:.06},bad:{none:true}},{text:'站远一点看它自己走',effect:{none:true}}]},
+    {id:'turtle_03',animal:'turtle',name:'贝壳旁的海龟',text:'海龟在礁石附近慢慢爬动，旁边有几枚被海水磨圆的贝壳。',choices:[{text:'捡起一枚贝壳',effect:{randomItemChance:.28}},{text:'观察潮水方向',effect:{nextCheckBonus:.06}},{text:'轻声打个招呼',effect:{none:true}}]},
+    {id:'turtle_04',animal:'turtle',name:'沙地上的痕迹',text:'海龟留下长长的爬痕，像在沙滩上画了一条歪歪扭扭的线。',choices:[{text:'沿痕迹找找',check:'luck',good:{randomFood:1},bad:{none:true}},{text:'记下附近地形',effect:{nextCheckBonus:.05}},{text:'给它让路',effect:{skipDecay:true}}]},
+    {id:'turtle_05',animal:'turtle',name:'安静的陪伴',text:'你坐下休息时，海龟竟然也停在不远处。两个谁都不说话，倒挺合拍。',choices:[{text:'一起晒会儿太阳',effect:{skipDecay:true}},{text:'检查附近漂流物',check:'luck',good:{randomItemChance:.4},bad:{none:true}},{text:'继续赶自己的事',effect:{none:true}}]},
+    {id:'turtle_06',animal:'turtle',name:'潮池边缘',text:'海龟在潮池边停住，鼻尖轻轻碰了碰水面。',choices:[{text:'检查潮池里的小鱼',check:'agi',good:{randomFood:1},bad:{none:true}},{text:'装一点清水备用',effect:{health:1}},{text:'只观察它',effect:{nextCheckBonus:.04}}]},
+    {id:'turtle_07',animal:'turtle',name:'被浪翻了一下',text:'一个浪头把海龟推得歪了一下，它费劲地重新调整方向。',choices:[{text:'帮它扶正',effect:{health:1}},{text:'挡一下下一波浪',check:'str',good:{nextCheckBonus:.06},bad:{health:-1}},{text:'让自然自己处理',effect:{none:true}}]},
+    {id:'turtle_08',animal:'turtle',name:'海龟与木片',text:'海龟旁边卡着一块飞机内饰碎片，边缘没有那么锋利。',choices:[{text:'把木片拿走',effect:{campMaterial:{wood:1}}},{text:'看看下面有没有东西',check:'luck',good:{randomItemChance:.45},bad:{none:true}},{text:'不碰它附近的东西',effect:{none:true}}]},
+    {id:'turtle_09',animal:'turtle',name:'午后的慢节奏',text:'海龟慢得让人着急，却也提醒你：荒岛上不是每件事都需要冲刺。',choices:[{text:'学它慢下来休息',effect:{skipDecay:true}},{text:'趁机整理思路',effect:{nextCheckBonus:.08}},{text:'还是去干活吧',effect:{none:true}}]},
+    {id:'turtle_10',animal:'turtle',name:'重新入海',text:'海龟终于爬到水边，浪花盖过它的背甲。它回头的动作很慢，倒像是在认真告别。',choices:[{text:'目送它游走',effect:{rescueScore:.15}},{text:'看看潮水带来什么',check:'luck',good:{randomItemChance:.5},bad:{none:true}},{text:'拍掉手上的沙继续生存',effect:{none:true}}]},
+
+    // 老鹰 10
+    {id:'eagle_01',animal:'eagle',name:'高处的目光',text:'老鹰停在枯枝上，一动不动地盯着你。你怀疑它已经把你评估完了。',choices:[{text:'也盯回去',effect:{nextCheckBonus:.05}},{text:'观察它看的方向',check:'int',good:{randomItemChance:.35},bad:{none:true}},{text:'保持距离',effect:{none:true}}]},
+    {id:'eagle_02',animal:'eagle',name:'盘旋的影子',text:'老鹰绕着高地盘旋了好几圈，似乎在关注某处。',choices:[{text:'跟着它的视线找',check:'luck',good:{randomItem:1},bad:{none:true}},{text:'记录方向',effect:{rescueScore:.2}},{text:'不理它',effect:{none:true}}]},
+    {id:'eagle_03',animal:'eagle',name:'掉落的羽毛',text:'一根深色羽毛被风吹到脚边，看起来很完整。',choices:[{text:'捡起来做标记',effect:{nextCheckBonus:.05}},{text:'顺风向寻找高处',check:'agi',good:{rescueScore:.2},bad:{health:-1}},{text:'留在原地',effect:{none:true}}]},
+    {id:'eagle_04',animal:'eagle',name:'树顶的警报',text:'老鹰忽然发出短促叫声，随后飞离树顶。附近的灌木也跟着晃了一下。',choices:[{text:'立刻提高警惕',effect:{nextCheckBonus:.08}},{text:'去灌木边看看',check:'agi',good:{randomItemChance:.4},bad:{beast:true}},{text:'换个方向走',effect:{none:true}}]},
+    {id:'eagle_05',animal:'eagle',name:'海面反光',text:'老鹰飞过海面时突然改变方向。那一带似乎有一点不同寻常的反光。',choices:[{text:'登高看清楚',check:'int',good:{rescueScore:.35},bad:{none:true}},{text:'往海边靠近',check:'agi',good:{randomItemChance:.45},bad:{health:-1}},{text:'记住位置以后再说',effect:{nextCheckBonus:.04}}]},
+    {id:'eagle_06',animal:'eagle',name:'抢食失败',text:'老鹰俯冲了一次却空爪而回，落在石头上显得有点不爽。',choices:[{text:'看看它刚才扑向哪里',check:'luck',good:{randomFood:1},bad:{none:true}},{text:'别去招惹它',effect:{none:true}},{text:'绕到下风口观察',effect:{nextCheckBonus:.05}}]},
+    {id:'eagle_07',animal:'eagle',name:'风里的老师',text:'老鹰几乎不扇翅膀，只借着上升气流滑翔。你突然觉得这家伙很懂得省力。',choices:[{text:'观察风向',effect:{nextCheckBonus:.08}},{text:'借机寻找开阔路线',check:'int',good:{skipDecay:true},bad:{none:true}},{text:'继续自己的计划',effect:{none:true}}]},
+    {id:'eagle_08',animal:'eagle',name:'崖边巢影',text:'远处岩壁上似乎有一个鸟巢。老鹰就在附近守着。',choices:[{text:'远远观察，不靠近巢',effect:{rescueScore:.15}},{text:'寻找巢下掉落物',check:'luck',good:{randomItemChance:.35},bad:{none:true}},{text:'立即离开',effect:{none:true}}]},
+    {id:'eagle_09',animal:'eagle',name:'突然的俯冲',text:'老鹰忽然从头顶掠过，风声把你吓了一跳。幸好它只是追另一只鸟。',choices:[{text:'稳住以后看看附近',check:'luck',good:{randomFood:1},bad:{none:true}},{text:'笑自己太紧张',effect:{skipDecay:true}},{text:'提高警戒',effect:{nextCheckBonus:.05}}]},
+    {id:'eagle_10',animal:'eagle',name:'远方的信号',text:'老鹰飞得很高。你突然意识到，从它现在的高度，整座岛大概都看得见。',choices:[{text:'在空地摆出醒目标记',effect:{rescueScore:.35}},{text:'寻找更适合求救的位置',check:'int',good:{rescueScore:.5},bad:{none:true}},{text:'先省下体力',effect:{skipDecay:true}}]},
+
+    // 灰兔 10
+    {id:'rabbit_01',animal:'rabbit',name:'草丛里的耳朵',text:'两只长耳朵先从草里冒出来，随后是一只灰兔。它看到你，整只兔都僵住了。',choices:[{text:'原地不动',effect:{nextCheckBonus:.04}},{text:'慢慢绕开',effect:{none:true}},{text:'轻轻放下一点食物',effect:{skipDecay:true}}]},
+    {id:'rabbit_02',animal:'rabbit',name:'突然窜过',text:'灰兔从脚边猛地窜过，你差点以为自己踩到了会跑的石头。',choices:[{text:'顺着它跑的方向看看',check:'luck',good:{randomFood:1},bad:{none:true}},{text:'拍拍胸口继续走',effect:{none:true}},{text:'检查它钻出的草丛',check:'int',good:{campMaterial:{fiber:1}},bad:{none:true}}]},
+    {id:'rabbit_03',animal:'rabbit',name:'啃叶子的灰兔',text:'灰兔正低头啃一种嫩叶。它吃得很香，至少证明这种叶子对兔子没毒。',choices:[{text:'辨认这种植物',check:'int',good:{health:1},bad:{none:true}},{text:'采些柔软叶片',effect:{campMaterial:{fiber:1}}},{text:'不拿兔子的午饭',effect:{none:true}}]},
+    {id:'rabbit_04',animal:'rabbit',name:'树根下的小洞',text:'灰兔钻进树根边的小洞，洞口旁露出一截旧布。',choices:[{text:'等它离开再检查',check:'luck',good:{randomItemChance:.45},bad:{none:true}},{text:'只拿露在外面的布',effect:{campMaterial:{fiber:1}}},{text:'算了，别堵人家门',effect:{none:true}}]},
+    {id:'rabbit_05',animal:'rabbit',name:'雨后的兔子',text:'灰兔的毛有点湿，它蹲在较干的石头下面，显得比平时更圆。',choices:[{text:'帮它挡一点风',effect:{nextCheckBonus:.04}},{text:'顺便在石下休息',effect:{skipDecay:true}},{text:'继续做自己的事',effect:{none:true}}]},
+    {id:'rabbit_06',animal:'rabbit',name:'胆子大了一点',text:'这只灰兔没有立刻逃走，反而隔着几米看你。你们大概算“见过几次面”的关系了——至少你这么认为。',choices:[{text:'轻声和它说话',effect:{nextCheckBonus:.05}},{text:'放下一小块食物',effect:{skipDecay:true}},{text:'不打扰',effect:{none:true}}]},
+    {id:'rabbit_07',animal:'rabbit',name:'落叶堆',text:'灰兔在一堆落叶里刨来刨去，好像下面有什么。',choices:[{text:'等它走后翻一翻',check:'luck',good:{randomItemChance:.5},bad:{none:true}},{text:'帮它拨开落叶',effect:{campMaterial:{fiber:1}}},{text:'看着就好',effect:{none:true}}]},
+    {id:'rabbit_08',animal:'rabbit',name:'野果边的小家伙',text:'灰兔蹲在掉落的野果旁边，咬一口又警觉地抬头。',choices:[{text:'挑一个完整的果子',effect:{randomFood:1}},{text:'观察它避开的果子',effect:{nextCheckBonus:.06}},{text:'把果子都留给它',effect:{skipDecay:true}}]},
+    {id:'rabbit_09',animal:'rabbit',name:'迷路了吗',text:'灰兔在一块开阔地来回跑了两次，看起来像找不到熟悉的草丛。',choices:[{text:'从远处把它往林边引',check:'agi',good:{nextCheckBonus:.06},bad:{none:true}},{text:'保持距离让它自己找',effect:{none:true}},{text:'顺便检查周围',check:'luck',good:{randomItemChance:.35},bad:{none:true}}]},
+    {id:'rabbit_10',animal:'rabbit',name:'一闪而过的白尾巴',text:'你只看见灰兔的小白尾巴在灌木后一闪。它跑得比你今天的计划快多了。',choices:[{text:'笑一笑继续干活',effect:{skipDecay:true}},{text:'看看它从哪里来',check:'int',good:{randomFood:1},bad:{none:true}},{text:'追两步试试',check:'agi',good:{nextCheckBonus:.05},bad:{health:-1}}]},
+
+    // 野狼 10
+    {id:'wolf_01',animal:'wolf',name:'远处的灰影',text:'野狼站在较远的石坡上，没有靠近。它看你，你也看它，谁都没有打算先犯傻。',choices:[{text:'保持目光但慢慢后退',check:'int',good:{nextCheckBonus:.08},bad:{none:true}},{text:'举起火把或树枝示警',check:'str',good:{none:true},bad:{health:-1}},{text:'直接绕开',effect:{none:true}}]},
+    {id:'wolf_02',animal:'wolf',name:'水边的狼',text:'野狼正在水边喝水。它抬起头，耳朵竖了起来。',choices:[{text:'停在安全距离',effect:{nextCheckBonus:.05}},{text:'换到下游取水',check:'int',good:{health:1},bad:{none:true}},{text:'快速离开',check:'agi',good:{none:true},bad:{health:-1}}]},
+    {id:'wolf_03',animal:'wolf',name:'低声警告',text:'野狼发出一声低低的呜咽，并没有冲上来。你大概踩进了它不喜欢的距离。',choices:[{text:'缓慢后退',effect:{none:true}},{text:'用火光吓退它',check:'int',good:{nextCheckBonus:.05},bad:{health:-1}},{text:'站稳不乱跑',check:'luck',good:{none:true},bad:{health:-1}}]},
+    {id:'wolf_04',animal:'wolf',name:'跟随了一段路',text:'你走了几十米，野狼一直在远处跟着。说不上友好，但也没表现出攻击意图。',choices:[{text:'不理它继续走',effect:{nextCheckBonus:.04}},{text:'绕到开阔地',check:'int',good:{skipDecay:true},bad:{none:true}},{text:'回头驱赶',check:'str',good:{none:true},bad:{health:-1}}]},
+    {id:'wolf_05',animal:'wolf',name:'狼留下的猎物',text:'野狼离开后，草丛里留下了少量没吃完的猎物。看起来还算新鲜。',choices:[{text:'取一点能用的',check:'int',good:{randomFood:1},bad:{health:-1}},{text:'完全不碰',effect:{none:true}},{text:'只检查附近痕迹',effect:{nextCheckBonus:.06}}]},
+    {id:'wolf_06',animal:'wolf',name:'被荆棘绊住',text:'野狼后腿附近缠着一段藤蔓，它非常警觉。靠近显然不是一个“聪明人的默认选项”。',choices:[{text:'远处用长树枝拨开',check:'agi',good:{nextCheckBonus:.08},bad:{health:-1}},{text:'保持距离等待',effect:{none:true}},{text:'直接离开',effect:{none:true}}]},
+    {id:'wolf_07',animal:'wolf',name:'夜色前的狼影',text:'太阳快落山时，野狼从林边经过。它没有看你太久，似乎也在找一个安全的过夜地点。',choices:[{text:'观察它避开的方向',effect:{nextCheckBonus:.07}},{text:'检查附近是否安全',check:'int',good:{skipDecay:true},bad:{none:true}},{text:'赶紧回到人多的地方',effect:{none:true}}]},
+    {id:'wolf_08',animal:'wolf',name:'隔着溪流',text:'你和野狼隔着一条浅溪对望。水声让气氛没有那么紧绷。',choices:[{text:'慢慢取水',check:'luck',good:{health:1},bad:{none:true}},{text:'等它离开',effect:{nextCheckBonus:.04}},{text:'换一个取水点',effect:{none:true}}]},
+    {id:'wolf_09',animal:'wolf',name:'嗅到背包',text:'野狼朝你的背包方向嗅了嗅。你突然意识到，里面的食物味道可能比你本人有吸引力。',choices:[{text:'把食物收得更严实',check:'int',good:{nextCheckBonus:.08},bad:{none:true}},{text:'慢慢离开',effect:{none:true}},{text:'大声驱赶',check:'str',good:{none:true},bad:{health:-1}}]},
+    {id:'wolf_10',animal:'wolf',name:'安静的同行者',text:'野狼在远处和你保持着几乎固定的距离。奇怪的是，这种互不靠近的陪伴反而让林子没那么空。',choices:[{text:'保持这种距离',effect:{skipDecay:true}},{text:'观察它选择的路线',effect:{nextCheckBonus:.08}},{text:'转向另一条路',effect:{none:true}}]}
+  ];
+
   const intimateCoupleEvents = [
     {id:'intimate_rain_roof',title:'雨落屋檐',text:'夜里，细雨落在窝棚顶上，声音轻得像一层薄纱。{a}和{b}并肩坐在门边，谁都没有急着说话。',dialogue:['{a}：“以前总觉得安静很浪费时间，现在反而舍不得打破它。”','{b}：“那就再坐一会儿。今晚不用和谁抢时间。”','两个人相视一笑，靠得更近了一点。']},
     {id:'intimate_campfire',title:'营火余温',text:'公共营地的火已经烧得很小，只剩温暖的红光。{a}替{b}拂掉肩上的草屑，动作很轻。',dialogue:['{b}：“你这样看着我，我都快忘了这里是荒岛。”','{a}：“忘一会儿也好。明天醒来，我们还是会继续想办法。”','火星偶尔升起来，像把两人的影子也拉得更近。']},
@@ -953,5 +1011,5 @@ window.DAY81_DATA = (() => {
     N('distant_light','远海灯光','很远的海面上，似乎有一盏灯一闪而过。没有人敢确定那是不是船。',{rescueScore:.5},'good',{minDay:60})
   ];
 
-  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,interactionProfiles,interactionEvents,coupleInteractionEvents,intimateCoupleEvents,travelEvents,campBuildings,shelterLevels,shelterFacilities,nightInteractionEvents,storyChains,crisisTemplates,nights};
+  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,interactionProfiles,interactionEvents,coupleInteractionEvents,intimateCoupleEvents,travelEvents,campBuildings,shelterLevels,shelterFacilities,animals,animalInteractions,nightInteractionEvents,storyChains,crisisTemplates,nights};
 })();
