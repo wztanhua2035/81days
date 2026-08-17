@@ -669,7 +669,7 @@
     if(effect.loseItem){const lost=loseRandomItem(c);msgs.push(lost?`${who}丢失${item(lost).name}-1`:`${who}及时护住了背包，没有丢东西`);}
     if(effect.loseFood){const foods=c.inventory.filter(id=>item(id).kind==='food');if(foods.length){const hs=homeShelterOf(c);if(hs?.facilities?.includes('drying_rack')&&!hs?.damagedFacilities?.includes('drying_rack')&&c.locationId===hs.locationId){msgs.push('干燥架救下了这批食物，今天不用心疼');}else{const id=rand(foods);c.inventory.splice(c.inventory.indexOf(id),1);msgs.push(`${who}的${item(id).name}腐坏-1`);}}else msgs.push(`${who}没有食物可坏，多少有点心酸`);}
     if(effect.achievement)unlock(effect.achievement);
-    if(effect.rescueScore){state.rescueScore+=effect.rescueScore;msgs.push(`求救努力+${effect.rescueScore}`);}
+    if(effect.rescueScore){const boost=gearMod(c,'rescueBoost');const total=Math.round((Number(effect.rescueScore||0)*(1+boost))*100)/100;state.rescueScore+=total;msgs.push(`求救努力+${total}${boost?`（装备加成${Math.round(boost*100)}%）`:''}`);}
     if(effect.nightDanger){state.nightDanger+=effect.nightDanger;msgs.push('今晚的风险悄悄升高了');}
     if(effect.fromNpc){const donor=alive().filter(x=>x.id!==c.id&&tradableItems(x).length);if(donor.length){const d=rand(donor),pool=tradableItems(d),iid=[...pool].sort((a,b)=>NPC.itemValue(D.items[a],d,state.day)-NPC.itemValue(D.items[b],d,state.day))[0];d.inventory.splice(d.inventory.indexOf(iid),1);gainItem(c,iid);msgs.push(`${d.name}给${who}${item(iid).name}+1`);}else msgs.push('附近没有人能腾出多余物资');}
     if(effect.campMaterial){addCampMaterial(effect.campMaterial);const labels={wood:'木材',fiber:'藤条',scrap:'零件'};msgs.push(`公共材料增加：${Object.entries(effect.campMaterial).map(([k,v])=>`${labels[k]||k}+${v}`).join('、')}`);}

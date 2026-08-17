@@ -504,3 +504,27 @@ html[data-font-size="large"] .sceneBriefOverlay{max-height:78%!important}
 @media(max-width:390px){.phase-post_action .eventSceneStrip .sceneStripImage{height:165px!important;min-height:165px}}
 .interactionVisual .resultFocus.interactionFocus{top:55%}
 .interactionVisual .resultFocus.interactionFocus img{width:112px;height:128px;border-radius:20px}
+
+
+/* v2.10：探索返回结果框扩大约50%，优先改善大字号阅读 */
+.phase-post .resultPaper{
+  max-height:44dvh!important;
+  min-height:24dvh!important;
+  overflow:auto!important;
+}
+html[data-font-size="medium"] .phase-post .resultPaper{
+  max-height:60dvh!important;
+  min-height:31dvh!important;
+}
+html[data-font-size="large"] .phase-post .resultPaper{
+  max-height:72dvh!important;
+  min-height:36dvh!important;
+}
+/* 为结果区腾出更多垂直空间，同时保留地点画面氛围 */
+.phase-post .eventSceneStrip .sceneStripImage{height:145px!important;min-height:145px!important}
+@media(max-width:390px){
+  .phase-post .eventSceneStrip .sceneStripImage{height:132px!important;min-height:132px!important}
+  .phase-post .resultPaper{max-height:46dvh!important;min-height:25dvh!important}
+  html[data-font-size="medium"] .phase-post .resultPaper{max-height:61dvh!important;min-height:32dvh!important}
+  html[data-font-size="large"] .phase-post .resultPaper{max-height:70dvh!important;min-height:38dvh!important}
+}
