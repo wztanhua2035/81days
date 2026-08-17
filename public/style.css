@@ -252,7 +252,7 @@ body{font-size:15px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLe
 @media(max-height:700px){.phase-morning .sceneBrief{max-height:108px!important}}
 
 /* v2.2：把叙事信息叠加到场景画面，提升手机单屏信息密度 */
-.sceneBriefOverlay{position:absolute;z-index:4;left:8px;right:8px;bottom:8px;max-height:44%;overflow:auto;background:linear-gradient(135deg,#071413e8,#102827d4);border:1px solid #ffffff38;border-radius:11px;padding:8px 10px;color:#f1f7f4;font-size:14px;line-height:1.65;text-shadow:0 1px 2px #000;backdrop-filter:blur(5px);box-shadow:0 6px 18px #0005}
+.sceneBriefOverlay{position:absolute;z-index:4;left:8px;right:8px;bottom:8px;max-height:66%;overflow:auto;background:linear-gradient(135deg,#071413e8,#102827d4);border:1px solid #ffffff38;border-radius:11px;padding:8px 10px;color:#f1f7f4;font-size:14px;line-height:1.65;text-shadow:0 1px 2px #000;backdrop-filter:blur(5px);box-shadow:0 6px 18px #0005}
 .phase-morning .scenePeople,.phase-location .scenePeople{left:auto!important;right:8px!important;top:8px!important;bottom:auto!important;max-width:55%;z-index:6}
 .phase-morning .scenePeopleRow,.phase-location .scenePeopleRow{justify-content:flex-end}
 .phase-morning .scenePerson,.phase-location .scenePerson{background:#071b1bdc}
@@ -268,7 +268,7 @@ body{font-size:15px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLe
 .phase-travel{display:flex;flex-direction:column;min-height:0}.phase-travel .eventSceneStrip{flex:0 0 150px!important}.phase-travel .travelPaper{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}.travelPaper .result{font-size:14px;line-height:1.65}.travelPaper .choice{font-size:14px}
 
 @media(max-height:700px){
-  .sceneBriefOverlay{font-size:12.5px;line-height:1.5;max-height:42%;padding:6px 8px}
+  .sceneBriefOverlay{font-size:12.5px;line-height:1.5;max-height:63%;padding:6px 8px}
   .eventSceneStrip{flex-basis:112px!important}.eventSceneStrip .sceneStripImage{height:86px!important}.sceneEventOverlay>b{font-size:14px}.sceneEventOverlay>div{font-size:12.5px;line-height:1.48}
   .interactionSceneTalk{top:34px;max-height:34%;padding:5px 6px}.sceneTalkLine{font-size:11.5px;line-height:1.4}.dialogueLine span{font-size:12px!important}.interactionSceneTitle{font-size:15px!important}
   .phase-travel .eventSceneStrip{flex-basis:120px!important}
@@ -457,3 +457,14 @@ html[data-font-size="large"] .phase-travel .sceneEventOverlay{padding:12px 14px}
 html[data-font-size="medium"] .animalInteractionScene{min-height:330px}
 html[data-font-size="large"] .animalInteractionScene{min-height:370px}
 html[data-font-size="large"] .animalDialogueCard{padding:12px 14px}
+
+
+/* v2.8：场景描述框扩大约50%，中/大字号给予额外垂直空间 */
+.sceneBriefOverlay{max-height:66%!important}
+html[data-font-size="medium"] .sceneBriefOverlay{max-height:72%!important}
+html[data-font-size="large"] .sceneBriefOverlay{max-height:78%!important}
+@media(max-width:390px){
+  .sceneBriefOverlay{max-height:63%!important}
+  html[data-font-size="medium"] .sceneBriefOverlay{max-height:70%!important}
+  html[data-font-size="large"] .sceneBriefOverlay{max-height:76%!important}
+}

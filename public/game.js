@@ -151,8 +151,13 @@
     queueRelationAlert(other,'生死之交','情侣','彼此已经把对方当成最重要的同伴',`${other.name}轻轻看着你：“等我们离开这里以后，还有很多话可以慢慢说。”`);
     setupCoupleHome(other);sound('story');return true;
   }
+  function scaledRelationDelta(delta){
+    if(!delta)return 0;
+    return Math.sign(delta)*Math.max(1,Math.round(Math.abs(delta)*1.25));
+  }
   function changeRelation(a,b,delta,reason=''){
-    if(!a||!b||a.id===b.id||!delta)return;
+    if(!a||!b||a.id===b.id||!delta)return 0;
+    delta=scaledRelationDelta(delta);
     const k=pairKey(a.id,b.id),before=relationScore(a,b),beforeTier=relationTierByScore(before),after=clamp(before+delta,-100,100),afterTier=relationTierByScore(after);
     state.relationships[k]=after;
     const involved=a.id===state.playerId||b.id===state.playerId;const other=involved?(a.id===state.playerId?b:a):null;
@@ -164,6 +169,7 @@
     if(involved&&beforeTier.key!==afterTier.key&&!becameCouple){
       log(`${other.name}与你的关系：${beforeTier.label} → ${afterTier.label}${reason?`（${reason}）`:''}`,true);
     }
+    return after-before;
   }
   function relationLabel(a,b){if(isCouplePair(a,b))return'情侣';const s=relationScore(a,b),bond=Number(rules().bondThreshold||60);if(s<=-50)return'敌对';if(s<=-20)return'冷淡';if(s<25)return'普通';if(s<bond)return'信任';return'生死之交';}
   function relationClass(a,b){if(isCouplePair(a,b))return'relCouple';const s=relationScore(a,b);return s<=-20?'relBad':s>=25?'relGood':'relNormal';}
@@ -656,9 +662,9 @@
     if(effect.nightDanger){state.nightDanger+=effect.nightDanger;msgs.push('今晚的风险悄悄升高了');}
     if(effect.fromNpc){const donor=alive().filter(x=>x.id!==c.id&&tradableItems(x).length);if(donor.length){const d=rand(donor),pool=tradableItems(d),iid=[...pool].sort((a,b)=>NPC.itemValue(D.items[a],d,state.day)-NPC.itemValue(D.items[b],d,state.day))[0];d.inventory.splice(d.inventory.indexOf(iid),1);gainItem(c,iid);msgs.push(`${d.name}给${who}${item(iid).name}+1`);}else msgs.push('附近没有人能腾出多余物资');}
     if(effect.campMaterial){addCampMaterial(effect.campMaterial);const labels={wood:'木材',fiber:'藤条',scrap:'零件'};msgs.push(`公共材料增加：${Object.entries(effect.campMaterial).map(([k,v])=>`${labels[k]||k}+${v}`).join('、')}`);}
-    if(effect.relationTo){const o=cBy(effect.relationTo);if(o){const d=effect.relation||0;changeRelation(c,o,d,'剧情选择');msgs.push(`${o.name}跟${who}的关系${d>=0?'提升':'下降'}${Math.abs(d)}，${Math.abs(d)>10?(d>0?'明显更亲近了':'彼此明显疏远了'):'彼此的态度有所改变'}`);}}
-    if(effect.relationRandom){const o=randomOther(c);if(o){const d=effect.relationRandom;changeRelation(c,o,d,'剧情选择');msgs.push(`${o.name}跟${who}的关系${d>=0?'提升':'下降'}${Math.abs(d)}`);}}
-    if(effect.relationAll){for(const o of alive().filter(x=>x.id!==c.id))changeRelation(c,o,effect.relationAll,'共同经历');msgs.push(`${who}与其他幸存者的关系普遍提升${Math.abs(effect.relationAll)}`);}
+    if(effect.relationTo){const o=cBy(effect.relationTo);if(o){const d=effect.relation||0,actual=changeRelation(c,o,d,'剧情选择');msgs.push(`${o.name}跟${who}的关系${actual>=0?'提升':'下降'}${Math.abs(actual)}，${Math.abs(actual)>10?(actual>0?'明显更亲近了':'彼此明显疏远了'):'彼此的态度有所改变'}`);}}
+    if(effect.relationRandom){const o=randomOther(c);if(o){const d=effect.relationRandom,actual=changeRelation(c,o,d,'剧情选择');msgs.push(`${o.name}跟${who}的关系${actual>=0?'提升':'下降'}${Math.abs(actual)}`);}}
+    if(effect.relationAll){const changes=alive().filter(x=>x.id!==c.id).map(o=>changeRelation(c,o,effect.relationAll,'共同经历')).filter(Boolean);const amt=changes.length?Math.max(...changes.map(Math.abs)):Math.abs(scaledRelationDelta(effect.relationAll));msgs.push(`${who}与其他幸存者的关系普遍${effect.relationAll>=0?'提升':'下降'}${amt}`);}
     return msgs.join('；');
   }
   function checkNarrative(e,stat,ok,effect=''){
@@ -743,8 +749,8 @@
     const sorted=[...new Set(bb)].sort((x,y)=>NPC.itemValue(item(x),b,state.day)-NPC.itemValue(item(y),b,state.day));const rel=relationScore(a,b);let giveB=sorted[0];if(rel>=60)giveB=sorted[sorted.length-1];else if(rel>=25)giveB=sorted[Math.floor((sorted.length-1)*.65)];else if(rel>=0)giveB=sorted[Math.floor((sorted.length-1)*.35)];
     if(!giveA||!giveB)return '没有合适的交换物品。';
     removeInventoryUnit(a,giveA);removeInventoryUnit(b,giveB);gainItem(a,giveB,'交易获得');gainItem(b,giveA,'交易获得');
-    const relGain=rel>=25?6:3;a.stats.trades++;b.stats.trades++;changeRelation(a,b,relGain,'完成交易');sound('trade');if(a.id===state.playerId||b.id===state.playerId)state.statistics.trades++;
-    return `${a.name}拿出${item(giveA).name}-1，${b.name}拿出${item(giveB).name}-1。交换后，${a.name}收到${item(giveB).name}+1，${b.name}收到${item(giveA).name}+1；双方关系提升${relGain}。`;
+    const relGain=rel>=25?6:3;a.stats.trades++;b.stats.trades++;const actualRelGain=changeRelation(a,b,relGain,'完成交易');sound('trade');if(a.id===state.playerId||b.id===state.playerId)state.statistics.trades++;
+    return `${a.name}拿出${item(giveA).name}-1，${b.name}拿出${item(giveB).name}-1。交换后，${a.name}收到${item(giveB).name}+1，${b.name}收到${item(giveA).name}+1；双方关系提升${Math.abs(actualRelGain)}。`;
   }
   function resolveNpcEncounter(a,b){
     const rel=relationScore(a,b),loc=locationById(a.locationId)?.name||'岛上';let r='';
@@ -896,7 +902,7 @@ ${base}`,choices:prof?.choices||[]};
     modal(`<h2>赠送给 ${esc(o.name)}</h2><p class="muted">赠送不会换回物品，但会明显改善关系。</p>${[...new Set(mine)].map(id=>`<button class="choice" onclick="Game.interactionGiftChoose('${id}')">赠送 ${item(id).ico} <b class="itemName">${esc(item(id).name)}</b></button>`).join('')}<button class="btn ghost" onclick="Game.closeModal()">取消</button>`);
   }
   function interactionGiftChoose(id){
-    closeModal();const p=player(),o=cBy(state.interaction?.targetId);if(!o||!socialActionAvailable()||!tradableItems(p).includes(id))return;removeInventoryUnit(p,id);gainItem(o,id,'收到赠送');const boost=relationScore(p,o)<0?16:12;changeRelation(p,o,boost,'收到你的赠送');markSocialAction(o.id);state.currentResult=`你把${item(id).name}+1递给${o.name}。${o.name}愣了一下，认真收好。${o.name}跟你的关系提升${boost}，彼此的态度${boost>10?'明显变了':'有所改变'}。`;state.interaction=null;state.phase='POST_ACTION';log(`你赠送给${o.name}${item(id).name}。`);sound('good');save();render();
+    closeModal();const p=player(),o=cBy(state.interaction?.targetId);if(!o||!socialActionAvailable()||!tradableItems(p).includes(id))return;removeInventoryUnit(p,id);gainItem(o,id,'收到赠送');const boost=relationScore(p,o)<0?16:12,actualBoost=changeRelation(p,o,boost,'收到你的赠送');markSocialAction(o.id);state.currentResult=`你把${item(id).name}+1递给${o.name}。${o.name}愣了一下，认真收好。${o.name}跟你的关系提升${Math.abs(actualBoost)}，彼此的态度${Math.abs(actualBoost)>10?'明显变了':'有所改变'}。`;state.interaction=null;state.phase='POST_ACTION';log(`你赠送给${o.name}${item(id).name}。`);sound('good');save();render();
   }
   function downgradeOneTierWithPlayer(other,reason='抢夺行为'){const p=player();if(!other||other.id===p.id||other.dead)return;const beforeLabel=isCouplePair(p,other)?'情侣':relationTierByScore(relationScore(p,other)).label;let target;const score=relationScore(p,other);if(beforeLabel==='情侣'){state.coupleId=null;state.coupleHome=null;target=40;}else if(score>=Number(rules().bondThreshold||60))target=40;else if(score>=25)target=0;else if(score>-20)target=-30;else target=-70;const before=relationScore(p,other);state.relationships[pairKey(p.id,other.id)]=target;const afterLabel=relationTierByScore(target).label;if(beforeLabel!==afterLabel){queueRelationAlert(other,beforeLabel,afterLabel,reason,'');log(`${other.name}与你的关系：${beforeLabel} → ${afterLabel}（${reason}）`,true);}}
   function interactionRob(){
@@ -919,7 +925,7 @@ ${base}`,choices:prof?.choices||[]};
       ()=>{const n=addLife(p,1);return n?`生命+${n}`:'生命已满，获得求救努力+2';},
       ()=>{state.rescueScore+=2;return '求救努力+2';},
       ()=>{camp().materials.wood+=2;camp().materials.fiber+=2;camp().materials.scrap+=1;return '获得木材×2、藤条×2、零件×1';},
-      ()=>{for(const o of alive().filter(x=>x.id!==p.id))changeRelation(p,o,5,'完成全岛探索');return '与所有幸存者关系+5';},
+      ()=>{const gains=alive().filter(x=>x.id!==p.id).map(o=>changeRelation(p,o,5,'完成全岛探索')).filter(Boolean);return `与所有幸存者关系+${gains.length?Math.max(...gains.map(Math.abs)):Math.abs(scaledRelationDelta(5))}`;},
       ()=>{p.nextCheckBonus=Math.max(p.nextCheckBonus,.20);return '下一次属性检定获得大幅加成';}
     ];
     let idx=Math.floor(rng()*rewards.length);if(idx===1&&p.life>=p.maxLife){state.rescueScore+=2;idx=2;}const text=rewards[idx]();checkShelterBuildReady();state.exploreRewardText=text;log(`全岛探索奖励：探索完全部12个地点：${text}`);sound('story');toast(`★ 全岛探索完成：${text}`);return text;
@@ -1218,7 +1224,7 @@ ${base}`,choices:prof?.choices||[]};
 
   function modal(html){document.body.insertAdjacentHTML('beforeend',`<div class="modalWrap" id="modal"><div class="modal">${html}</div></div>`);}
   function closeModal(){document.getElementById('modal')?.remove();}
-  function itemInfo(id){closeModal();const it=item(id),starter=isStarterItem(player(),id),can=it.consumable&&['LOCATION','MAP','POST','POST_ACTION'].includes(state.phase),count=player().inventory.filter(x=>x===id).length;modal(`<div class="row between"><h2>${it.ico} <span class="itemName">${esc(it.name)}</span>${it.consumable&&count>1?` <small>×${count}</small>`:''}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><p>${esc(it.desc)}</p><div class="muted">${starter?'角色专属 · 永久持有 · 不可交易 / 夺取 / 丢弃':it.consumable?'消耗品 · 相同物品每个背包格最多叠加2个':'携带生效 · 同名效果不叠加'}</div>${can?`<button class="btn" style="margin-top:14px" onclick="Game.use('${id}')">使用1个</button>`:''}`);}
+  function itemInfo(id){closeModal();const it=item(id),starter=isStarterItem(player(),id),can=it.consumable&&['MORNING','LOCATION','MAP','POST','POST_ACTION'].includes(state.phase),count=player().inventory.filter(x=>x===id).length;modal(`<div class="row between"><h2>${it.ico} <span class="itemName">${esc(it.name)}</span>${it.consumable&&count>1?` <small>×${count}</small>`:''}</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div><p>${esc(it.desc)}</p><div class="muted">${starter?'角色专属 · 永久持有 · 不可交易 / 夺取 / 丢弃':it.consumable?'消耗品 · 相同物品每个背包格最多叠加2个':'携带生效 · 同名效果不叠加'}</div>${can?`<button class="btn" style="margin-top:14px" onclick="Game.use('${id}')">使用1个</button>`:''}`);}
   function characterCurrentScore(c){
     // 实时人物分强调“本局成长”，避免开局因满状态/基础属性直接出现数百分。
     const survivalDays=Math.max(1,c.dead?(c.deathDay||1):state.day);
