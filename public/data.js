@@ -816,6 +816,14 @@ window.DAY81_DATA = (() => {
     {id:'stove',name:'简易炉灶',icon:'🍲',desc:'窝棚主人使用食品时，健康恢复额外+1。',cost:{wood:2,scrap:2}},
     {id:'medical_corner',name:'医疗角',icon:'🩹',desc:'在窝棚过夜且生命未满时，每5天有25%概率恢复1点生命。',cost:{fiber:2,scrap:2}}
   ];
+  const intimateCoupleEvents = [
+    {id:'intimate_rain_roof',title:'雨落屋檐',text:'夜里，细雨落在窝棚顶上，声音轻得像一层薄纱。{a}和{b}并肩坐在门边，谁都没有急着说话。',dialogue:['{a}：“以前总觉得安静很浪费时间，现在反而舍不得打破它。”','{b}：“那就再坐一会儿。今晚不用和谁抢时间。”','两个人相视一笑，靠得更近了一点。']},
+    {id:'intimate_campfire',title:'营火余温',text:'公共营地的火已经烧得很小，只剩温暖的红光。{a}替{b}拂掉肩上的草屑，动作很轻。',dialogue:['{b}：“你这样看着我，我都快忘了这里是荒岛。”','{a}：“忘一会儿也好。明天醒来，我们还是会继续想办法。”','火星偶尔升起来，像把两人的影子也拉得更近。']},
+    {id:'intimate_home',title:'像一个家',text:'窝棚不大，木板还有点歪，却在夜色里有了真正“家”的样子。{a}和{b}把白天收好的东西摆回原位。',dialogue:['{a}：“要是以后真回去了，我大概会想念这里。”','{b}：“我可不想念荒岛。我只会想念……这里的一些人。”','那句话没有说得更明白，但两个人都懂。']},
+    {id:'intimate_stars',title:'屋外的星光',text:'夜风不冷，两个人干脆坐到窝棚外。树叶之间露出一小片星空，亮得出奇。',dialogue:['{b}：“你看，那颗星是不是每天都在同一个位置？”','{a}：“不知道。不过只要你明天还问，我就陪你再看一次。”','{b}轻轻笑了，手指悄悄碰上了{a}的手。']},
+    {id:'intimate_whisper',title:'夜深以后',text:'岛上渐渐安静下来，只剩远处的浪声。{a}和{b}低声聊着一些平时不会提起的小事。',dialogue:['{a}：“如果今天是普通的一天，我们现在应该在做什么？”','{b}：“也许吃宵夜，也许吵着谁洗碗。”','{a}：“听起来都比数椰子幸福。”','两个人笑得很轻，随后安静地依偎在一起。']}
+  ];
+
   const nightInteractionEvents = [
     {id:'night_chat',text:'{a}和{b}借着微弱的光聊了几句白天的经历。',positive:'两人的关系更近了一些。',negative:'话题没聊到一起，气氛有点僵。'},
     {id:'night_share',text:'{a}整理东西时，顺手问{b}今天过得怎么样。',positive:'两人互相提醒了明天要注意的事。',negative:'两个人都太累，只草草说了几句。'},
@@ -945,5 +953,5 @@ window.DAY81_DATA = (() => {
     N('distant_light','远海灯光','很远的海面上，似乎有一盏灯一闪而过。没有人敢确定那是不是船。',{rescueScore:.5},'good',{minDay:60})
   ];
 
-  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,interactionProfiles,interactionEvents,coupleInteractionEvents,travelEvents,campBuildings,shelterLevels,shelterFacilities,nightInteractionEvents,storyChains,crisisTemplates,nights};
+  return {characters,items,itemPool,foodPool,medicalPool,gearPool,events,locations,locationEvents,interactionProfiles,interactionEvents,coupleInteractionEvents,intimateCoupleEvents,travelEvents,campBuildings,shelterLevels,shelterFacilities,nightInteractionEvents,storyChains,crisisTemplates,nights};
 })();

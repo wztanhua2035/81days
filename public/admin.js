@@ -1,7 +1,7 @@
 (() => {
   const ids=['linlan','zhouye','chenmo','suqing','gaoyuan','xutang'];
   const labels={linlan:'急诊护士',zhouye:'消防员',chenmo:'机械工程师',suqing:'户外摄影师',gaoyuan:'餐厅厨师',xutang:'中学教师'};
-  const standard={nightEventChance:.70,baseCheckModifier:0,healthDecayChance:1,healthyLifeRecoverChance:.20,inventoryLimit:8,startingBonusFood:0,hostileBattleChance:.20,eventRecentWindow:24,interactionRecentWindow:24,bondThreshold:60,npcSaveChanceDay30:.82,npcSaveChanceDay50:.52};
+  const standard={nightEventChance:.70,baseCheckModifier:0,healthDecayChance:1,healthyLifeRecoverChance:.20,inventoryLimit:8,startingBonusFood:0,hostileBattleChance:.20,eventRecentWindow:24,interactionRecentWindow:24,bondThreshold:60,npcSaveChanceDay30:.84,npcSaveChanceDay50:.66,npcSaveChanceDay60:.62};
   const $=id=>document.getElementById(id);
   const pct=x=>Math.round(Number(x)*100);
   const unpct=x=>Number(x)/100;
@@ -20,9 +20,9 @@
     $('healthDecayChance').value=pct(d.healthDecayChance);$('healthyLifeRecoverChance').value=pct(d.healthyLifeRecoverChance);
     $('inventoryLimit').value=d.inventoryLimit;$('startingBonusFood').value=d.startingBonusFood;
     $('hostileBattleChance').value=pct(d.hostileBattleChance);$('eventRecentWindow').value=d.eventRecentWindow;$('interactionRecentWindow').value=d.interactionRecentWindow;$('bondThreshold').value=d.bondThreshold;
-    $('npcSaveChanceDay30').value=pct(d.npcSaveChanceDay30);$('npcSaveChanceDay50').value=pct(d.npcSaveChanceDay50);
+    $('npcSaveChanceDay30').value=pct(d.npcSaveChanceDay30);$('npcSaveChanceDay50').value=pct(d.npcSaveChanceDay50);$('npcSaveChanceDay60').value=pct(d.npcSaveChanceDay60);
   }
-  function collect(){return {roleNames:Object.fromEntries(ids.map(id=>[id,$(`role_${id}`).value.trim()])),difficulty:{nightEventChance:unpct($('nightEventChance').value),baseCheckModifier:unpct($('baseCheckModifier').value),healthDecayChance:unpct($('healthDecayChance').value),healthyLifeRecoverChance:unpct($('healthyLifeRecoverChance').value),inventoryLimit:Number($('inventoryLimit').value),startingBonusFood:Number($('startingBonusFood').value),hostileBattleChance:unpct($('hostileBattleChance').value),eventRecentWindow:Number($('eventRecentWindow').value),interactionRecentWindow:Number($('interactionRecentWindow').value),bondThreshold:Number($('bondThreshold').value),npcSaveChanceDay30:unpct($('npcSaveChanceDay30').value),npcSaveChanceDay50:unpct($('npcSaveChanceDay50').value)}}}
+  function collect(){return {roleNames:Object.fromEntries(ids.map(id=>[id,$(`role_${id}`).value.trim()])),difficulty:{nightEventChance:unpct($('nightEventChance').value),baseCheckModifier:unpct($('baseCheckModifier').value),healthDecayChance:unpct($('healthDecayChance').value),healthyLifeRecoverChance:unpct($('healthyLifeRecoverChance').value),inventoryLimit:Number($('inventoryLimit').value),startingBonusFood:Number($('startingBonusFood').value),hostileBattleChance:unpct($('hostileBattleChance').value),eventRecentWindow:Number($('eventRecentWindow').value),interactionRecentWindow:Number($('interactionRecentWindow').value),bondThreshold:Number($('bondThreshold').value),npcSaveChanceDay30:unpct($('npcSaveChanceDay30').value),npcSaveChanceDay50:unpct($('npcSaveChanceDay50').value),npcSaveChanceDay60:unpct($('npcSaveChanceDay60').value)}}}
   async function loadSettings(){
     try{const d=await api('/api/admin/settings');renderRoles(d.settings.roleNames);fillDifficulty(d.settings.difficulty);showAdmin();}
     catch(e){if(e.status===401)showLogin();else{showLogin();msg('loginMsg',e.message,'error')}}

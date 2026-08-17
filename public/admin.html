@@ -47,8 +47,9 @@
           <label>探索事件全局去重窗口<input id="eventRecentWindow" type="number" min="12" max="40" step="1" /><small>默认24。数值越大，短期内越不容易重复探索事件。</small></label>
           <label>人物互动去重窗口<input id="interactionRecentWindow" type="number" min="6" max="24" step="1" /><small>默认24。模板更多后使用更长去重窗口，进一步降低重复。</small></label>
           <label>生死之交阈值<input id="bondThreshold" type="number" min="50" max="80" step="1" /><small>默认60。异性角色第一次达到该值时可成为情侣。</small></label>
-          <label>NPC前30天濒死保护概率（%）<input id="npcSaveChanceDay30" type="number" min="30" max="95" step="1" /><small>默认82。用于避免非主角在前期过快大量死亡。</small></label>
-          <label>NPC第31—50天濒死保护概率（%）<input id="npcSaveChanceDay50" type="number" min="15" max="85" step="1" /><small>默认52。</small></label>
+          <label>NPC前30天濒死保护概率（%）<input id="npcSaveChanceDay30" type="number" min="30" max="95" step="1" /><small>默认84。用于避免非主角在前期过快大量死亡。</small></label>
+          <label>NPC第31—50天濒死保护概率（%）<input id="npcSaveChanceDay50" type="number" min="15" max="85" step="1" /><small>默认66。</small></label>
+          <label>NPC第51—60天濒死保护概率（%）<input id="npcSaveChanceDay60" type="number" min="10" max="80" step="1" /><small>默认62。用于控制普通难度下前60天死亡率。</small></label>
         </div>
         <div class="row"><button id="saveBtn">保存角色与难度设置</button><button id="resetBtn" class="ghost" type="button">恢复标准难度</button></div>
         <div id="saveMsg" class="msg"></div>

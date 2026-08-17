@@ -12,7 +12,7 @@ const DEFAULT_PASSWORD = process.env.ADMIN_PASSWORD || '818181';
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8',
   '.js':'application/javascript; charset=utf-8', '.json':'application/json; charset=utf-8',
-  '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon'
+  '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.wav':'audio/wav'
 };
 
 const DEFAULT_SETTINGS = {
@@ -30,8 +30,9 @@ const DEFAULT_SETTINGS = {
     eventRecentWindow: 24,
     interactionRecentWindow: 24,
     bondThreshold: 60,
-    npcSaveChanceDay30: 0.82,
-    npcSaveChanceDay50: 0.52
+    npcSaveChanceDay30: 0.84,
+    npcSaveChanceDay50: 0.66,
+    npcSaveChanceDay60: 0.62
   }
 };
 
@@ -153,7 +154,8 @@ function validateSettings(input){
     interactionRecentWindow:num('interactionRecentWindow',6,24,true),
     bondThreshold:num('bondThreshold',50,80,true),
     npcSaveChanceDay30:num('npcSaveChanceDay30',.30,.95),
-    npcSaveChanceDay50:num('npcSaveChanceDay50',.15,.85)
+    npcSaveChanceDay50:num('npcSaveChanceDay50',.15,.90),
+    npcSaveChanceDay60:num('npcSaveChanceDay60',.10,.85)
   }};
 }
 function clientIp(req){ return String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim(); }

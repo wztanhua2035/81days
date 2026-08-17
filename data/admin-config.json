@@ -20,8 +20,9 @@
       "eventRecentWindow": 24,
       "interactionRecentWindow": 24,
       "bondThreshold": 60,
-      "npcSaveChanceDay30": 0.82,
-      "npcSaveChanceDay50": 0.52
+      "npcSaveChanceDay30": 0.84,
+      "npcSaveChanceDay50": 0.66,
+      "npcSaveChanceDay60": 0.62
     }
   }
 }

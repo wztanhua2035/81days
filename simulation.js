@@ -1,5 +1,5 @@
-/** 《八十一天》v2.2 近似平衡回归测试。
- * 普通难度目标：在原约50%的基础上略微提高；NPC DAY30前死亡率<20%，DAY50前<50%。
+/** 《八十一天》v2.3 近似平衡回归测试。
+ * 普通难度目标：在原约50%的基础上略微提高；NPC DAY30前死亡率<20%，DAY60前<40%。
  * 这是简化压力模型，用于调参回归，不代替上线后的真实玩家统计。
  */
 const chars=[
@@ -12,7 +12,7 @@ const chars=[
 ];
 const R=Math.random;
 function gainHealth(s,n){const target=s.health+n;if(target<=3)s.health=target;else if(s.life<s.max){s.life++;s.health=1;}else s.health=3;}
-function saveNpc(s,day,npc){if(!npc||s.life>0)return;const p=day<=30?.82:day<=50?.52:0;if(p&&R()<p)s.life=1;}
+function saveNpc(s,day,npc){if(!npc||s.life>0)return;const p=day<=30?.84:day<=50?.66:day<=60?.62:0;if(p&&R()<p)s.life=1;}
 function run(c,npc=false){
   const s={life:c.max,max:c.max,health:3,foods:1,meds:c.id==='linlan'?1:0,linCd:0,streak:0,death:81};
   let shelter=false,water=false,trap=false;
@@ -53,9 +53,9 @@ function run(c,npc=false){
 }
 const games=Number(process.argv[2]||20000);let total=0;
 console.log(`每个角色模拟 ${games} 局（普通难度）\n`);
-for(const c of chars){let wins=0,npc30=0,npc50=0,deathSum=0,loss=0;for(let i=0;i<games;i++){
+for(const c of chars){let wins=0,npc30=0,npc60=0,deathSum=0,loss=0;for(let i=0;i<games;i++){
   const p=run(c,false);if(p.win)wins++;else{loss++;deathSum+=p.death;}
-  const n=run(c,true);if(!n.win&&n.death<=30)npc30++;if(!n.win&&n.death<=50)npc50++;
-}total+=wins;console.log(`${c.name}: 玩家胜率 ${(wins/games*100).toFixed(1)}% | NPC≤30天死亡 ${(npc30/games*100).toFixed(1)}% | NPC≤50天死亡 ${(npc50/games*100).toFixed(1)}% | 失败平均日 ${loss?(deathSum/loss).toFixed(1):'-'}`);}
+  const n=run(c,true);if(!n.win&&n.death<=30)npc30++;if(!n.win&&n.death<=60)npc60++;
+}total+=wins;console.log(`${c.name}: 玩家胜率 ${(wins/games*100).toFixed(1)}% | NPC≤30天死亡 ${(npc30/games*100).toFixed(1)}% | NPC≤60天死亡 ${(npc60/games*100).toFixed(1)}% | 失败平均日 ${loss?(deathSum/loss).toFixed(1):'-'}`);}
 console.log(`\n玩家六角色平均通关率：${(total/(games*chars.length)*100).toFixed(1)}%`);
-console.log('目标：较旧版略有提升；NPC≤30天<20%，NPC≤50天<50%。');
+console.log('目标：较旧版略有提升；NPC≤30天<20%，NPC≤60天<40%。');

@@ -276,3 +276,40 @@ body{font-size:15px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLe
 @media(max-width:390px){
   .sceneBriefOverlay{font-size:13px;line-height:1.52}.sceneEventOverlay>div{font-size:13px}.sceneEventOverlay>b{font-size:15px}.sceneTalkLine{font-size:12px}.phase-morning .scenePeople,.phase-location .scenePeople{max-width:60%}
 }
+
+/* v2.3 阅读设置 */
+html[data-font-size="small"]{--read-body:13px;--read-detail:12px;--read-scene:13px;--read-dialogue:14px;--read-choice:13px}
+html[data-font-size="medium"]{--read-body:14px;--read-detail:13px;--read-scene:15px;--read-dialogue:15px;--read-choice:14px}
+html[data-font-size="large"]{--read-body:16px;--read-detail:15px;--read-scene:17px;--read-dialogue:17px;--read-choice:16px}
+.gameScreen,.modal{font-size:var(--read-body,14px)}
+.gameScreen .meta,.modal .meta,.peopleScoreHint{font-size:var(--read-detail,13px)!important}
+.sceneBriefOverlay,.sceneEventOverlay>div{font-size:var(--read-scene,15px)!important;line-height:1.62}
+.choice,.compactChoices .choice,.interactionStoryChoices .choice{font-size:var(--read-choice,14px)!important}
+.settingsBlock{display:grid;gap:7px;padding:12px;margin:10px 0;border:1px solid #34514d;border-radius:14px;background:#0d1b1a}.settingsBlock>b{font-size:16px}.settingsBlock>.muted{font-size:12px;line-height:1.55}.settingPills{display:flex;gap:7px;flex-wrap:wrap}.settingPill{border:1px solid #55716d;background:#192b29;color:#e7efec;border-radius:999px;padding:8px 13px;min-width:52px;font-weight:800}.settingPill.active{background:#d6b460;color:#211d16;border-color:#f0d28c}.musicPills .settingPill{min-width:calc(50% - 4px)}
+
+/* v2.3 3:4 大幅海岛地图 */
+.mapPortraitCard{max-height:calc(100dvh - 126px);overflow:auto}.portraitMap{width:100%;height:auto!important;aspect-ratio:3/4;max-height:68dvh;background:#5fc7ee!important;border-radius:20px}.islandMapArt{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}.portraitMap .mapSpot{z-index:3;width:88px}.portraitMap .mapSpot .pin{width:40px;height:40px;font-size:20px}.portraitMap .spotLabel{font-size:11px;background:#082b31dc;border:1px solid #ffffff47}.portraitMap .mapSpot.current .pin{outline:3px solid #ffd66c}
+
+/* 场景内人物头像进一步放大 */
+.gameScreen .sceneAvatar{width:50px!important;height:50px!important;border-width:2px!important}.scenePerson span{font-size:12px!important}.phase-morning .scenePeople,.phase-location .scenePeople{max-width:68%!important}.scenePeopleRow{gap:7px!important}.actionPerson .meetPortrait{width:44px!important;height:44px!important}.actionPerson span{font-size:12px!important}
+
+/* RPG 式逐句对白 */
+.rpgInteractionVisual{min-height:250px}.enlargedDuo .interactionBigPortrait{width:108px;height:132px}.enlargedDuo>span{color:#f5a7b6;font-size:22px}.rpgDialogueOverlay{position:absolute;z-index:7;left:8px;right:8px;bottom:8px}.rpgDialogue{display:flex;align-items:flex-end;gap:8px}.rpgDialogue.mine{flex-direction:row-reverse}.rpgSpeakerPortrait{width:72px;height:88px;object-fit:cover;object-position:center top;border-radius:13px;border:2px solid #f0d39b;box-shadow:0 6px 16px #0008;flex:none}.rpgBubble{position:relative;flex:1;min-height:86px;background:#fff8ebf2;color:#2b2b27;border:1px solid #e0cda8;border-radius:16px;padding:10px 12px 34px;box-shadow:0 7px 20px #0007;backdrop-filter:blur(4px)}.rpgDialogue.mine .rpgBubble{background:#e3f1f8f2;border-color:#a9c9d9}.rpgBubble>b{display:block;color:#80612e;margin-bottom:4px;font-size:13px}.rpgBubble>div{font-size:var(--read-dialogue,15px);line-height:1.65}.dialogueNext{position:absolute;right:8px;bottom:7px;border:0;border-radius:999px;background:#233f3d;color:#fff;padding:5px 11px;font-size:12px;font-weight:800}.dialogueNext span{font-size:17px;vertical-align:-1px}.interactionPaper{max-height:36dvh}.interactionStoryChoices{max-height:22dvh}
+
+/* 女性次日临时加成、疲惫提示 */
+.tempBoost{color:#ffcf76;font-size:10px;margin-left:2px}.forcedRestCard{border:1px solid #906968;background:#f4e2d5}.forcedRestCard .event-title{font-size:18px}.forcedRestCard .event-text{font-size:14px;line-height:1.65;margin-bottom:12px}
+
+/* 夜间情侣红心动画 */
+.nightScreen{position:relative;overflow:hidden}.heartRise{position:fixed;inset:0;z-index:5;pointer-events:none;overflow:hidden}.heartRise i{position:absolute;bottom:-30px;left:calc(8% + (var(--i) * 7%));color:#ff7188;font-style:normal;font-size:calc(18px + (var(--i) % 4) * 4px);opacity:0;animation:heartFloat 3.2s ease-out calc((var(--i) % 6) * .12s) forwards}@keyframes heartFloat{0%{transform:translateY(0) scale(.7) rotate(-8deg);opacity:0}16%{opacity:.9}100%{transform:translateY(-82dvh) translateX(calc((var(--i) % 3 - 1)*22px)) scale(1.35) rotate(14deg);opacity:0}}.intimateNightPaper{border:1px solid #d58a99;box-shadow:0 0 35px #df72865c}.intimateNightTag{background:#ffe0e7;color:#8e3045;border-radius:12px;padding:8px 10px;margin-bottom:9px;font-size:13px;font-weight:850}
+
+/* 人物实时评分 */
+.peopleScoreHint{color:#9fb5af;line-height:1.5;margin:-2px 0 10px}.scoredPeople .relationItem{position:relative;padding-left:42px}.rankBadge{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:#203b38;color:#f1d88d;font-weight:900;font-size:12px}.currentScore{color:#f2cd72;white-space:nowrap;font-size:14px}
+
+/* 系统与情侣住所提示 */
+.systemAlert,.coupleHomeModal{text-align:center}.systemAlertIcon{font-size:44px}.systemAlert h2,.coupleHomeModal h2{margin:8px 0}.systemAlert p,.coupleHomeModal p{line-height:1.7;color:#c9d8d3}.coupleHomeCard{text-align:left}.coupleHomeCard span{display:block;margin-top:5px;color:#3c5d4f;font-size:12px;font-weight:700}
+
+/* 结局演出 */
+.endCinematic{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:#081514}.endCinematic .cinematicBg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.endCinematic.fail .cinematicBg{filter:grayscale(.72) brightness(.34)}.endCinematic.win .cinematicBg{filter:saturate(1.25) brightness(.86)}.cinematicShade{position:absolute;inset:0;background:linear-gradient(#07151944,#061013db)}.cinematicContent{position:relative;z-index:2;width:min(88%,430px);animation:cinematicIn 1.3s ease-out}.cinematicContent h1{font-size:40px;margin:10px 0;color:#ffe8aa;text-shadow:0 5px 22px #000}.endCinematic.fail h1{color:#ffd0cb}.cinematicContent p{font-size:16px;line-height:1.8;color:#f0f5f2;text-shadow:0 2px 5px #000}.cinematicPortrait{width:126px;height:152px;border-radius:18px;object-fit:cover;object-position:center top;border:2px solid #f5dca2}.endCinematic.fail .cinematicPortrait{filter:grayscale(.75)}.cinematicAction{opacity:0;animation:buttonReveal .7s ease 2.3s forwards}.rescueGlow{position:absolute;width:240px;height:240px;border-radius:50%;background:#ffe89970;filter:blur(30px);animation:rescuePulse 2s ease-in-out infinite}.rescueShip{font-size:72px;animation:shipIn 3s ease-out both}.failRain{position:absolute;inset:-20%;background:repeating-linear-gradient(100deg,transparent 0 16px,#b8d9e31f 17px 19px);animation:rainMove .6s linear infinite}@keyframes cinematicIn{from{opacity:0;transform:scale(.92) translateY(18px)}to{opacity:1;transform:none}}@keyframes buttonReveal{to{opacity:1}}@keyframes rescuePulse{50%{transform:scale(1.35);opacity:.6}}@keyframes shipIn{from{transform:translateX(45vw) scale(.5);opacity:0}to{transform:none;opacity:1}}@keyframes rainMove{to{transform:translate(-30px,90px)}}
+
+@media(max-width:390px){.gameScreen .sceneAvatar{width:46px!important;height:46px!important}.enlargedDuo .interactionBigPortrait{width:94px;height:116px}.rpgSpeakerPortrait{width:64px;height:80px}.rpgBubble{min-height:80px;padding:8px 10px 32px}.portraitMap .mapSpot{width:76px}.portraitMap .spotLabel{font-size:10px}.interactionPaper{max-height:35dvh}}
+.actionOrderLine{font-size:12px;line-height:1.5;color:#7b6d59;background:#f7edda;border:1px dashed #cdbb99;border-radius:9px;padding:6px 8px;margin:4px 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
