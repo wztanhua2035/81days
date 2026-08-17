@@ -1,6 +1,6 @@
 {
   "name": "day81-card-survival",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "private": true,
   "description": "《八十一天》v2.8 单人卡牌荒岛生存游戏（场景文本、晨间道具与关系变化优化）",
   "main": "server.js",
