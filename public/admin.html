@@ -56,6 +56,19 @@
       </section>
 
       <section class="panel">
+        <h2>背景音乐管理</h2>
+        <p class="muted">可上传自定义背景音乐，并选择哪些曲目提供给玩家。上传文件会保存到 <code>public/assets/music</code>，与内置音乐位于同一目录。</p>
+        <div class="music-upload-grid">
+          <label>音乐名称<input id="musicLabel" maxlength="30" placeholder="例如：海风与星光" /></label>
+          <label>选择音频文件<input id="musicFile" type="file" accept="audio/*,.wav,.mp3,.ogg,.m4a,.aac" /></label>
+        </div>
+        <div class="row"><button id="musicUploadBtn" type="button">上传音乐</button><button id="musicSaveBtn" type="button" class="ghost">保存可用曲目</button></div>
+        <div id="musicMsg" class="msg"></div>
+        <div id="musicList" class="music-list"></div>
+        <p class="muted music-note">勾选的音乐才会出现在玩家“本局资料”的背景音乐选项中。内置音乐不能物理删除，但可以取消勾选；自定义上传音乐可以删除。</p>
+      </section>
+
+      <section class="panel">
         <h2>修改管理密码</h2>
         <div class="settings-grid password-grid">
           <label>当前密码<input id="currentPassword" type="password" autocomplete="current-password" /></label>

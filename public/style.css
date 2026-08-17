@@ -429,3 +429,31 @@ html[data-font-size="large"] .interactionUtilityLabel{font-size:15px}
   .dialogueOnlyVisual{min-height:205px!important;flex-basis:205px!important}
   .copyrightLine{font-size:9px}
 }
+
+/* v2.7：移动/特别事件在中大字号下优先保证完整可读 */
+.phase-travel .eventSceneStrip{flex:0 0 auto!important}
+.phase-travel .eventSceneStrip .sceneStripImage{height:clamp(190px,30dvh,260px)!important;min-height:190px}
+.phase-travel .sceneEventOverlay{top:10px;bottom:auto;max-height:calc(100% - 20px);overflow:auto;padding:10px 12px}
+.phase-travel .sceneEventOverlay>b{font-size:18px}
+.phase-travel .sceneEventOverlay>div{line-height:1.72!important}
+html[data-font-size="medium"] .phase-travel .eventSceneStrip .sceneStripImage{height:clamp(215px,33dvh,285px)!important}
+html[data-font-size="large"] .phase-travel .eventSceneStrip .sceneStripImage{height:clamp(245px,37dvh,320px)!important}
+html[data-font-size="large"] .phase-travel .sceneEventOverlay{padding:12px 14px}
+@media(max-height:700px){
+  .phase-travel .eventSceneStrip .sceneStripImage{height:190px!important;min-height:190px}
+  html[data-font-size="large"] .phase-travel .eventSceneStrip .sceneStripImage{height:225px!important}
+}
+
+/* 探索页只保留场景和事件信息，不再在右上角重复显示同地点伙伴头像 */
+.phase-event .sceneStripPeople,.phase-post .sceneStripPeople{display:none!important}
+
+/* 动物互动说明提高前景/背景反差，避免深灰文字落在深色卡片上 */
+.animalDialogueCard{background:#071817f2!important;border-color:#ffffff54!important}
+.animalDialogueCard .event-text,.animalDialogueCard .event-text *{color:#f4faf7!important;text-shadow:0 1px 3px #000!important;opacity:1!important}
+.animalDialogueCard .section-title{color:#c5d8d1!important}
+.animalDialogueCard .event-title{color:#ffe39f!important;text-shadow:0 1px 2px #000}
+
+/* 中、大字体时，动物说明卡也给予更充足的高度 */
+html[data-font-size="medium"] .animalInteractionScene{min-height:330px}
+html[data-font-size="large"] .animalInteractionScene{min-height:370px}
+html[data-font-size="large"] .animalDialogueCard{padding:12px 14px}

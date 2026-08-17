@@ -12,7 +12,13 @@
 
   const DEFAULT_GAME_CONFIG = {
     roleNames: {linlan:'林岚',zhouye:'周野',chenmo:'陈默',suqing:'苏晴',gaoyuan:'高远',xutang:'许棠'},
-    difficulty: {nightEventChance:.70,baseCheckModifier:0,healthDecayChance:1,healthyLifeRecoverChance:.20,inventoryLimit:8,startingBonusFood:0,hostileBattleChance:.20,eventRecentWindow:24,interactionRecentWindow:24,bondThreshold:60,npcSaveChanceDay30:.84,npcSaveChanceDay50:.66,npcSaveChanceDay60:.62}
+    difficulty: {nightEventChance:.70,baseCheckModifier:0,healthDecayChance:1,healthyLifeRecoverChance:.20,inventoryLimit:8,startingBonusFood:0,hostileBattleChance:.20,eventRecentWindow:24,interactionRecentWindow:24,bondThreshold:60,npcSaveChanceDay30:.84,npcSaveChanceDay50:.66,npcSaveChanceDay60:.62},
+    music:{tracks:[
+      {id:'gentle_sea',label:'温柔的海风',src:'/assets/music/gentle_sea.wav'},
+      {id:'quiet_forest',label:'静谧森林',src:'/assets/music/quiet_forest.wav'},
+      {id:'under_stars',label:'星空之下',src:'/assets/music/under_stars.wav'},
+      {id:'morning_light',label:'晨曦之光',src:'/assets/music/morning_light.wav'}
+    ]}
   };
 
   const DIFFICULTY_META = {
@@ -29,13 +35,17 @@
   let fontSizePref = localStorage.getItem(FONT_KEY) || 'medium';
   let bgmChoice = localStorage.getItem(BGM_KEY) || 'gentle_sea';
   let bgmAudio = null;
-  const BGM_TRACKS = {
-    off:{label:'关闭背景音乐',src:''},
-    gentle_sea:{label:'温柔的海风',src:'/assets/music/gentle_sea.wav'},
-    quiet_forest:{label:'静谧森林',src:'/assets/music/quiet_forest.wav'},
-    under_stars:{label:'星空之下',src:'/assets/music/under_stars.wav'},
-    morning_light:{label:'晨曦之光',src:'/assets/music/morning_light.wav'}
-  };
+  let BGM_TRACKS = {off:{label:'关闭背景音乐',src:''}};
+  function configureBgmTracks(tracks){
+    const next={off:{label:'关闭背景音乐',src:''}};
+    for(const t of (tracks||[])){
+      const id=String(t?.id||'');const label=String(t?.label||'').trim();const src=String(t?.src||'');
+      if(!id||!label||!src||id==='off')continue;next[id]={label,src};
+    }
+    BGM_TRACKS=next;
+    if(!BGM_TRACKS[bgmChoice]){bgmChoice=Object.keys(BGM_TRACKS).find(k=>k!=='off')||'off';localStorage.setItem(BGM_KEY,bgmChoice);}
+  }
+  configureBgmTracks(DEFAULT_GAME_CONFIG.music.tracks);
 
   function rules(){ return state?.rules || GAME_CONFIG.difficulty; }
   function invLimit(c){ return Number(c?.inventoryLimit || rules().inventoryLimit || 8); }
@@ -396,7 +406,7 @@
     if(!['small','medium','large'].includes(size))return;fontSizePref=size;localStorage.setItem(FONT_KEY,size);applyFontSize();sound('click');closeModal();showOverview();
   }
   function ensureBgm(){
-    if(!soundEnabled||bgmChoice==='off')return null;const track=BGM_TRACKS[bgmChoice]||BGM_TRACKS.gentle_sea;
+    if(!soundEnabled||bgmChoice==='off')return null;const track=BGM_TRACKS[bgmChoice]||Object.values(BGM_TRACKS).find(t=>t.src);if(!track||!track.src)return null;
     if(!bgmAudio){bgmAudio=new Audio();bgmAudio.loop=true;bgmAudio.preload='auto';bgmAudio.playsInline=true;bgmAudio.volume=.26;}
     if(bgmAudio.dataset.track!==bgmChoice){bgmAudio.pause();bgmAudio.src=track.src;bgmAudio.dataset.track=bgmChoice;bgmAudio.load();}
     return bgmAudio;
@@ -1129,8 +1139,11 @@ ${base}`,choices:prof?.choices||[]};
   function quickDockHtml(){
     return `<nav class="quickDock"><button onclick="Game.showStatus()"><span>👤</span>状态</button><button onclick="Game.showInventory()"><span>🎒</span>背包</button><button onclick="Game.survivors()"><span>👥</span>人物</button><button onclick="Game.showCamp()"><span>🏕️</span>营地</button><button onclick="Game.showShelter()"><span>🏠</span>窝棚</button><button onclick="Game.logs()"><span>📖</span>日志</button></nav>`;
   }
-  function miniSceneHtml(loc,overlayTitle='',overlayText='',typing=false){
-    const peers=locationPeers(),animal=animalAtLocation(loc?.id);return `<section class="sceneStrip eventSceneStrip"><div class="sceneStripHead"><b>${esc(loc?.name||'未知地点')}</b><span>${peers.length+(animal?1:0)?`同地点伙伴${peers.length+(animal?1:0)}`:'独自一人'}</span></div><div class="sceneStripImage"><img src="${esc(loc?.scene||'')}" alt="${esc(loc?.name||'地点')}"><div class="sceneStripShade"></div>${overlayTitle||overlayText?`<div class="sceneEventOverlay">${overlayTitle?`<b>${esc(overlayTitle)}</b>`:''}<div ${typing?'id="eventText"':''}>${typing?'':richText(overlayText)}</div></div>`:''}<div class="sceneStripPeople">${peers.map(c=>`<button onclick="Game.personInfo('${c.id}')">${portrait(c,'sceneAvatar')}<span>${esc(c.name)}</span></button>`).join('')}${animal?`<button onclick="Game.animalInfo('${animal.id}')"><img class="sceneAvatar animalAvatar" src="${esc(animal.image)}"><span>${esc(animal.name)}</span></button>`:''}</div></div></section>`;
+  function miniSceneHtml(loc,overlayTitle='',overlayText='',typing=false,showPeople=true){
+    const peers=locationPeers(),animal=animalAtLocation(loc?.id),count=peers.length+(animal?1:0);
+    const partnerInfo=showPeople?(count?`同地点伙伴${count}`:'独自一人'):'';
+    const people=showPeople?`<div class="sceneStripPeople">${peers.map(c=>`<button onclick="Game.personInfo('${c.id}')">${portrait(c,'sceneAvatar')}<span>${esc(c.name)}</span></button>`).join('')}${animal?`<button onclick="Game.animalInfo('${animal.id}')"><img class="sceneAvatar animalAvatar" src="${esc(animal.image)}"><span>${esc(animal.name)}</span></button>`:''}</div>`:'';
+    return `<section class="sceneStrip eventSceneStrip"><div class="sceneStripHead"><b>${esc(loc?.name||'未知地点')}</b><span>${partnerInfo}</span></div><div class="sceneStripImage"><img src="${esc(loc?.scene||'')}" alt="${esc(loc?.name||'地点')}"><div class="sceneStripShade"></div>${overlayTitle||overlayText?`<div class="sceneEventOverlay">${overlayTitle?`<b>${esc(overlayTitle)}</b>`:''}<div ${typing?'id="eventText"':''}>${typing?'':richText(overlayText)}</div></div>`:''}${people}</div></section>`;
   }
 
   function showStatus(){
@@ -1145,7 +1158,7 @@ ${base}`,choices:prof?.choices||[]};
     const bgmButtons=Object.entries(BGM_TRACKS).map(([k,v])=>`<button class="settingPill ${bgmChoice===k?'active':''}" onclick="Game.setBgm('${k}')">${k==='off'?'关闭':esc(v.label)}</button>`).join('');
     modal(`<div class="row between"><h2>本局资料</h2><button class="btn small ghost" onclick="Game.closeModal()">关闭</button></div>
       <div class="settingsBlock"><b>显示字体</b><span class="muted">可按阅读习惯切换，小/中/大三档会立即生效。</span><div class="settingPills">${fontButtons}</div></div>
-      <div class="settingsBlock"><b>背景音乐</b><span class="muted">四首原创轻音乐循环播放。手机端首次触摸后会自动解锁。</span><div class="settingPills musicPills">${bgmButtons}</div><div class="meta">总声音：${soundEnabled?'开启':'静音'} · 右上角扬声器会同时控制背景音乐和音效</div></div>
+      <div class="settingsBlock"><b>背景音乐</b><span class="muted">这里只显示管理后台已启用的曲目。手机端首次触摸后会自动解锁。</span><div class="settingPills musicPills">${bgmButtons}</div><div class="meta">总声音：${soundEnabled?'开启':'静音'} · 右上角扬声器会同时控制背景音乐和音效</div></div>
       <div class="overviewList"><button class="choice" onclick="Game.closeModal();Game.showStatus()">👤 角色状态</button><button class="choice" onclick="Game.closeModal();Game.showInventory()">🎒 背包</button><button class="choice" onclick="Game.closeModal();Game.survivors()">👥 人物列表</button><button class="choice" onclick="Game.closeModal();Game.showCamp()">🏕️ 公共营地</button><button class="choice" onclick="Game.closeModal();Game.showShelter()">🏠 我的窝棚</button><button class="choice" onclick="Game.closeModal();Game.logs()">📖 重要日志</button></div>
       ${cr?`<div class="crisisBanner now"><div class="crisisIcon">${cr.icon}</div><div><b>${esc(cr.name)}</b><span>${cr.left===0?'今晚发生':`${cr.left}天后发生`} · ${esc(cr.desc)}</span></div></div>`:''}
       ${s?`<div class="storyHint"><span>📖</span><div><b>${esc(s.chain.name)}</b><small>${s.ready?'新线索：'+esc(locationById(s.step.location)?.name||'未知'):`等待${s.wait}天`}</small></div></div>`:''}<div class="copyrightLine overviewCopyright">制作：Wztanhua&nbsp;&nbsp;&nbsp;邮箱：wztanhua@gmail.com</div>`);
@@ -1180,10 +1193,10 @@ ${base}`,choices:prof?.choices||[]};
     }
     else if(state.phase==='EVENT'&&state.currentEvent){
       const e=state.currentEvent,key=`${state.day}-${e.id}`,shouldType=lastTypedKey!==key,controls=e.choices.map((ch,i)=>`<button class="choice" onclick="Game.resolve(${i})">${esc(ch.text)}<small>${esc(riskHint(ch))}</small></button>`).join('');
-      center=`${miniSceneHtml(loc,e.name,e.text,shouldType)}<section class="paper eventPaper compactPaper ${e.storyChain?'storyPaper':''}"><div class="section-title">${e.storyChain?'📖 '+esc(e.storyName):'今日探索'} · ${esc(loc?.name||'')}</div><div class="choices compactChoices ${shouldType?'typingLocked':''}" id="eventChoices">${controls}</div></section>`;if(shouldType){lastTypedKey=key;typeAfter=()=>typeText(document.getElementById('eventText'),e.text);}
+      center=`${miniSceneHtml(loc,e.name,e.text,shouldType,false)}<section class="paper eventPaper compactPaper ${e.storyChain?'storyPaper':''}"><div class="section-title">${e.storyChain?'📖 '+esc(e.storyName):'今日探索'} · ${esc(loc?.name||'')}</div><div class="choices compactChoices ${shouldType?'typingLocked':''}" id="eventChoices">${controls}</div></section>`;if(shouldType){lastTypedKey=key;typeAfter=()=>typeText(document.getElementById('eventText'),e.text);}
     }
     else if(state.phase==='POST'||state.phase==='POST_ACTION'){
-      const isExplore=state.phase==='POST';center=`${miniSceneHtml(loc,isExplore?state.currentEvent?.name:'行动完成',isExplore?(state.currentEvent?.text||''):'')}<section class="paper eventPaper resultPaper"><div class="section-title">${isExplore?'探索结果':'行动结果'} · ${esc(loc?.name||'')}</div>${isExplore?`<div class="event-title">${esc(state.currentEvent?.name||'今日探索')}</div>`:''}<div class="result richResult">${richResultText(state.currentResult)}</div></section>${availableActionsHtml()}`;
+      const isExplore=state.phase==='POST';center=`${miniSceneHtml(loc,isExplore?state.currentEvent?.name:'行动完成',isExplore?(state.currentEvent?.text||''):'',false,false)}<section class="paper eventPaper resultPaper"><div class="section-title">${isExplore?'探索结果':'行动结果'} · ${esc(loc?.name||'')}</div>${isExplore?`<div class="event-title">${esc(state.currentEvent?.name||'今日探索')}</div>`:''}<div class="result richResult">${richResultText(state.currentResult)}</div></section>${availableActionsHtml()}`;
     } else {state.phase=state.travelDecisionMade?'LOCATION':'MORNING';return renderMain();}
     app.innerHTML=`<div class="screen gameScreen">${compactHudHtml()}<main class="gameStage phase-${state.phase.toLowerCase()}">${center}</main>${quickDockHtml()}</div>`;if(state.pending)renderPending();if(typeAfter)setTimeout(typeAfter,70);setTimeout(maybeShowDeathAlert,80);
   }
@@ -1302,7 +1315,7 @@ ${base}`,choices:prof?.choices||[]};
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)unlockAudio();else pauseBgm();});
 
   async function boot(){
-    try{const r=await fetch('/api/game-config',{cache:'no-store'});if(r.ok){const cfg=await r.json();GAME_CONFIG={roleNames:{...DEFAULT_GAME_CONFIG.roleNames,...(cfg.roleNames||{})},difficulty:{...DEFAULT_GAME_CONFIG.difficulty,...(cfg.difficulty||{})}};}}catch(e){console.warn('game config unavailable, using defaults',e);}
+    try{const r=await fetch('/api/game-config',{cache:'no-store'});if(r.ok){const cfg=await r.json();GAME_CONFIG={roleNames:{...DEFAULT_GAME_CONFIG.roleNames,...(cfg.roleNames||{})},difficulty:{...DEFAULT_GAME_CONFIG.difficulty,...(cfg.difficulty||{})},music:{tracks:Array.isArray(cfg.music?.tracks)?cfg.music.tracks:DEFAULT_GAME_CONFIG.music.tracks}};configureBgmTracks(GAME_CONFIG.music.tracks);}}catch(e){console.warn('game config unavailable, using defaults',e);configureBgmTracks(DEFAULT_GAME_CONFIG.music.tracks);}
     applyNamesToCharacters(D.characters);applyFontSize();renderHome();
   }
   boot();

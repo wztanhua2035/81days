@@ -5,6 +5,7 @@ const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 const ROOT = path.join(__dirname, 'public');
+const MUSIC_DIR = path.join(ROOT, 'assets', 'music');
 const DATA_DIR = process.env.ADMIN_DATA_DIR ? path.resolve(process.env.ADMIN_DATA_DIR) : path.join(__dirname, 'data');
 const CONFIG_FILE = path.join(DATA_DIR, 'admin-config.json');
 const LEADERBOARD_FILE = path.join(DATA_DIR, 'leaderboard.json');
@@ -12,7 +13,8 @@ const DEFAULT_PASSWORD = process.env.ADMIN_PASSWORD || '818181';
 const MIME = {
   '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8',
   '.js':'application/javascript; charset=utf-8', '.json':'application/json; charset=utf-8',
-  '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.wav':'audio/wav'
+  '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon',
+  '.wav':'audio/wav', '.mp3':'audio/mpeg', '.ogg':'audio/ogg', '.m4a':'audio/mp4', '.aac':'audio/aac'
 };
 
 const DEFAULT_SETTINGS = {
@@ -33,6 +35,15 @@ const DEFAULT_SETTINGS = {
     npcSaveChanceDay30: 0.84,
     npcSaveChanceDay50: 0.66,
     npcSaveChanceDay60: 0.62
+  },
+  music: {
+    tracks: [
+      {id:'gentle_sea',label:'温柔的海风',file:'gentle_sea.wav',builtin:true},
+      {id:'quiet_forest',label:'静谧森林',file:'quiet_forest.wav',builtin:true},
+      {id:'under_stars',label:'星空之下',file:'under_stars.wav',builtin:true},
+      {id:'morning_light',label:'晨曦之光',file:'morning_light.wav',builtin:true}
+    ],
+    enabledIds: ['gentle_sea','quiet_forest','under_stars','morning_light']
   }
 };
 
@@ -56,6 +67,23 @@ function writeConfig(config){
   fs.writeFileSync(tmp, JSON.stringify(config, null, 2), 'utf8');
   fs.renameSync(tmp, CONFIG_FILE);
 }
+function normalizeMusic(rawMusic){
+  const base=clone(DEFAULT_SETTINGS.music);
+  const tracks=[...base.tracks];
+  const seen=new Set(tracks.map(t=>t.id));
+  if(Array.isArray(rawMusic?.tracks)){
+    for(const t of rawMusic.tracks){
+      if(!t||t.builtin) continue;
+      const id=String(t.id||''); const file=path.basename(String(t.file||'')); const label=String(t.label||'').trim().slice(0,30);
+      const ext=path.extname(file).toLowerCase();
+      if(!/^custom_[a-f0-9]{8,32}$/.test(id)||seen.has(id)||!label||!['.wav','.mp3','.ogg','.m4a','.aac'].includes(ext)) continue;
+      tracks.push({id,label,file,builtin:false}); seen.add(id);
+    }
+  }
+  const requested=Array.isArray(rawMusic?.enabledIds)?rawMusic.enabledIds:base.enabledIds;
+  const enabledIds=[...new Set(requested.map(String))].filter(id=>seen.has(id));
+  return {tracks,enabledIds};
+}
 function normalizeConfig(raw){
   const out = { passwordHash: raw?.passwordHash || hashPassword(DEFAULT_PASSWORD), settings: clone(DEFAULT_SETTINGS) };
   if(raw?.settings?.roleNames){
@@ -66,10 +94,12 @@ function normalizeConfig(raw){
   }
   if(raw?.settings?.difficulty){ for(const key of Object.keys(out.settings.difficulty)){ if(raw.settings.difficulty[key] !== undefined) out.settings.difficulty[key]=raw.settings.difficulty[key]; } }
   out.settings.difficulty.inventoryLimit = Math.max(8, Math.min(10, Number(out.settings.difficulty.inventoryLimit)||8));
+  out.settings.music=normalizeMusic(raw?.settings?.music);
   return out;
 }
 function loadConfig(){
   fs.mkdirSync(DATA_DIR, {recursive:true});
+  fs.mkdirSync(MUSIC_DIR, {recursive:true});
   if(!fs.existsSync(CONFIG_FILE)){
     const fresh = normalizeConfig(null); writeConfig(fresh); return fresh;
   }
@@ -128,7 +158,16 @@ function json(res,status,data,extra={}){ res.writeHead(status,{'Content-Type':'a
 function readBody(req){
   return new Promise((resolve,reject)=>{let body='';req.on('data',c=>{body+=c;if(body.length>50_000){reject(new Error('too_large'));req.destroy();}});req.on('end',()=>{try{resolve(body?JSON.parse(body):{})}catch{reject(new Error('bad_json'));}});req.on('error',reject);});
 }
-function publicSettings(){ return clone(config.settings); }
+function readRawBody(req,maxBytes=25*1024*1024){
+  return new Promise((resolve,reject)=>{const chunks=[];let size=0;req.on('data',c=>{size+=c.length;if(size>maxBytes){reject(new Error('too_large'));req.destroy();return;}chunks.push(c);});req.on('end',()=>resolve(Buffer.concat(chunks)));req.on('error',reject);});
+}
+function musicPublicTrack(t){return {id:t.id,label:t.label,src:`/assets/music/${encodeURIComponent(t.file)}`};}
+function publicSettings(){
+  const out=clone(config.settings);
+  const music=config.settings.music||normalizeMusic(null);
+  out.music={tracks:music.tracks.filter(t=>music.enabledIds.includes(t.id)&&fs.existsSync(path.join(MUSIC_DIR,t.file))).map(musicPublicTrack)};
+  return out;
+}
 function validateSettings(input){
   const names=input?.roleNames||{}; const d=input?.difficulty||{};
   const roleNames={};
@@ -156,8 +195,9 @@ function validateSettings(input){
     npcSaveChanceDay30:num('npcSaveChanceDay30',.30,.95),
     npcSaveChanceDay50:num('npcSaveChanceDay50',.15,.90),
     npcSaveChanceDay60:num('npcSaveChanceDay60',.10,.85)
-  }};
+  },music:clone(config.settings.music||normalizeMusic(null))};
 }
+function safeDecode(v){try{return decodeURIComponent(String(v||''));}catch{return String(v||'');}}
 function clientIp(req){ return String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim(); }
 function canAttempt(ip){
   const now=Date.now(); let r=loginAttempts.get(ip); if(!r||r.reset<now){r={count:0,reset:now+10*60*1000};loginAttempts.set(ip,r);} return r.count<8;
@@ -201,6 +241,37 @@ async function handleApi(req,res,pathname){
     const s=getSession(req); if(s)sessions.delete(s.token); return json(res,200,{ok:true},{'Set-Cookie':sessionCookie(req,'',0)});
   }
   const session=getSession(req); if(!session) return json(res,401,{ok:false,error:'未登录或登录已过期'});
+  if(pathname==='/api/admin/music' && req.method==='GET'){
+    const music=config.settings.music||normalizeMusic(null);
+    const tracks=music.tracks.map(t=>({...musicPublicTrack(t),builtin:!!t.builtin,file:t.file,enabled:music.enabledIds.includes(t.id),exists:fs.existsSync(path.join(MUSIC_DIR,t.file))}));
+    return json(res,200,{ok:true,tracks});
+  }
+  if(pathname==='/api/admin/music/upload' && req.method==='POST'){
+    const rawName=safeDecode(req.headers['x-file-name']);
+    const rawLabel=safeDecode(req.headers['x-music-label']);
+    const ext=path.extname(rawName).toLowerCase();
+    if(!['.wav','.mp3','.ogg','.m4a','.aac'].includes(ext)) return json(res,400,{ok:false,error:'仅支持 WAV、MP3、OGG、M4A、AAC 音频'});
+    let body; try{body=await readRawBody(req);}catch(e){return json(res,413,{ok:false,error:'音乐文件过大，单个文件请控制在25MB以内'});}
+    if(!body.length) return json(res,400,{ok:false,error:'没有收到音乐文件'});
+    const hex=crypto.randomBytes(6).toString('hex'); const id=`custom_${hex}`; const file=`custom-${Date.now()}-${hex}${ext}`;
+    const label=(rawLabel||path.basename(rawName,ext)||'自定义音乐').trim().slice(0,30);
+    fs.mkdirSync(MUSIC_DIR,{recursive:true}); fs.writeFileSync(path.join(MUSIC_DIR,file),body);
+    config.settings.music=config.settings.music||normalizeMusic(null);config.settings.music.tracks.push({id,label,file,builtin:false});writeConfig(config);
+    return json(res,200,{ok:true,track:{id,label,src:`/assets/music/${encodeURIComponent(file)}`,builtin:false,enabled:false}});
+  }
+  if(pathname==='/api/admin/music/enabled' && req.method==='PUT'){
+    let body; try{body=await readBody(req)}catch{return json(res,400,{ok:false,error:'请求格式错误'});}
+    const music=config.settings.music||normalizeMusic(null); const valid=new Set(music.tracks.map(t=>t.id));
+    const enabledIds=[...new Set((Array.isArray(body.enabledIds)?body.enabledIds:[]).map(String))].filter(id=>valid.has(id));
+    music.enabledIds=enabledIds;config.settings.music=music;writeConfig(config);return json(res,200,{ok:true,enabledIds});
+  }
+  if(pathname.startsWith('/api/admin/music/') && req.method==='DELETE'){
+    const id=decodeURIComponent(pathname.slice('/api/admin/music/'.length)); const music=config.settings.music||normalizeMusic(null); const idx=music.tracks.findIndex(t=>t.id===id);
+    if(idx<0) return json(res,404,{ok:false,error:'音乐不存在'}); const track=music.tracks[idx];
+    if(track.builtin) return json(res,400,{ok:false,error:'内置音乐不能删除，可取消勾选使玩家不可见'});
+    try{const fp=path.join(MUSIC_DIR,path.basename(track.file));if(fp.startsWith(MUSIC_DIR)&&fs.existsSync(fp))fs.unlinkSync(fp);}catch{}
+    music.tracks.splice(idx,1);music.enabledIds=music.enabledIds.filter(x=>x!==id);config.settings.music=music;writeConfig(config);return json(res,200,{ok:true});
+  }
   if(pathname==='/api/admin/settings' && req.method==='GET') return json(res,200,{ok:true,settings:publicSettings()});
   if(pathname==='/api/admin/settings' && req.method==='PUT'){
     let body; try{body=await readBody(req)}catch{return json(res,400,{ok:false,error:'请求格式错误'});}

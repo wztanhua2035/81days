@@ -23,6 +23,40 @@
       "npcSaveChanceDay30": 0.84,
       "npcSaveChanceDay50": 0.66,
       "npcSaveChanceDay60": 0.62
+    },
+    "music": {
+      "tracks": [
+        {
+          "id": "gentle_sea",
+          "label": "温柔的海风",
+          "file": "gentle_sea.wav",
+          "builtin": true
+        },
+        {
+          "id": "quiet_forest",
+          "label": "静谧森林",
+          "file": "quiet_forest.wav",
+          "builtin": true
+        },
+        {
+          "id": "under_stars",
+          "label": "星空之下",
+          "file": "under_stars.wav",
+          "builtin": true
+        },
+        {
+          "id": "morning_light",
+          "label": "晨曦之光",
+          "file": "morning_light.wav",
+          "builtin": true
+        }
+      ],
+      "enabledIds": [
+        "gentle_sea",
+        "quiet_forest",
+        "under_stars",
+        "morning_light"
+      ]
     }
   }
 }
