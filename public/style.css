@@ -528,3 +528,45 @@ html[data-font-size="large"] .phase-post .resultPaper{
   html[data-font-size="medium"] .phase-post .resultPaper{max-height:61dvh!important;min-height:32dvh!important}
   html[data-font-size="large"] .phase-post .resultPaper{max-height:70dvh!important;min-height:38dvh!important}
 }
+
+/* v2.11：修复“行动完成”页场景区域占高过大，保证今日行动/结束今天直接可见 */
+.phase-post_action .sceneStrip,
+.phase-post_action .eventSceneStrip{
+  flex:0 0 auto!important;
+  min-height:0!important;
+  height:auto!important;
+}
+.phase-post_action .eventSceneStrip .sceneStripImage{
+  height:108px!important;
+  min-height:108px!important;
+}
+.phase-post_action .sceneStripImage{
+  height:108px!important;
+  min-height:108px!important;
+}
+.phase-post_action .resultPaper{
+  flex:0 0 auto!important;
+  min-height:0!important;
+  max-height:24dvh!important;
+  overflow:auto!important;
+  margin-top:5px!important;
+}
+.phase-post_action .compactHub{
+  flex:0 0 auto!important;
+  margin-top:0!important;
+}
+@media(max-width:390px){
+  .phase-post_action .eventSceneStrip .sceneStripImage,
+  .phase-post_action .sceneStripImage{
+    height:92px!important;
+    min-height:92px!important;
+  }
+  .phase-post_action .resultPaper{max-height:22dvh!important}
+}
+@media(max-height:700px){
+  .phase-post_action .eventSceneStrip .sceneStripImage,
+  .phase-post_action .sceneStripImage{
+    height:82px!important;
+    min-height:82px!important;
+  }
+}
