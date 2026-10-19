@@ -54,6 +54,6 @@ jobs:
         env:
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
-          curl -fsS --retry 3 --max-time 60 \
+          curl -fsS -X POST --retry 3 --max-time 60 \
             -H "Authorization: Bearer $COOLIFY_TOKEN" \
             "https://coolify.wzpy.net/api/v1/deploy?uuid=h58uimjdhf2ado6rfr6eseto&force=false"
